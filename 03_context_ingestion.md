@@ -98,7 +98,7 @@ This separation is operationally important: it minimizes customer questioning an
 | `primary_persona`         | string                                             | Customer interview |
 | `primary_objective`       | string                                             | Customer interview |
 | `secondary_objectives`    | array                                              | Customer interview |
-| `workload_type`           | enum (oltp, olap, hybrid, queue, multitenant_saas) | Customer interview |
+| `workload_type`           | enum (oltp, olap, hybrid, queue, vector, multitenant_saas) | Customer interview |
 | `application_description` | string                                             | Customer interview |
 | `critical_services`       | array                                              | Customer interview |
 | `latency_slo`             | string                                             | Customer interview |
@@ -148,6 +148,7 @@ allowed_values:
   - olap
   - hybrid
   - queue
+  - vector
   - multitenant_saas
 affects:
   - threshold_profile

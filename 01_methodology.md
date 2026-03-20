@@ -52,17 +52,38 @@ Every metric collected should map to at least one persona objective. This matrix
 
 In practice, you need slightly more granularity than the classic OLTP/OLAP split:
 
-| Workload Type        | Characteristics                     | Key Concerns                                                 |
-|----------------------|-------------------------------------|--------------------------------------------------------------|
-| OLTP                 | Latency-sensitive, high concurrency | p95/p99 latency, lock contention, connection pressure        |
-| OLAP                 | Scan-heavy, throughput-oriented     | Query throughput, temp spill, I/O patterns                   |
-| Hybrid (HTAP)        | Mixed transactional and analytical  | Resource isolation, priority conflicts                       |
-| Queue / Event-driven | Write-heavy, append-only            | WAL pressure, checkpoint tuning, vacuum throughput           |
-| Multi-tenant SaaS    | Shared resources, variable load     | Noisy neighbor risk, connection fairness, resource isolation |
+| Workload Type        | Characteristics                              | Key Concerns                                                          |
+|----------------------|----------------------------------------------|-----------------------------------------------------------------------|
+| OLTP                 | Latency-sensitive, high concurrency          | p95/p99 latency, lock contention, connection pressure                 |
+| OLAP                 | Scan-heavy, throughput-oriented              | Query throughput, temp spill, I/O patterns                            |
+| Hybrid (HTAP)        | Mixed transactional and analytical           | Resource isolation, priority conflicts                                |
+| Queue / Event-driven | Write-heavy, append-only                     | WAL pressure, checkpoint tuning, vacuum throughput                    |
+| Vector / Embedding   | ANN search, high-dimensional, CPU/memory-heavy | Index type tuning (HNSW/IVFFlat), recall vs latency, memory pressure |
+| Multi-tenant SaaS    | Shared resources, variable load              | Noisy neighbor risk, connection fairness, resource isolation          |
 
 This classification defines expected baselines, not just observed metrics.
 
-A 200ms query is catastrophic in OLTP, irrelevant in OLAP.
+A 200ms query is catastrophic in OLTP, irrelevant in OLAP. An HNSW index build that takes 10 minutes is expected for vector workloads but would be alarming in OLTP.
+
+### Vector / Embedding workloads
+
+Vector workloads using `pgvector` are increasingly common and have distinct health characteristics:
+
+- **Query patterns** are dominated by approximate nearest-neighbor (ANN) searches using operators like `<->`, `<=>`, `<#>`, not traditional B-tree lookups or sequential scans
+- **Index types** are specialized — HNSW (`ef_construction`, `m`, `ef_search`) and IVFFlat (`lists`, `probes`) have very different tuning knobs than B-tree indexes
+- **Resource pressure** is memory-heavy and CPU-heavy (distance computations), less I/O-bound in the traditional sense
+- **Maintenance** differs — HNSW index builds are expensive and slow, index bloat interacts differently with vacuum, and large vector columns affect table size disproportionately
+- **Latency expectations** vary — real-time embedding search (e.g., semantic search in a product) has tight latency requirements; batch similarity jobs (e.g., deduplication, clustering) do not
+- **Scaling** is dimension-dependent — 1536-dim embeddings (OpenAI) behave very differently from 384-dim (smaller models) in terms of memory, index size, and query cost
+- **Recall vs performance tradeoff** is a first-order concern that has no analog in traditional workloads — tuning `ef_search` or `probes` trades accuracy for speed
+
+For vector workloads, relevant health signals include:
+- Whether `pgvector` is installed and at a current version
+- Index type choice relative to dataset size and query pattern
+- Memory pressure from HNSW graphs resident in `shared_buffers`
+- Sequential scan fallback when indexes are missing or misconfigured
+- Query latency distribution for ANN queries specifically
+- Table bloat from wide rows containing high-dimensional vectors
 
 ## 4. Health Domains
 
