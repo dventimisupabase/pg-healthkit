@@ -3,26 +3,11 @@
 ## Core Principle
 Health = f(persona, objective, workload, evidence, interpretation)
 
-## Personas
-- DBA/SRE → reliability, uptime
-- Application developer → latency, correctness
-- CTO → cost, capacity, predictability
+## Flow
+Context → Evidence → Interpretation → Scores → Report
 
-## Workload Types
-- OLTP
-- OLAP
-- Hybrid
-- Event-driven / queue
-- Multi-tenant SaaS
+## Insight
+Context defines meaning of evidence.
 
-## Health Domains
-- Availability
-- Performance
-- Concurrency
-- Storage
-- Efficiency
-- Cost
-- Operational hygiene
-
-## Key Insight
-Metrics are not health. Interpretation + context defines health.
+## Principle
+Health is relative to intended use.
