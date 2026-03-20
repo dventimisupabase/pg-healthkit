@@ -20,12 +20,12 @@ Assessment
 
 The system managing assessments must satisfy four functions simultaneously:
 
-| Capability | Description | What Satisfies It |
-|-----------|-------------|-------------------|
-| **Ingestion** | Collect structured and unstructured inputs | CLI + platform APIs → DB; manual inputs → DB |
-| **State Management** | Track an assessment as an evolving object | Assessments table with status field and lifecycle |
-| **Computation** | Run probes, scoring, and heuristics | Rule engine (Go service, SQL functions, or edge functions) |
-| **Output** | Produce consistent, high-quality reports | Rendered reports (Markdown / HTML / PDF) |
+| Capability           | Description                                | What Satisfies It                                          |
+|----------------------|--------------------------------------------|------------------------------------------------------------|
+| **Ingestion**        | Collect structured and unstructured inputs | CLI + platform APIs → DB; manual inputs → DB               |
+| **State Management** | Track an assessment as an evolving object  | Assessments table with status field and lifecycle          |
+| **Computation**      | Run probes, scoring, and heuristics        | Rule engine (Go service, SQL functions, or edge functions) |
+| **Output**           | Produce consistent, high-quality reports   | Rendered reports (Markdown / HTML / PDF)                   |
 
 Most individual tools (Notion, Slack, CLI) cover only 1–2 of these. The assessment model requires all four.
 
@@ -68,15 +68,15 @@ draft
 
 For v1, the following entities are sufficient:
 
-| Entity | Role | Mental Model |
-|--------|------|--------------|
-| `assessments` | The case | The top-level container for a health evaluation |
-| `assessment_inputs` | Assertions and context | Structured key/value inputs with provenance |
-| `assessment_evidence` | Observations | Raw probe outputs and imported telemetry |
-| `assessment_findings` | Interpretations | Rule-derived insights that humans act on |
-| `assessment_scores` | Rollups | Computed per-domain and overall scores |
-| `assessment_reports` | Deliverables | Generated artifacts (Markdown, JSON, HTML) |
-| `assessment_events` | Audit trail | Cheap workflow history without full workflow modeling |
+| Entity                | Role                   | Mental Model                                          |
+|-----------------------|------------------------|-------------------------------------------------------|
+| `assessments`         | The case               | The top-level container for a health evaluation       |
+| `assessment_inputs`   | Assertions and context | Structured key/value inputs with provenance           |
+| `assessment_evidence` | Observations           | Raw probe outputs and imported telemetry              |
+| `assessment_findings` | Interpretations        | Rule-derived insights that humans act on              |
+| `assessment_scores`   | Rollups                | Computed per-domain and overall scores                |
+| `assessment_reports`  | Deliverables           | Generated artifacts (Markdown, JSON, HTML)            |
+| `assessment_events`   | Audit trail            | Cheap workflow history without full workflow modeling |
 
 See `03_data_model.md` for the complete SQL schema.
 
@@ -84,12 +84,12 @@ See `03_data_model.md` for the complete SQL schema.
 
 Assessments should be tagged with a profile that drives probe selection, threshold interpretation, and scoring weights:
 
-| Profile | Primary Use Case |
-|---------|-----------------|
-| `default` | General health review |
-| `performance` | Developer-driven latency investigation |
-| `reliability` | DBA/SRE-driven availability assurance |
-| `cost_capacity` | CTO-driven cost and sizing review |
+| Profile         | Primary Use Case                       |
+|-----------------|----------------------------------------|
+| `default`       | General health review                  |
+| `performance`   | Developer-driven latency investigation |
+| `reliability`   | DBA/SRE-driven availability assurance  |
+| `cost_capacity` | CTO-driven cost and sizing review      |
 
 The profile is not exclusive — it determines emphasis, not hard boundaries.
 

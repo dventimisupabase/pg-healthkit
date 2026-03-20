@@ -131,23 +131,23 @@ This document provides the human-readable probe catalog with purpose, interpreta
 
 ## Probe-to-Finding Mapping Matrix
 
-| Finding | Primary Probes | Corroborating Probes |
-|---------|---------------|---------------------|
-| `long_running_transactions_detected` | `long_running_transactions` | — |
-| `idle_in_transaction_sessions_detected` | `connection_pressure`, `long_running_transactions` | — |
-| `active_lock_blocking_detected` | `lock_blocking_chains` | — |
-| `deadlocks_observed` | `database_activity` | — |
-| `high_connection_utilization` | `connection_pressure` | `instance_metadata` |
-| `significant_temp_spill_activity` | `temp_spill_queries` | `database_activity`, `top_queries_total_time` |
-| `high_impact_query_total_time` | `top_queries_total_time` | — |
-| `high_latency_queries_detected` | `top_queries_mean_latency` | `temp_spill_queries`, `lock_blocking_chains` |
-| `dead_tuple_accumulation_detected` | `dead_tuple_ratio` | `long_running_transactions`, `largest_tables` |
-| `stale_vacuum_or_analyze_detected` | `stale_maintenance` | `dead_tuple_ratio` |
-| `potentially_unused_large_indexes` | `unused_indexes` | `largest_tables` |
-| `replication_lag_elevated` | `replication_health` | — |
-| `checkpoint_pressure_detected` | `wal_checkpoint_health` | `database_activity`, `instance_metadata` |
-| `diagnostic_visibility_limited` | `extensions_inventory` | — |
-| `storage_concentration_risk` | `largest_tables` | `unused_indexes` |
+| Finding                                 | Primary Probes                                     | Corroborating Probes                          |
+|-----------------------------------------|----------------------------------------------------|-----------------------------------------------|
+| `long_running_transactions_detected`    | `long_running_transactions`                        | —                                             |
+| `idle_in_transaction_sessions_detected` | `connection_pressure`, `long_running_transactions` | —                                             |
+| `active_lock_blocking_detected`         | `lock_blocking_chains`                             | —                                             |
+| `deadlocks_observed`                    | `database_activity`                                | —                                             |
+| `high_connection_utilization`           | `connection_pressure`                              | `instance_metadata`                           |
+| `significant_temp_spill_activity`       | `temp_spill_queries`                               | `database_activity`, `top_queries_total_time` |
+| `high_impact_query_total_time`          | `top_queries_total_time`                           | —                                             |
+| `high_latency_queries_detected`         | `top_queries_mean_latency`                         | `temp_spill_queries`, `lock_blocking_chains`  |
+| `dead_tuple_accumulation_detected`      | `dead_tuple_ratio`                                 | `long_running_transactions`, `largest_tables` |
+| `stale_vacuum_or_analyze_detected`      | `stale_maintenance`                                | `dead_tuple_ratio`                            |
+| `potentially_unused_large_indexes`      | `unused_indexes`                                   | `largest_tables`                              |
+| `replication_lag_elevated`              | `replication_health`                               | —                                             |
+| `checkpoint_pressure_detected`          | `wal_checkpoint_health`                            | `database_activity`, `instance_metadata`      |
+| `diagnostic_visibility_limited`         | `extensions_inventory`                             | —                                             |
+| `storage_concentration_risk`            | `largest_tables`                                   | `unused_indexes`                              |
 
 ## Strongest Probes for Immediate Value
 
@@ -162,10 +162,10 @@ This document provides the human-readable probe catalog with purpose, interpreta
 
 ## Best Score Coverage with Least Complexity
 
-| Domain | Key Probes |
-|--------|-----------|
-| Availability | replication, long xacts, blocking |
-| Performance | top queries, temp spill, blocking, dead tuples |
-| Concurrency | connections, long xacts, blocking |
-| Storage | dead tuples, maintenance, large tables, unused indexes |
+| Domain            | Key Probes                                                         |
+|-------------------|--------------------------------------------------------------------|
+| Availability      | replication, long xacts, blocking                                  |
+| Performance       | top queries, temp spill, blocking, dead tuples                     |
+| Concurrency       | connections, long xacts, blocking                                  |
+| Storage           | dead tuples, maintenance, large tables, unused indexes             |
 | Cost / Efficiency | top queries, temp spill, large tables, unused indexes, checkpoints |

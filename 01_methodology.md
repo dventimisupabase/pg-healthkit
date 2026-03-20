@@ -26,13 +26,13 @@ Probes are only one input channel. Context defines the meaning of evidence. Inte
 
 Every engagement must start by classifying into one or more of these intents:
 
-| Intent | Driver | What "Healthy" Means |
-|--------|--------|---------------------|
-| Reliability assurance | DBA / SRE | Low incident risk, failover readiness, vacuum/replication health |
-| Performance optimization | App developer | Low query latency, predictable throughput, no contention |
-| Cost / capacity optimization | CTO / finance | Right-sized resources, minimal waste, forecastable spend |
-| Pre-scale validation | Engineering leadership | Ready to absorb growth without degradation |
-| Post-incident forensics | Ops / SRE | Root cause identified, recurrence prevented |
+| Intent                       | Driver                 | What "Healthy" Means                                             |
+|------------------------------|------------------------|------------------------------------------------------------------|
+| Reliability assurance        | DBA / SRE              | Low incident risk, failover readiness, vacuum/replication health |
+| Performance optimization     | App developer          | Low query latency, predictable throughput, no contention         |
+| Cost / capacity optimization | CTO / finance          | Right-sized resources, minimal waste, forecastable spend         |
+| Pre-scale validation         | Engineering leadership | Ready to absorb growth without degradation                       |
+| Post-incident forensics      | Ops / SRE              | Root cause identified, recurrence prevented                      |
 
 Without explicit intent, metrics are meaningless. Each intent determines the lens.
 
@@ -40,11 +40,11 @@ Without explicit intent, metrics are meaningless. Each intent determines the len
 
 Codify this as a matrix, not informal reasoning:
 
-| Persona | Primary Objective | Secondary Objective | Risk Sensitivity |
-|---------|-------------------|---------------------|------------------|
-| DBA / SRE | Availability, stability | Operability (low toil) | Very low tolerance for incidents |
-| App Developer | Query latency, correctness | Predictability | Moderate |
-| CTO / Eng Leadership | Cost efficiency, scalability | Forecastability | High for waste |
+| Persona              | Primary Objective            | Secondary Objective    | Risk Sensitivity                 |
+|----------------------|------------------------------|------------------------|----------------------------------|
+| DBA / SRE            | Availability, stability      | Operability (low toil) | Very low tolerance for incidents |
+| App Developer        | Query latency, correctness   | Predictability         | Moderate                         |
+| CTO / Eng Leadership | Cost efficiency, scalability | Forecastability        | High for waste                   |
 
 Every metric collected should map to at least one persona objective. This matrix is the lens selector.
 
@@ -52,13 +52,13 @@ Every metric collected should map to at least one persona objective. This matrix
 
 In practice, you need slightly more granularity than the classic OLTP/OLAP split:
 
-| Workload Type | Characteristics | Key Concerns |
-|---------------|-----------------|--------------|
-| OLTP | Latency-sensitive, high concurrency | p95/p99 latency, lock contention, connection pressure |
-| OLAP | Scan-heavy, throughput-oriented | Query throughput, temp spill, I/O patterns |
-| Hybrid (HTAP) | Mixed transactional and analytical | Resource isolation, priority conflicts |
-| Queue / Event-driven | Write-heavy, append-only | WAL pressure, checkpoint tuning, vacuum throughput |
-| Multi-tenant SaaS | Shared resources, variable load | Noisy neighbor risk, connection fairness, resource isolation |
+| Workload Type        | Characteristics                     | Key Concerns                                                 |
+|----------------------|-------------------------------------|--------------------------------------------------------------|
+| OLTP                 | Latency-sensitive, high concurrency | p95/p99 latency, lock contention, connection pressure        |
+| OLAP                 | Scan-heavy, throughput-oriented     | Query throughput, temp spill, I/O patterns                   |
+| Hybrid (HTAP)        | Mixed transactional and analytical  | Resource isolation, priority conflicts                       |
+| Queue / Event-driven | Write-heavy, append-only            | WAL pressure, checkpoint tuning, vacuum throughput           |
+| Multi-tenant SaaS    | Shared resources, variable load     | Noisy neighbor risk, connection fairness, resource isolation |
 
 This classification defines expected baselines, not just observed metrics.
 
@@ -140,14 +140,14 @@ Attach specific metrics to each domain.
 
 This is where most "health checks" fail. Metrics alone are not enough — you need interpretation rules.
 
-| Signal Combination | Likely Cause |
-|-------------------|--------------|
-| High CPU + low I/O | Inefficient queries or missing indexes |
-| High I/O + low cache hit | Working set exceeds memory |
-| High latency + low CPU | Lock contention or I/O stalls |
-| Bloat + high write rate | Autovacuum misconfiguration |
-| High temp writes + high latency | Sort/hash spill, likely work_mem or query design |
-| buffers_backend high | Backends doing their own writes, checkpoint tuning may be off |
+| Signal Combination              | Likely Cause                                                  |
+|---------------------------------|---------------------------------------------------------------|
+| High CPU + low I/O              | Inefficient queries or missing indexes                        |
+| High I/O + low cache hit        | Working set exceeds memory                                    |
+| High latency + low CPU          | Lock contention or I/O stalls                                 |
+| Bloat + high write rate         | Autovacuum misconfiguration                                   |
+| High temp writes + high latency | Sort/hash spill, likely work_mem or query design              |
+| buffers_backend high            | Backends doing their own writes, checkpoint tuning may be off |
 
 This becomes the heuristic engine. Rules should be explicit about what they infer and at what confidence.
 
@@ -160,14 +160,14 @@ To make assessments customer-facing and repeatable, introduce scoring:
 
 Example weights for a DBA/SRE review:
 
-| Domain | Weight |
-|--------|--------|
-| Availability & Recoverability | 25% |
-| Concurrency & Contention | 20% |
-| Storage & Maintenance | 20% |
-| Performance & Latency | 15% |
-| Efficiency & Sizing | 10% |
-| Security & Hygiene | 10% |
+| Domain                        | Weight |
+|-------------------------------|--------|
+| Availability & Recoverability | 25%    |
+| Concurrency & Contention      | 20%    |
+| Storage & Maintenance         | 20%    |
+| Performance & Latency         | 15%    |
+| Efficiency & Sizing           | 10%    |
+| Security & Hygiene            | 10%    |
 
 For a CTO-focused review, cost and capacity get heavier weight; performance and maintenance lower unless tied to customer impact.
 

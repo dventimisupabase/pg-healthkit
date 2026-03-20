@@ -8,27 +8,27 @@ Translate findings and evidence into a structured, communicable health posture. 
 
 Seven orthogonal scoring domains:
 
-| Domain | What It Captures |
-|--------|-----------------|
-| `availability` | Uptime, failover readiness, replication health, backup posture |
-| `performance` | Query latency, throughput, plan quality, I/O efficiency |
-| `concurrency` | Lock contention, connection pressure, transaction hygiene |
-| `storage` | Bloat, dead tuples, table/index growth, maintenance posture |
-| `efficiency` | Resource utilization, temp spill, checkpoint behavior, waste |
-| `cost` | Right-sizing, storage waste, compute headroom, forecast clarity |
+| Domain                | What It Captures                                                     |
+|-----------------------|----------------------------------------------------------------------|
+| `availability`        | Uptime, failover readiness, replication health, backup posture       |
+| `performance`         | Query latency, throughput, plan quality, I/O efficiency              |
+| `concurrency`         | Lock contention, connection pressure, transaction hygiene            |
+| `storage`             | Bloat, dead tuples, table/index growth, maintenance posture          |
+| `efficiency`          | Resource utilization, temp spill, checkpoint behavior, waste         |
+| `cost`                | Right-sizing, storage waste, compute headroom, forecast clarity      |
 | `operational_hygiene` | Vacuum/analyze cadence, diagnostic visibility, configuration posture |
 
 ## Scale
 
 Each domain scored 0–100.
 
-| Score Range | Interpretation |
-|-------------|---------------|
-| 90–100 | Healthy — no significant issues |
-| 70–89 | Minor issues — worth monitoring |
-| 50–69 | Moderate concern — action recommended |
-| 25–49 | High concern — near-term action needed |
-| 0–24 | Critical risk — immediate attention required |
+| Score Range | Interpretation                               |
+|-------------|----------------------------------------------|
+| 90–100      | Healthy — no significant issues              |
+| 70–89       | Minor issues — worth monitoring              |
+| 50–69       | Moderate concern — action recommended        |
+| 25–49       | High concern — near-term action needed       |
+| 0–24        | Critical risk — immediate attention required |
 
 ## Scoring Mechanism
 
@@ -60,47 +60,47 @@ Scoring weights vary by assessment profile (which derives from persona):
 
 ### DBA / SRE Profile (`reliability`)
 
-| Domain | Weight |
-|--------|--------|
-| Availability & Recoverability | 25% |
-| Concurrency & Contention | 20% |
-| Storage & Maintenance | 20% |
-| Performance & Latency | 15% |
-| Efficiency & Sizing | 10% |
-| Operational Hygiene | 10% |
+| Domain                        | Weight |
+|-------------------------------|--------|
+| Availability & Recoverability | 25%    |
+| Concurrency & Contention      | 20%    |
+| Storage & Maintenance         | 20%    |
+| Performance & Latency         | 15%    |
+| Efficiency & Sizing           | 10%    |
+| Operational Hygiene           | 10%    |
 
 ### CTO / Eng Leadership Profile (`cost_capacity`)
 
-| Domain | Weight |
-|--------|--------|
-| Cost & Capacity | 30% |
-| Efficiency & Sizing | 25% |
-| Performance & Latency | 15% |
-| Storage & Maintenance | 15% |
-| Availability | 10% |
-| Concurrency | 5% |
+| Domain                | Weight |
+|-----------------------|--------|
+| Cost & Capacity       | 30%    |
+| Efficiency & Sizing   | 25%    |
+| Performance & Latency | 15%    |
+| Storage & Maintenance | 15%    |
+| Availability          | 10%    |
+| Concurrency           | 5%     |
 
 ### App Developer Profile (`performance`)
 
-| Domain | Weight |
-|--------|--------|
-| Performance & Latency | 30% |
-| Concurrency & Contention | 25% |
-| Efficiency | 15% |
-| Availability | 15% |
-| Storage | 10% |
-| Cost | 5% |
+| Domain                   | Weight |
+|--------------------------|--------|
+| Performance & Latency    | 30%    |
+| Concurrency & Contention | 25%    |
+| Efficiency               | 15%    |
+| Availability             | 15%    |
+| Storage                  | 10%    |
+| Cost                     | 5%     |
 
 ### Default Profile
 
-| Domain | Weight |
-|--------|--------|
-| Availability | 20% |
-| Performance | 25% |
-| Concurrency | 20% |
-| Storage | 15% |
-| Efficiency | 10% |
-| Cost | 10% |
+| Domain       | Weight |
+|--------------|--------|
+| Availability | 20%    |
+| Performance  | 25%    |
+| Concurrency  | 20%    |
+| Storage      | 15%    |
+| Efficiency   | 10%    |
+| Cost         | 10%    |
 
 ## Two-Pass Scoring
 

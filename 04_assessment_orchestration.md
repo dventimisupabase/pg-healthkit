@@ -10,51 +10,51 @@ Six candidate platforms were evaluated:
 
 ### A. Document-centric tools (Notion, Google Docs)
 
-| Aspect | Assessment |
-|--------|-----------|
-| **Strengths** | Good for narrative output, easy collaboration, low friction |
+| Aspect          | Assessment                                                                                                    |
+|-----------------|---------------------------------------------------------------------------------------------------------------|
+| **Strengths**   | Good for narrative output, easy collaboration, low friction                                                   |
 | **Limitations** | No strong typing, no real workflow/state machine, no programmatic integration with probes, no reproducibility |
-| **Conclusion** | Useful as a **presentation layer**, not as the system of record |
+| **Conclusion**  | Useful as a **presentation layer**, not as the system of record                                               |
 
 ### B. CLI-only approach (Go CLI)
 
-| Aspect | Assessment |
-|--------|-----------|
-| **Strengths** | Excellent for data collection, deterministic, automatable, easy to integrate with Supabase internals |
-| **Limitations** | Stateless, no persistence, no collaboration, no workflow visibility |
-| **Conclusion** | This is an **instrument**, not the arena |
+| Aspect          | Assessment                                                                                           |
+|-----------------|------------------------------------------------------------------------------------------------------|
+| **Strengths**   | Excellent for data collection, deterministic, automatable, easy to integrate with Supabase internals |
+| **Limitations** | Stateless, no persistence, no collaboration, no workflow visibility                                  |
+| **Conclusion**  | This is an **instrument**, not the arena                                                             |
 
 ### C. Slack / ChatOps
 
-| Aspect | Assessment |
-|--------|-----------|
-| **Strengths** | Good for triggering workflows, notifications, collaboration; fits existing team behavior |
-| **Limitations** | Terrible as a system of record, hard to structure data, hard to audit or reproduce |
-| **Conclusion** | Useful as a **control plane / interface**, not storage |
+| Aspect          | Assessment                                                                               |
+|-----------------|------------------------------------------------------------------------------------------|
+| **Strengths**   | Good for triggering workflows, notifications, collaboration; fits existing team behavior |
+| **Limitations** | Terrible as a system of record, hard to structure data, hard to audit or reproduce       |
+| **Conclusion**  | Useful as a **control plane / interface**, not storage                                   |
 
 ### D. Spreadsheet / lightweight tabular tools
 
-| Aspect | Assessment |
-|--------|-----------|
-| **Strengths** | Structured, familiar, decent for tracking |
+| Aspect          | Assessment                                                                       |
+|-----------------|----------------------------------------------------------------------------------|
+| **Strengths**   | Structured, familiar, decent for tracking                                        |
 | **Limitations** | Weak integration with probes, no strong workflow or logic layer, breaks at scale |
-| **Conclusion** | **Transitional** at best |
+| **Conclusion**  | **Transitional** at best                                                         |
 
 ### E. Database-backed system (Supabase itself)
 
-| Aspect | Assessment |
-|--------|-----------|
-| **Strengths** | Native fit (evaluating Postgres with Postgres), strong structure for assessments, easy to store probe outputs (JSONB), supports workflows/state/versioning, integrates with Supabase auth/edge functions/storage, enables automation |
-| **Limitations** | Requires some upfront design, needs a UI or interface layer |
-| **Conclusion** | **Most appropriate system of record** |
+| Aspect          | Assessment                                                                                                                                                                                                                           |
+|-----------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| **Strengths**   | Native fit (evaluating Postgres with Postgres), strong structure for assessments, easy to store probe outputs (JSONB), supports workflows/state/versioning, integrates with Supabase auth/edge functions/storage, enables automation |
+| **Limitations** | Requires some upfront design, needs a UI or interface layer                                                                                                                                                                          |
+| **Conclusion**  | **Most appropriate system of record**                                                                                                                                                                                                |
 
 ### F. Custom application (internal tool)
 
-| Aspect | Assessment |
-|--------|-----------|
-| **Strengths** | Tailored UX for assessments, can enforce methodology, can integrate CLI + platform + reporting, can scale into a product |
-| **Limitations** | Engineering cost, requires prioritization |
-| **Conclusion** | **Ideal long-term arena**, backed by a database. Not mutually exclusive with E — sits on top of it |
+| Aspect          | Assessment                                                                                                               |
+|-----------------|--------------------------------------------------------------------------------------------------------------------------|
+| **Strengths**   | Tailored UX for assessments, can enforce methodology, can integrate CLI + platform + reporting, can scale into a product |
+| **Limitations** | Engineering cost, requires prioritization                                                                                |
+| **Conclusion**  | **Ideal long-term arena**, backed by a database. Not mutually exclusive with E — sits on top of it                       |
 
 ## Three-Layer Architecture
 
@@ -118,12 +118,12 @@ This is the "laboratory process." It is iterative, not one-shot. An assessment m
 
 ## Four Required Capabilities (satisfied)
 
-| Capability | How Satisfied |
-|-----------|---------------|
-| **Ingestion** | CLI + platform APIs → DB; manual inputs → DB |
+| Capability           | How Satisfied                                              |
+|----------------------|------------------------------------------------------------|
+| **Ingestion**        | CLI + platform APIs → DB; manual inputs → DB               |
 | **State Management** | `assessments` table + `status` field + `assessment_events` |
-| **Computation** | Rule engine (Go service or SQL/edge functions) |
-| **Output** | Rendered reports (Markdown/HTML/PDF) |
+| **Computation**      | Rule engine (Go service or SQL/edge functions)             |
+| **Output**           | Rendered reports (Markdown/HTML/PDF)                       |
 
 ## Key Principle
 

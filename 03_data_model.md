@@ -128,11 +128,11 @@ create index assessment_inputs_key_idx on assessment_inputs(key);
 
 Example rows:
 
-| key | value | source |
-|-----|-------|--------|
-| `postgres_version` | `"17.4.1.084"` | platform |
-| `managed_service` | `true` | platform |
-| `workload_type` | `"oltp"` | customer |
+| key                 | value                 | source   |
+|---------------------|-----------------------|----------|
+| `postgres_version`  | `"17.4.1.084"`        | platform |
+| `managed_service`   | `true`                | platform |
+| `workload_type`     | `"oltp"`              | customer |
 | `primary_objective` | `"latency reduction"` | customer |
 
 The duplication between `assessment_inputs` and `platform_context`/`customer_context` is acceptable in v1: one is optimized for convenience, one for traceability.

@@ -256,17 +256,17 @@ supabase db health findings list --assessment-id <uuid>
 
 Even without a formal public API, define it as if you had one:
 
-| Method | Path | Purpose |
-|--------|------|---------|
-| `POST` | `/assessments` | Create assessment |
-| `PATCH` | `/assessments/{id}` | Update assessment metadata/status |
-| `POST` | `/assessments/{id}/inputs:batchUpsert` | Upsert inputs |
-| `POST` | `/assessments/{id}/evidence:batchCreate` | Upload probe evidence |
-| `POST` | `/assessments/{id}/analyze` | Trigger rule evaluation and scoring |
-| `POST` | `/assessments/{id}/reports` | Generate report |
-| `GET` | `/assessments/{id}` | Get assessment summary |
-| `GET` | `/assessments/{id}/findings` | List findings |
-| `GET` | `/assessments/{id}/scores` | Get scores |
+| Method  | Path                                     | Purpose                             |
+|---------|------------------------------------------|-------------------------------------|
+| `POST`  | `/assessments`                           | Create assessment                   |
+| `PATCH` | `/assessments/{id}`                      | Update assessment metadata/status   |
+| `POST`  | `/assessments/{id}/inputs:batchUpsert`   | Upsert inputs                       |
+| `POST`  | `/assessments/{id}/evidence:batchCreate` | Upload probe evidence               |
+| `POST`  | `/assessments/{id}/analyze`              | Trigger rule evaluation and scoring |
+| `POST`  | `/assessments/{id}/reports`              | Generate report                     |
+| `GET`   | `/assessments/{id}`                      | Get assessment summary              |
+| `GET`   | `/assessments/{id}/findings`             | List findings                       |
+| `GET`   | `/assessments/{id}/scores`               | Get scores                          |
 
 ## State Transitions
 

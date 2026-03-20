@@ -20,14 +20,14 @@ Historical assessments create a learning dataset. Future assessments can referen
 
 ## Comparison Axes
 
-| Axis | What It Enables |
-|------|----------------|
-| **Workload type** | Compare OLTP vs OLAP vs hybrid baselines |
-| **Database size** | Normalize findings by data volume |
-| **Instance tier** | Compare performance relative to provisioned resources |
-| **Score distributions** | Identify outliers and typical ranges per domain |
-| **Finding frequency** | Which issues are most common across the fleet |
-| **Temporal trends** | How a single customer's health evolves over time |
+| Axis                    | What It Enables                                       |
+|-------------------------|-------------------------------------------------------|
+| **Workload type**       | Compare OLTP vs OLAP vs hybrid baselines              |
+| **Database size**       | Normalize findings by data volume                     |
+| **Instance tier**       | Compare performance relative to provisioned resources |
+| **Score distributions** | Identify outliers and typical ranges per domain       |
+| **Finding frequency**   | Which issues are most common across the fleet         |
+| **Temporal trends**     | How a single customer's health evolves over time      |
 
 ## Capabilities by Maturity
 

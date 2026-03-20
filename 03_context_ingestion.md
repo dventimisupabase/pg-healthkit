@@ -14,11 +14,11 @@ Persona, objectives, and workload type cannot be derived from SQL. They must be 
 
 The methodology separates into three layers:
 
-| Layer | Scope | Portability |
-|-------|-------|-------------|
-| **Assessment model** | Generic — domains, scoring, findings | Portable to any PostgreSQL environment |
-| **Evidence model** | What inputs are needed | Portable — defines requirements |
-| **Implementation model** | How inputs are obtained | Environment-specific (e.g., Supabase) |
+| Layer                    | Scope                                | Portability                            |
+|--------------------------|--------------------------------------|----------------------------------------|
+| **Assessment model**     | Generic — domains, scoring, findings | Portable to any PostgreSQL environment |
+| **Evidence model**       | What inputs are needed               | Portable — defines requirements        |
+| **Implementation model** | How inputs are obtained              | Environment-specific (e.g., Supabase)  |
 
 The assessment model stays generic. The evidence model defines what inputs are needed. The implementation model defines how a specific platform (e.g., Supabase) obtains them.
 
@@ -26,20 +26,20 @@ The assessment model stays generic. The evidence model defines what inputs are n
 
 Every variable in the framework should be annotated with its source:
 
-| Variable | Needed? | Source | Requires Customer Interview? |
-|----------|---------|--------|------------------------------|
-| Primary persona | Yes | Customer / CSM / SA | Yes |
-| Business objective | Yes | Customer | Yes |
-| Workload type (OLTP/OLAP/hybrid) | Yes | Customer + telemetry inference | Usually yes |
-| PostgreSQL version | Yes | Platform metadata | No |
-| Managed vs self-hosted | Yes | Platform metadata | No |
-| Extensions installed | Yes | Platform metadata / SQL | No |
-| HA topology | Yes | Platform metadata | No |
-| Replication status | Yes | Platform telemetry / SQL | No |
-| Query latency profile | Yes | SQL / observability | No |
-| Capacity growth expectations | Yes | Customer + billing + telemetry | Often yes |
-| SLO / RPO / RTO expectations | Yes | Customer | Yes |
-| Cost sensitivity | Yes | Customer / account team | Yes |
+| Variable                         | Needed? | Source                         | Requires Customer Interview? |
+|----------------------------------|---------|--------------------------------|------------------------------|
+| Primary persona                  | Yes     | Customer / CSM / SA            | Yes                          |
+| Business objective               | Yes     | Customer                       | Yes                          |
+| Workload type (OLTP/OLAP/hybrid) | Yes     | Customer + telemetry inference | Usually yes                  |
+| PostgreSQL version               | Yes     | Platform metadata              | No                           |
+| Managed vs self-hosted           | Yes     | Platform metadata              | No                           |
+| Extensions installed             | Yes     | Platform metadata / SQL        | No                           |
+| HA topology                      | Yes     | Platform metadata              | No                           |
+| Replication status               | Yes     | Platform telemetry / SQL       | No                           |
+| Query latency profile            | Yes     | SQL / observability            | No                           |
+| Capacity growth expectations     | Yes     | Customer + billing + telemetry | Often yes                    |
+| SLO / RPO / RTO expectations     | Yes     | Customer                       | Yes                          |
+| Cost sensitivity                 | Yes     | Customer / account team        | Yes                          |
 
 The key insight: **you only ask the customer what only the customer can know.**
 
@@ -79,41 +79,41 @@ This separation is operationally important: it minimizes customer questioning an
 
 ### Platform-derived
 
-| Key | Type | Source |
-|-----|------|--------|
-| `postgres_version` | string | Platform metadata / SQL |
-| `managed_service` | boolean | Platform metadata |
-| `extensions` | array | Platform metadata / SQL |
-| `compute_tier` | string | Platform metadata |
-| `storage_bytes` | integer | Platform metadata |
-| `replica_count` | integer | Platform metadata |
-| `pitr_enabled` | boolean | Platform metadata |
-| `max_connections` | integer | Platform metadata / SQL |
-| `pgbouncer_enabled` | boolean | Platform metadata |
+| Key                 | Type    | Source                  |
+|---------------------|---------|-------------------------|
+| `postgres_version`  | string  | Platform metadata / SQL |
+| `managed_service`   | boolean | Platform metadata       |
+| `extensions`        | array   | Platform metadata / SQL |
+| `compute_tier`      | string  | Platform metadata       |
+| `storage_bytes`     | integer | Platform metadata       |
+| `replica_count`     | integer | Platform metadata       |
+| `pitr_enabled`      | boolean | Platform metadata       |
+| `max_connections`   | integer | Platform metadata / SQL |
+| `pgbouncer_enabled` | boolean | Platform metadata       |
 
 ### Customer-derived
 
-| Key | Type | Source |
-|-----|------|--------|
-| `primary_persona` | string | Customer interview |
-| `primary_objective` | string | Customer interview |
-| `secondary_objectives` | array | Customer interview |
-| `workload_type` | enum (oltp, olap, hybrid, queue, multitenant_saas) | Customer interview |
-| `application_description` | string | Customer interview |
-| `critical_services` | array | Customer interview |
-| `latency_slo` | string | Customer interview |
-| `availability_target` | string | Customer interview |
-| `growth_expectation` | string | Customer interview |
-| `cost_sensitivity` | string | Customer interview |
-| `recent_incidents` | string | Customer interview |
+| Key                       | Type                                               | Source             |
+|---------------------------|----------------------------------------------------|--------------------|
+| `primary_persona`         | string                                             | Customer interview |
+| `primary_objective`       | string                                             | Customer interview |
+| `secondary_objectives`    | array                                              | Customer interview |
+| `workload_type`           | enum (oltp, olap, hybrid, queue, multitenant_saas) | Customer interview |
+| `application_description` | string                                             | Customer interview |
+| `critical_services`       | array                                              | Customer interview |
+| `latency_slo`             | string                                             | Customer interview |
+| `availability_target`     | string                                             | Customer interview |
+| `growth_expectation`      | string                                             | Customer interview |
+| `cost_sensitivity`        | string                                             | Customer interview |
+| `recent_incidents`        | string                                             | Customer interview |
 
 ### Operator-derived
 
-| Key | Type | Source |
-|-----|------|--------|
-| `assessment_scope` | string | Operator judgment |
-| `notes` | string | Operator |
-| `special_constraints` | string | Operator |
+| Key                   | Type   | Source            |
+|-----------------------|--------|-------------------|
+| `assessment_scope`    | string | Operator judgment |
+| `notes`               | string | Operator          |
+| `special_constraints` | string | Operator          |
 
 ## Input Schema Examples
 
@@ -159,11 +159,11 @@ affects:
 
 Each input should carry:
 
-| Field | Purpose |
-|-------|---------|
-| `source_of_truth` | Where the authoritative value comes from |
+| Field               | Purpose                                                                             |
+|---------------------|-------------------------------------------------------------------------------------|
+| `source_of_truth`   | Where the authoritative value comes from                                            |
 | `collection_method` | How the value is obtained (internal_api, SQL probe, questionnaire, operator lookup) |
-| `customer_visible` | Whether the input is appropriate to share with the customer |
+| `customer_visible`  | Whether the input is appropriate to share with the customer                         |
 
 This tells you what can be automated now and what cannot.
 
@@ -198,11 +198,11 @@ This is a better fit for managed service providers than a single-pass model, bec
 
 The human checklist should be organized into three sections:
 
-| Section | Content | Source |
-|---------|---------|--------|
-| **A. Auto-populated platform facts** | Everything the platform can determine without customer interaction | Platform APIs, SQL probes |
-| **B. Customer-derived business context** | Everything requiring customer explanation | Discovery conversation |
-| **C. Derived assessment outputs** | Classification, scores, findings, recommendations | Rule engine, scoring |
+| Section                                  | Content                                                            | Source                    |
+|------------------------------------------|--------------------------------------------------------------------|---------------------------|
+| **A. Auto-populated platform facts**     | Everything the platform can determine without customer interaction | Platform APIs, SQL probes |
+| **B. Customer-derived business context** | Everything requiring customer explanation                          | Discovery conversation    |
+| **C. Derived assessment outputs**        | Classification, scores, findings, recommendations                  | Rule engine, scoring      |
 
 This avoids mixing raw facts with interpretation.
 
