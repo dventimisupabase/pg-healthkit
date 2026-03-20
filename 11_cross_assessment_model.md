@@ -88,3 +88,32 @@ Even though cross-assessment capabilities are not in v1, acknowledging the model
 ## Principle
 
 > More data → better insights. But only if normalization and scoring are stable.
+
+## Supabase-Specific Benchmarking
+
+### Tier-based baselines
+
+- Establish typical score ranges per Supabase tier (e.g., "typical small-tier performance score: 60-80")
+- Flag assessments that deviate significantly from tier peers
+- Account for tier-specific resource constraints when comparing (small-tier connection pressure is structurally different from large-tier)
+
+### System schema patterns
+
+- Track auth table bloat frequency across fleet
+- Track Realtime slot lag prevalence
+- Identify correlation between storage usage and soft-delete pressure
+- Monitor vacuum effectiveness on system schemas across different tiers and project ages
+
+### Feature-based segmentation
+
+- Compare health profiles: Supabase Auth users vs external auth
+- Compare: Realtime-enabled vs not
+- Compare: pgvector-enabled vs not
+- Segment by feature combinations (e.g., Auth + Realtime + Storage vs Auth-only)
+
+### Product feedback loops (Supabase-specific)
+
+- "80% of storage-enabled customers show soft-delete pressure" → improve cleanup scheduling
+- "High idle-in-transaction in PostgREST workloads" → investigate PostgREST connection handling
+- "Auth table bloat despite autovacuum" → increase autovacuum aggressiveness on auth tables as platform default
+- "RLS column indexing issues in 60% of assessments" → add index recommendations to Supabase onboarding

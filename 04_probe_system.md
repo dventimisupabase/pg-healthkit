@@ -186,6 +186,142 @@ Good but not required for a credible first release:
 - `prepared_transactions`
 - `replica_conflicts`
 
+## Supabase-Specific Probes
+
+### Critical (v1)
+
+#### 1. rls_policy_column_indexing
+
+**Purpose:** Detect missing indexes on columns used in RLS USING clauses.
+**Prerequisites:** None.
+**Execution scope:** database.
+**Collects:** For each table with RLS enabled, extract columns referenced in USING/WITH CHECK clauses, check if those columns have indexes.
+**Candidate findings:** `rls_policy_columns_unindexed`.
+**Affected domains:** performance, efficiency.
+**Interpretation:** RLS is enabled by default in Supabase. Missing indexes on RLS filter columns cause sequential scans on every query through that table. This is arguably the #1 Supabase-specific performance issue. High signal, high confidence.
+
+#### 2. realtime_replication_slot_health
+
+**Purpose:** Detect unconsumed or lagging logical replication slots used by Supabase Realtime.
+**Prerequisites:** Realtime enabled.
+**Execution scope:** database.
+**Collects:** slot_name, slot_type, active, xmin, confirmed_flush_lsn, current WAL LSN, lag_bytes (computed).
+**Candidate findings:** `replication_slot_lag_elevated` (Supabase-specific variant), `replication_slot_inactive`.
+**Affected domains:** availability, storage.
+**Interpretation:** Supabase Realtime uses logical replication. Unconsumed or inactive slots prevent WAL cleanup and can fill disk. This is a common cause of disk pressure incidents.
+
+#### 3. auth_schema_health
+
+**Purpose:** Detect bloat and vacuum lag on Supabase Auth tables.
+**Prerequisites:** auth schema exists.
+**Execution scope:** database.
+**Collects:** For auth.users, auth.sessions, auth.refresh_tokens, auth.mfa_factors: row counts, dead tuple counts, dead tuple percentage, last autovacuum, last autoanalyze, table size.
+**Candidate findings:** `auth_table_bloat_detected`, `auth_session_explosion`.
+**Affected domains:** storage, performance, availability.
+**Interpretation:** Auth tables experience high churn (especially sessions and refresh_tokens). Stale vacuum on these tables slows login flows and bloats storage. Weight by whether Supabase Auth is the active auth provider.
+
+#### 4. storage_objects_health
+
+**Purpose:** Detect growth pressure and cleanup lag on storage.objects.
+**Prerequisites:** storage schema exists.
+**Execution scope:** database.
+**Collects:** storage.objects row count, soft-deleted row count (where deleted_at IS NOT NULL), total table size, dead tuples, last autovacuum.
+**Candidate findings:** `storage_soft_delete_pressure`, `storage_objects_bloat`.
+**Affected domains:** storage, cost.
+**Interpretation:** storage.objects can grow very large in file-heavy applications. Soft-deleted rows that aren't cleaned up waste storage and slow queries against the table.
+
+#### 5. system_schema_bloat
+
+**Purpose:** Detect vacuum/maintenance pressure across all Supabase system schemas.
+**Prerequisites:** None.
+**Execution scope:** database.
+**Collects:** For tables in auth, storage, realtime, extensions, supabase_functions schemas: schema, table, n_live_tup, n_dead_tup, dead_tuple_pct, last_autovacuum, last_autoanalyze, pg_total_relation_size.
+**Candidate findings:** `system_schema_vacuum_stale`.
+**Affected domains:** storage, performance, operational_hygiene.
+**Interpretation:** System schemas are managed by the platform but still need vacuum like any other tables. Customers often don't monitor these because they "belong to Supabase." High dead tuple ratios on system tables indicate platform-level maintenance gaps.
+
+#### 6. pgbouncer_pool_health
+
+**Purpose:** Detect connection pool mode and contention.
+**Prerequisites:** PgBouncer/Supavisor metrics accessible.
+**Execution scope:** platform.
+**Collects:** pool_mode (transaction/session), active connections, idle connections, waiting clients, max pool size.
+**Candidate findings:** `pool_mode_misconfiguration`, `pool_contention_detected`.
+**Affected domains:** concurrency, performance.
+**Interpretation:** Transaction mode breaks prepared statement caching (causing repeated planning overhead). Session mode limits connection reuse. High waiting client count indicates pool undersizing.
+
+### Contextual (v1.1)
+
+#### 7. pg_cron_job_health
+
+**Purpose:** Detect failed or long-running scheduled jobs.
+**Prerequisites:** pg_cron extension.
+**Execution scope:** database.
+**Collects:** job name, schedule, last run time, last duration, last status, error messages from cron.job_run_details.
+**Candidate findings:** `pg_cron_job_failures`.
+**Affected domains:** availability, operational_hygiene.
+**Interpretation:** Failed cron jobs may indicate schema issues, permission problems, or resource contention. Long-running jobs can spike CPU/lock pressure during execution windows.
+
+#### 8. extension_version_health
+
+**Purpose:** Detect outdated or potentially incompatible extensions.
+**Prerequisites:** None.
+**Execution scope:** database.
+**Collects:** installed extension names and versions, available (upgradeable) versions from pg_available_extension_versions.
+**Candidate findings:** `extension_version_outdated`.
+**Affected domains:** operational_hygiene, availability.
+**Interpretation:** Outdated extensions may miss security patches or performance improvements. On Supabase, extension upgrades are sometimes tied to platform version upgrades.
+
+#### 9. pgvector_index_health
+
+**Purpose:** Assess vector index configuration and health.
+**Prerequisites:** pgvector extension.
+**Execution scope:** database.
+**Collects:** vector indexes (HNSW/IVFFlat), index size, table row count, index parameters (m, ef_construction for HNSW; lists for IVFFlat), tables with vector columns but no vector index.
+**Candidate findings:** `pgvector_missing_index`, `pgvector_index_misconfigured`.
+**Affected domains:** performance, efficiency.
+**Interpretation:** Missing vector indexes cause sequential distance scans. HNSW with default parameters may not suit the dataset size. IVFFlat with too few lists reduces recall.
+
+### Supabase Probe-to-Finding Mapping
+
+| Probe | Supports (primary) | Supports (corroboration) |
+|-------|-------------------|-------------------------|
+| `rls_policy_column_indexing` | `rls_policy_columns_unindexed` | — |
+| `realtime_replication_slot_health` | `replication_slot_inactive_or_lagging` | `wal_checkpoint_health` |
+| `auth_schema_health` | `auth_table_bloat_detected`, `auth_session_explosion` | `dead_tuple_ratio`, `stale_maintenance` |
+| `storage_objects_health` | `storage_soft_delete_pressure`, `storage_objects_bloat` | `largest_tables` |
+| `system_schema_bloat` | `system_schema_vacuum_stale` | `stale_maintenance` |
+| `pgbouncer_pool_health` | `pool_mode_misconfiguration`, `pool_contention_detected` | `top_queries_total_time` |
+| `pg_cron_job_health` | `pg_cron_job_failures` | — |
+| `extension_version_health` | `extension_version_outdated` | `extensions_inventory` |
+| `pgvector_index_health` | `pgvector_missing_index`, `pgvector_index_misconfigured` | `largest_tables` |
+
+### Supabase Probe-to-Score-Domain Mapping (additions)
+
+#### Availability
+- **Primary:** `realtime_replication_slot_health`, `auth_schema_health`
+- **Secondary:** `pg_cron_job_health`, `extension_version_health`
+
+#### Performance
+- **Primary:** `rls_policy_column_indexing`, `pgbouncer_pool_health`, `pgvector_index_health`
+- **Secondary:** `auth_schema_health`, `system_schema_bloat`
+
+#### Concurrency
+- **Primary:** `pgbouncer_pool_health`
+
+#### Storage
+- **Primary:** `realtime_replication_slot_health`, `auth_schema_health`, `storage_objects_health`, `system_schema_bloat`
+
+#### Efficiency
+- **Primary:** `rls_policy_column_indexing`, `pgvector_index_health`
+
+#### Cost
+- **Primary:** `storage_objects_health`
+- **Secondary:** `system_schema_bloat`
+
+#### Operational Hygiene
+- **Primary:** `system_schema_bloat`, `pg_cron_job_health`, `extension_version_health`
+
 ## Standardized Evidence Payload
 
 All probe evidence uses a common wrapper. See `normalizer_interface_contract.md` for the full specification.

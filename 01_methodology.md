@@ -223,3 +223,46 @@ See `sample_report_template.md` for the canonical report format.
 - Generating remediation advice without confidence or tradeoffs
 
 A credible health methodology says: "Here is what we know, how we know it, how confident we are, and what to do next."
+
+## Supabase Platform Considerations
+
+When applying this methodology to Supabase-managed databases, several platform-specific factors modify the assessment:
+
+### PostgREST and API-Generated Queries
+
+Supabase exposes PostgreSQL via PostgREST, which auto-generates SQL from HTTP requests. This means:
+- Query patterns are generated, not hand-written — optimization requires understanding the HTTP-to-SQL mapping
+- Complex REST queries with embedding (e.g., `?select=*,related_table(*)`) generate joins that may not have been explicitly designed
+- Planning time overhead can be significant for complex PostgREST queries with many joins or filters
+
+### Row Level Security (RLS)
+
+RLS is enabled by default in Supabase and adds overhead to every query:
+- Every query through PostgREST passes through RLS policies
+- Missing indexes on columns referenced in USING clauses cause sequential scans on every request
+- Policy complexity directly impacts latency — policies with subqueries or function calls add compounding overhead
+- RLS policy indexing should be treated as a first-order performance concern, not a secondary check
+
+### Managed Service Constraints
+
+Supabase customers have limited control over:
+- Instance sizing (determined by tier)
+- Default PostgreSQL configuration (shared_buffers, max_connections set by tier)
+- Background maintenance scheduling
+- Extension availability and versions
+
+This means:
+- Some remediation paths (e.g., "increase shared_buffers") are not directly available — the recommendation becomes "upgrade tier" or "optimize queries to fit within current resources"
+- Configuration hygiene findings should distinguish between tunable and non-tunable settings
+- Cost recommendations should reference tier upgrades rather than infrastructure tuning
+
+### System Schemas
+
+Supabase manages several schemas that are not customer-created but affect customer experience:
+- `auth.*` — authentication tables (users, sessions, refresh_tokens, mfa_factors)
+- `storage.*` — file storage metadata (objects, buckets)
+- `realtime.*` — real-time subscription infrastructure
+- `extensions.*` — extension management
+- `supabase_functions.*` — edge function metadata
+
+Health issues in these schemas (bloat, stale vacuum, excessive growth) are platform concerns but manifest as customer-visible symptoms (slow logins, delayed file access, subscription lag). The assessment should monitor these schemas and clearly tag findings as "platform" vs "user" origin.

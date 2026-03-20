@@ -217,3 +217,39 @@ For Supabase, the four evidence channels are:
 4. A very short customer interview template
 
 Many variables that would require customer input in a generic context are platform-derivable at Supabase. The methodology stays generic; the implementation becomes more efficient.
+
+### Supabase Platform Inputs (auto-derivable)
+
+These additional platform-derived inputs should be collected for Supabase assessments:
+
+| Key | Type | Source |
+|-----|------|--------|
+| `supabase_tier` | string (small/medium/large/xl) | Platform metadata |
+| `supabase_region` | string | Platform metadata |
+| `auth_provider` | string (supabase/external) | Platform metadata |
+| `realtime_enabled` | boolean | Platform metadata |
+| `storage_enabled` | boolean | Platform metadata |
+| `pgbouncer_pool_mode` | string (transaction/session) | Platform metadata |
+| `postgrest_max_rows` | integer | Platform config |
+| `supabase_project_age_days` | integer | Platform metadata |
+
+### Supabase-Specific Customer Questions
+
+Add these to the customer-derived intake for Supabase assessments:
+
+- Are you using Supabase Auth, or an external auth provider?
+- Do you use Realtime subscriptions? Approximately how many concurrent subscribers?
+- Do you use Supabase Storage? Approximately how many files?
+- Do you use pgvector? What embedding dimensions?
+- Have you customized any RLS policies beyond the defaults?
+- Do you have pg_cron jobs? What do they do?
+
+### Supabase Feature Interaction Matrix
+
+Supabase features interact and compound health concerns:
+
+- **PostgREST + RLS** = every API call pays the RLS tax; index coverage on policy columns is critical
+- **Realtime + high write volume** = WAL pressure from both logical replication and physical replication
+- **Auth + high traffic** = session/token table churn creates vacuum pressure
+- **Storage + large file counts** = storage.objects table growth creates maintenance pressure
+- **pgvector + large datasets** = memory pressure from HNSW indexes in shared_buffers

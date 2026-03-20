@@ -249,6 +249,152 @@ Becomes more relevant when cost or maintenance is a primary objective.
 
 **Score effects:** storage -8, cost -6, efficiency -3
 
+## Supabase-Specific Findings
+
+### 16. rls_policy_columns_unindexed
+
+**Domain:** performance
+**Inputs:** `rls_policy_column_indexing`
+
+| Condition | Severity | Confidence |
+|-----------|----------|------------|
+| > 5 tables with unindexed RLS columns | high | high |
+| > 2 tables with unindexed RLS columns | medium | high |
+| Any table with unindexed RLS columns | low | high |
+
+**Score effects (high):** performance -20, efficiency -10
+
+**Note:** Possibly the single highest-impact Supabase-specific finding. RLS is enabled by default on all Supabase tables exposed through PostgREST. Every API call pays the RLS tax; missing indexes on policy columns turn this into a sequential scan on every request.
+
+---
+
+### 17. replication_slot_inactive_or_lagging
+
+**Domain:** availability
+**Inputs:** `realtime_replication_slot_health`
+
+| Condition | Severity | Confidence |
+|-----------|----------|------------|
+| Inactive slot with lag > 1GB | critical | high |
+| Lag > 500MB or inactive > 1 hour | high | high |
+| Lag > 100MB | medium | high |
+
+**Score effects (critical):** availability -25, storage -15
+
+**Note:** Supabase Realtime uses logical replication slots. Unconsumed or inactive slots prevent WAL cleanup and can fill disk, leading to database unavailability.
+
+---
+
+### 18. auth_table_bloat_detected
+
+**Domain:** storage
+**Inputs:** `auth_schema_health`
+
+| Condition | Severity | Confidence |
+|-----------|----------|------------|
+| dead_tuple_pct > 30% OR row count > 5M with stale vacuum | high | high |
+| dead_tuple_pct > 10% OR row count > 1M | medium | high |
+
+**Score effects (high):** storage -15, performance -8, availability -5
+
+**Note:** Auth tables (especially auth.sessions and auth.refresh_tokens) experience high churn. Stale vacuum on these tables slows login flows and bloats storage.
+
+---
+
+### 19. storage_soft_delete_pressure
+
+**Domain:** storage
+**Inputs:** `storage_objects_health`
+
+| Condition | Severity | Confidence |
+|-----------|----------|------------|
+| soft_deleted_ratio > 20% AND table size > 1GB | high | medium |
+| soft_deleted_ratio > 10% | medium | medium |
+
+**Score effects (high):** storage -12, cost -8
+
+**Note:** storage.objects can grow very large in file-heavy applications. Soft-deleted rows that aren't cleaned up waste storage and slow queries.
+
+---
+
+### 20. system_schema_vacuum_stale
+
+**Domain:** operational_hygiene
+**Inputs:** `system_schema_bloat`
+
+| Condition | Severity | Confidence |
+|-----------|----------|------------|
+| Any system table > 1M rows with no autovacuum in 7 days OR dead_tuple_pct > 30% | high | high |
+| dead_tuple_pct > 10% | medium | high |
+
+**Score effects (high):** operational_hygiene -15, storage -8, performance -5
+
+**Note:** System schemas (auth, storage, realtime, extensions, supabase_functions) are managed by the platform but still need vacuum. Findings should be tagged as "platform" origin to distinguish from user-schema issues.
+
+---
+
+### 21. pool_mode_misconfiguration
+
+**Domain:** performance
+**Inputs:** `pgbouncer_pool_health`
+
+| Condition | Severity | Confidence |
+|-----------|----------|------------|
+| Transaction mode with high planning time overhead | medium | medium |
+| Transaction mode detected (informational) | low | medium |
+
+**Score effects (medium):** performance -8, concurrency -5
+
+**Note:** Transaction mode breaks prepared statement caching, causing repeated planning overhead. This is informational unless paired with evidence of planning time impact.
+
+---
+
+### 22. pg_cron_job_failures
+
+**Domain:** operational_hygiene
+**Inputs:** `pg_cron_job_health`
+
+| Condition | Severity | Confidence |
+|-----------|----------|------------|
+| Multiple recent failures or critical job failing | high | high |
+| Any job failure detected | medium | medium |
+
+**Score effects (high):** operational_hygiene -10, availability -5
+
+**Note:** Failed cron jobs may indicate schema issues, permission problems, or resource contention.
+
+---
+
+### 23. extension_version_outdated
+
+**Domain:** operational_hygiene
+**Inputs:** `extension_version_health`
+
+| Condition | Severity | Confidence |
+|-----------|----------|------------|
+| Critical extensions outdated by multiple versions | medium | medium |
+| Any extension outdated | low | low |
+
+**Score effects (medium):** operational_hygiene -8
+
+**Note:** On Supabase, extension upgrades are sometimes tied to platform version upgrades. Outdated extensions may miss security patches or performance improvements.
+
+---
+
+### 24. pgvector_missing_index
+
+**Domain:** performance
+**Inputs:** `pgvector_index_health`
+
+| Condition | Severity | Confidence |
+|-----------|----------|------------|
+| Large tables (> 100K rows) with vector columns but no vector index | high | high |
+| Any table with vector columns but no vector index | medium | medium |
+
+**Score effects (high):** performance -15, efficiency -8
+
+**Note:** Missing vector indexes cause sequential distance scans. HNSW with default parameters may not suit the dataset size. IVFFlat with too few lists reduces recall.
+
 ## Most Actionable Findings (v1 priority)
 
 1. Long-running transactions

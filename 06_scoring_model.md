@@ -163,3 +163,35 @@ A scored assessment produces:
 - Score effects are additive deltas, not absolute values
 - The rule engine should not attempt sophisticated score normalization in v1
 - Absence of findings does not imply health — probes may have been skipped
+
+## Supabase-Specific Scoring Adjustments
+
+### RLS Performance Tax
+
+For Supabase assessments, the performance domain baseline should account for RLS overhead. RLS adds 5-50ms per query depending on policy complexity. When scoring performance for Supabase workloads, consider that some latency is structural and not a defect. However, missing indexes on RLS columns amplify this overhead dramatically and should score severely.
+
+### Tier-Aware Thresholds
+
+Supabase instance tiers determine available resources. Scoring thresholds should adjust:
+
+- **Small tier:** max_connections is low (~60); utilization > 70% is already medium severity. Shared memory is limited; cache efficiency is more critical.
+- **Medium tier:** moderate headroom; standard thresholds apply.
+- **Large/XL:** more resources but higher cost; cost domain becomes more impactful per finding.
+
+### System Schema Health Domain
+
+Consider adding a sub-domain or tagging system for findings that relate to Supabase system schemas (auth, storage, realtime). These tables are not under customer control but affect customer experience. Findings in system schemas should be flagged with a "platform" tag to distinguish from user-schema issues. This helps prioritize: user-schema issues are customer-actionable; system-schema issues may require Supabase support engagement.
+
+### Managed Service Profile
+
+Add a `supabase_default` profile with adjusted weights:
+
+| Domain | Weight | Rationale |
+|--------|--------|-----------|
+| Performance | 25% | Most customer-visible; includes RLS tax |
+| Availability | 20% | Platform manages HA but slot lag and WAL bloat are risks |
+| Storage | 20% | Direct billing impact; system schema bloat adds to cost |
+| Concurrency | 15% | Pool mode and connection limits are tier-constrained |
+| Operational Hygiene | 10% | Includes system schema maintenance and extension health |
+| Efficiency | 5% | Less tunable in managed context |
+| Cost | 5% | Tier-based pricing means less micro-optimization opportunity |

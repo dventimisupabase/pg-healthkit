@@ -97,3 +97,28 @@ Then add `connection_pressure` + `idle_in_transaction_sessions_detected`, then `
 - On a parallel track, the SQL probes can be run directly via `psql` or shared with customers
 - The implementation language (Go) is determined by organizational fit, not intrinsic superiority
 - The SQL probes are the portable core; the CLI is the Supabase-specific wrapper
+
+## Supabase-Specific Implementation Track
+
+### Phase 1 additions
+- Add RLS policy indexing audit to manual checklist
+- Add auth table bloat check to manual checklist
+- Add Realtime slot lag inspection to manual checklist
+- Add system schema vacuum check to manual checklist
+
+### Phase 2 additions
+- Implement 6 critical Supabase probes (RLS indexing, Realtime slots, Auth schema, Storage objects, System schema bloat, PgBouncer pool)
+- Add Supabase platform metadata auto-population (tier, region, features from Management API)
+- Add `supabase_default` scoring profile
+- Add system schema filtering option to CLI
+
+### Phase 3 additions
+- Auth session growth trends
+- Realtime subscription lag trends
+- Storage soft-delete queue age tracking
+- Tier-based benchmarking baselines
+
+### Phase 4 additions
+- Supabase dashboard integration
+- Fleet-wide benchmarking by tier, region, auth method
+- Platform-level recommendations (e.g., "adjust default autovacuum settings for auth tables")
