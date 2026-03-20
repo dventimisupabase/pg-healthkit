@@ -1,0 +1,782 @@
+version: "v1"
+schema_version: "2026-03-20"
+
+defaults:
+  enabled: true
+  execution_mode: sql
+  payload_contract_version: "v1"
+
+profiles:
+  - default
+  - performance
+  - reliability
+  - cost_capacity
+
+probes:
+
+  - name: instance_metadata
+    version: "2026-03-20"
+    enabled: true
+    profiles: [default, performance, reliability, cost_capacity]
+    category: baseline
+    sql_file: probes/00_instance_metadata.sql
+    prerequisites:
+      extensions: []
+      capabilities: []
+    payload_contract:
+      type: object
+      required:
+        - postgres_version
+        - server_version_num
+        - is_replica
+        - settings
+      properties:
+        postgres_version:
+          type: string
+          description: PostgreSQL version string
+        server_version_num:
+          type: integer
+          description: Numeric server version
+        is_replica:
+          type: boolean
+        settings:
+          type: object
+          required:
+            - max_connections
+            - shared_buffers
+            - work_mem
+            - maintenance_work_mem
+            - effective_cache_size
+            - max_wal_size
+            - checkpoint_timeout
+            - autovacuum
+          properties:
+            max_connections: { type: string }
+            shared_buffers: { type: string }
+            work_mem: { type: string }
+            maintenance_work_mem: { type: string }
+            effective_cache_size: { type: string }
+            max_wal_size: { type: string }
+            checkpoint_timeout: { type: string }
+            autovacuum: { type: string }
+    summary_fields: []
+    supports_findings:
+      - high_connection_utilization
+      - checkpoint_pressure_detected
+      - diagnostic_visibility_limited
+      - replication_lag_elevated
+      - storage_concentration_risk
+    affects_domains:
+      - availability
+      - performance
+      - efficiency
+      - cost
+
+  - name: extensions_inventory
+    version: "2026-03-20"
+    enabled: true
+    profiles: [default, performance, reliability, cost_capacity]
+    category: baseline
+    sql_file: probes/01_extensions_inventory.sql
+    prerequisites:
+      extensions: []
+      capabilities: []
+    payload_contract:
+      type: object
+      required:
+        - extensions
+        - summary
+      properties:
+        extensions:
+          type: array
+          items:
+            type: object
+            required: [name, version]
+            properties:
+              name: { type: string }
+              version: { type: string }
+        summary:
+          type: object
+          required:
+            - extension_count
+            - has_pg_stat_statements
+            - missing_features
+          properties:
+            extension_count: { type: integer }
+            has_pg_stat_statements: { type: boolean }
+            missing_features: { type: integer }
+    summary_fields:
+      - summary.extension_count
+      - summary.has_pg_stat_statements
+      - summary.missing_features
+    supports_findings:
+      - diagnostic_visibility_limited
+    affects_domains:
+      - operational_hygiene
+      - performance
+
+  - name: database_activity
+    version: "2026-03-20"
+    enabled: true
+    profiles: [default, performance, reliability]
+    category: baseline
+    sql_file: probes/10_database_activity.sql
+    prerequisites:
+      extensions: []
+      capabilities: []
+    payload_contract:
+      type: object
+      required:
+        - datname
+        - stats
+      properties:
+        datname: { type: string }
+        stats:
+          type: object
+          required:
+            - xact_commit
+            - xact_rollback
+            - blks_read
+            - blks_hit
+            - temp_files
+            - temp_bytes
+            - deadlocks
+          properties:
+            xact_commit: { type: integer }
+            xact_rollback: { type: integer }
+            blks_read: { type: integer }
+            blks_hit: { type: integer }
+            temp_files: { type: integer }
+            temp_bytes: { type: integer }
+            deadlocks: { type: integer }
+            blk_read_time: { type: number, nullable: true }
+            blk_write_time: { type: number, nullable: true }
+    summary_fields:
+      - stats.deadlocks
+      - stats.temp_bytes
+    supports_findings:
+      - deadlocks_observed
+      - significant_temp_spill_activity
+      - checkpoint_pressure_detected
+    affects_domains:
+      - performance
+      - concurrency
+      - efficiency
+
+  - name: connection_pressure
+    version: "2026-03-20"
+    enabled: true
+    profiles: [default, performance, reliability]
+    category: baseline
+    sql_file: probes/11_connection_pressure.sql
+    prerequisites:
+      extensions: []
+      capabilities: []
+    payload_contract:
+      type: object
+      required:
+        - summary
+        - states
+      properties:
+        summary:
+          type: object
+          required:
+            - total_connections
+            - active
+            - idle
+            - idle_in_transaction
+            - max_connections
+            - utilization_pct
+          properties:
+            total_connections: { type: integer }
+            active: { type: integer }
+            idle: { type: integer }
+            idle_in_transaction: { type: integer }
+            max_connections: { type: integer }
+            utilization_pct: { type: number }
+        states:
+          type: array
+          items:
+            type: object
+            required: [state, count]
+            properties:
+              state: { type: string, nullable: true }
+              count: { type: integer }
+    summary_fields:
+      - summary.total_connections
+      - summary.idle_in_transaction
+      - summary.utilization_pct
+    supports_findings:
+      - high_connection_utilization
+      - idle_in_transaction_sessions_detected
+    affects_domains:
+      - concurrency
+      - availability
+      - efficiency
+
+  - name: long_running_transactions
+    version: "2026-03-20"
+    enabled: true
+    profiles: [default, performance, reliability]
+    category: baseline
+    sql_file: probes/12_long_running_transactions.sql
+    prerequisites:
+      extensions: []
+      capabilities: []
+    payload_contract:
+      type: object
+      required:
+        - rows
+        - summary
+      properties:
+        rows:
+          type: array
+          items:
+            type: object
+            required:
+              - pid
+              - usename
+              - application_name
+              - state
+              - xact_age_seconds
+              - query_age_seconds
+            properties:
+              pid: { type: integer }
+              usename: { type: string, nullable: true }
+              application_name: { type: string, nullable: true }
+              state: { type: string, nullable: true }
+              xact_age_seconds: { type: integer }
+              query_age_seconds: { type: integer }
+              wait_event_type: { type: string, nullable: true }
+              wait_event: { type: string, nullable: true }
+              query: { type: string, nullable: true }
+        summary:
+          type: object
+          required:
+            - row_count
+            - oldest_xact_age_seconds
+            - oldest_idle_xact_age_seconds
+          properties:
+            row_count: { type: integer }
+            oldest_xact_age_seconds: { type: integer }
+            oldest_idle_xact_age_seconds: { type: integer }
+    summary_fields:
+      - summary.row_count
+      - summary.oldest_xact_age_seconds
+      - summary.oldest_idle_xact_age_seconds
+    supports_findings:
+      - long_running_transactions_detected
+      - idle_in_transaction_sessions_detected
+      - dead_tuple_accumulation_detected
+    affects_domains:
+      - concurrency
+      - storage
+      - availability
+
+  - name: lock_blocking_chains
+    version: "2026-03-20"
+    enabled: true
+    profiles: [default, performance, reliability]
+    category: baseline
+    sql_file: probes/13_lock_blocking_chains.sql
+    prerequisites:
+      extensions: []
+      capabilities: []
+    payload_contract:
+      type: object
+      required:
+        - rows
+        - summary
+      properties:
+        rows:
+          type: array
+          items:
+            type: object
+            required:
+              - blocked_pid
+              - blocker_pid
+            properties:
+              blocked_pid: { type: integer }
+              blocked_user: { type: string, nullable: true }
+              blocked_app: { type: string, nullable: true }
+              blocker_pid: { type: integer }
+              blocker_user: { type: string, nullable: true }
+              blocker_app: { type: string, nullable: true }
+              wait_event_type: { type: string, nullable: true }
+              wait_event: { type: string, nullable: true }
+              blocked_query: { type: string, nullable: true }
+              blocker_query: { type: string, nullable: true }
+        summary:
+          type: object
+          required:
+            - blocking_pairs
+          properties:
+            blocking_pairs: { type: integer }
+    summary_fields:
+      - summary.blocking_pairs
+    supports_findings:
+      - active_lock_blocking_detected
+      - high_latency_queries_detected
+    affects_domains:
+      - concurrency
+      - performance
+      - availability
+
+  - name: top_queries_total_time
+    version: "2026-03-20"
+    enabled: true
+    profiles: [default, performance, cost_capacity]
+    category: baseline
+    sql_file: probes/20_top_queries_total_time.sql
+    prerequisites:
+      extensions: [pg_stat_statements]
+      capabilities: []
+    payload_contract:
+      type: object
+      required:
+        - rows
+        - summary
+      properties:
+        rows:
+          type: array
+          items:
+            type: object
+            required:
+              - queryid
+              - calls
+              - total_exec_time_ms
+              - mean_exec_time_ms
+            properties:
+              queryid: { type: string }
+              calls: { type: integer }
+              total_exec_time_ms: { type: number }
+              mean_exec_time_ms: { type: number }
+              rows: { type: integer, nullable: true }
+              shared_blks_hit: { type: integer, nullable: true }
+              shared_blks_read: { type: integer, nullable: true }
+              temp_blks_written: { type: integer, nullable: true }
+              query: { type: string, nullable: true }
+        summary:
+          type: object
+          required:
+            - row_count
+            - top_total_exec_time_ms
+            - top_calls
+          properties:
+            row_count: { type: integer }
+            top_total_exec_time_ms: { type: number }
+            top_calls: { type: integer }
+    summary_fields:
+      - summary.top_total_exec_time_ms
+      - summary.top_calls
+    supports_findings:
+      - high_impact_query_total_time
+    affects_domains:
+      - performance
+      - efficiency
+      - cost
+
+  - name: top_queries_mean_latency
+    version: "2026-03-20"
+    enabled: true
+    profiles: [default, performance]
+    category: baseline
+    sql_file: probes/21_top_queries_mean_latency.sql
+    prerequisites:
+      extensions: [pg_stat_statements]
+      capabilities: []
+    payload_contract:
+      type: object
+      required:
+        - rows
+        - summary
+      properties:
+        rows:
+          type: array
+          items:
+            type: object
+            required:
+              - queryid
+              - calls
+              - mean_exec_time_ms
+            properties:
+              queryid: { type: string }
+              calls: { type: integer }
+              mean_exec_time_ms: { type: number }
+              max_exec_time_ms: { type: number, nullable: true }
+              stddev_exec_time_ms: { type: number, nullable: true }
+              query: { type: string, nullable: true }
+        summary:
+          type: object
+          required:
+            - row_count
+            - top_mean_exec_time_ms
+          properties:
+            row_count: { type: integer }
+            top_mean_exec_time_ms: { type: number }
+    summary_fields:
+      - summary.top_mean_exec_time_ms
+    supports_findings:
+      - high_latency_queries_detected
+    affects_domains:
+      - performance
+      - concurrency
+
+  - name: temp_spill_queries
+    version: "2026-03-20"
+    enabled: true
+    profiles: [default, performance, cost_capacity]
+    category: baseline
+    sql_file: probes/22_temp_spill_queries.sql
+    prerequisites:
+      extensions: [pg_stat_statements]
+      capabilities: []
+    payload_contract:
+      type: object
+      required:
+        - rows
+        - summary
+      properties:
+        rows:
+          type: array
+          items:
+            type: object
+            required:
+              - queryid
+              - calls
+              - temp_blks_read
+              - temp_blks_written
+            properties:
+              queryid: { type: string }
+              calls: { type: integer }
+              temp_blks_read: { type: integer }
+              temp_blks_written: { type: integer }
+              total_exec_time_ms: { type: number, nullable: true }
+              mean_exec_time_ms: { type: number, nullable: true }
+              query: { type: string, nullable: true }
+        summary:
+          type: object
+          required:
+            - row_count
+            - max_temp_blks_written
+          properties:
+            row_count: { type: integer }
+            max_temp_blks_written: { type: integer }
+    summary_fields:
+      - summary.max_temp_blks_written
+    supports_findings:
+      - significant_temp_spill_activity
+      - high_latency_queries_detected
+    affects_domains:
+      - performance
+      - efficiency
+      - cost
+
+  - name: largest_tables
+    version: "2026-03-20"
+    enabled: true
+    profiles: [default, reliability, cost_capacity]
+    category: baseline
+    sql_file: probes/30_largest_tables.sql
+    prerequisites:
+      extensions: []
+      capabilities: []
+    payload_contract:
+      type: object
+      required:
+        - rows
+        - summary
+      properties:
+        rows:
+          type: array
+          items:
+            type: object
+            required:
+              - schemaname
+              - relname
+              - total_bytes
+            properties:
+              schemaname: { type: string }
+              relname: { type: string }
+              total_bytes: { type: integer }
+              table_bytes: { type: integer, nullable: true }
+              index_bytes: { type: integer, nullable: true }
+              n_live_tup: { type: integer, nullable: true }
+              n_dead_tup: { type: integer, nullable: true }
+        summary:
+          type: object
+          required:
+            - row_count
+            - top_relation_total_bytes
+          properties:
+            row_count: { type: integer }
+            top_relation_total_bytes: { type: integer }
+    summary_fields:
+      - summary.top_relation_total_bytes
+    supports_findings:
+      - storage_concentration_risk
+      - dead_tuple_accumulation_detected
+      - potentially_unused_large_indexes
+    affects_domains:
+      - storage
+      - cost
+      - efficiency
+
+  - name: dead_tuple_ratio
+    version: "2026-03-20"
+    enabled: true
+    profiles: [default, performance, reliability]
+    category: baseline
+    sql_file: probes/31_dead_tuple_ratio.sql
+    prerequisites:
+      extensions: []
+      capabilities: []
+    payload_contract:
+      type: object
+      required:
+        - rows
+        - summary
+      properties:
+        rows:
+          type: array
+          items:
+            type: object
+            required:
+              - schemaname
+              - relname
+              - dead_tuple_pct
+            properties:
+              schemaname: { type: string }
+              relname: { type: string }
+              n_live_tup: { type: integer, nullable: true }
+              n_dead_tup: { type: integer, nullable: true }
+              dead_tuple_pct: { type: number }
+              last_vacuum: { type: string, nullable: true }
+              last_autovacuum: { type: string, nullable: true }
+              last_analyze: { type: string, nullable: true }
+              last_autoanalyze: { type: string, nullable: true }
+        summary:
+          type: object
+          required:
+            - row_count
+            - max_dead_tuple_pct
+          properties:
+            row_count: { type: integer }
+            max_dead_tuple_pct: { type: number }
+    summary_fields:
+      - summary.max_dead_tuple_pct
+    supports_findings:
+      - dead_tuple_accumulation_detected
+      - stale_vacuum_or_analyze_detected
+    affects_domains:
+      - storage
+      - performance
+      - availability
+
+  - name: stale_maintenance
+    version: "2026-03-20"
+    enabled: true
+    profiles: [default, performance, reliability]
+    category: baseline
+    sql_file: probes/32_stale_maintenance.sql
+    prerequisites:
+      extensions: []
+      capabilities: []
+    payload_contract:
+      type: object
+      required:
+        - rows
+        - summary
+      properties:
+        rows:
+          type: array
+          items:
+            type: object
+            required:
+              - schemaname
+              - relname
+            properties:
+              schemaname: { type: string }
+              relname: { type: string }
+              n_live_tup: { type: integer, nullable: true }
+              last_autovacuum: { type: string, nullable: true }
+              last_autoanalyze: { type: string, nullable: true }
+              autovacuum_count: { type: integer, nullable: true }
+              autoanalyze_count: { type: integer, nullable: true }
+        summary:
+          type: object
+          required:
+            - row_count
+            - stale_tables
+            - tables_missing_autoanalyze
+            - tables_over_1m_live_tup
+          properties:
+            row_count: { type: integer }
+            stale_tables: { type: integer }
+            tables_missing_autoanalyze: { type: integer }
+            tables_over_1m_live_tup: { type: integer }
+    summary_fields:
+      - summary.stale_tables
+      - summary.tables_missing_autoanalyze
+      - summary.tables_over_1m_live_tup
+    supports_findings:
+      - stale_vacuum_or_analyze_detected
+      - dead_tuple_accumulation_detected
+    affects_domains:
+      - storage
+      - performance
+      - operational_hygiene
+
+  - name: unused_indexes
+    version: "2026-03-20"
+    enabled: true
+    profiles: [default, cost_capacity]
+    category: baseline
+    sql_file: probes/33_unused_indexes.sql
+    prerequisites:
+      extensions: []
+      capabilities: []
+    payload_contract:
+      type: object
+      required:
+        - rows
+        - summary
+      properties:
+        rows:
+          type: array
+          items:
+            type: object
+            required:
+              - schemaname
+              - table_name
+              - index_name
+              - idx_scan
+              - index_bytes
+            properties:
+              schemaname: { type: string }
+              table_name: { type: string }
+              index_name: { type: string }
+              idx_scan: { type: integer }
+              index_bytes: { type: integer }
+        summary:
+          type: object
+          required:
+            - row_count
+            - zero_scan_large_index_count
+          properties:
+            row_count: { type: integer }
+            zero_scan_large_index_count: { type: integer }
+    summary_fields:
+      - summary.zero_scan_large_index_count
+    supports_findings:
+      - potentially_unused_large_indexes
+    affects_domains:
+      - storage
+      - efficiency
+      - cost
+
+  - name: replication_health
+    version: "2026-03-20"
+    enabled: true
+    profiles: [default, reliability]
+    category: contextual
+    sql_file: probes/40_replication_health.sql
+    prerequisites:
+      extensions: []
+      capabilities: []
+    payload_contract:
+      type: object
+      required:
+        - rows
+        - summary
+      properties:
+        rows:
+          type: array
+          items:
+            type: object
+            properties:
+              application_name: { type: string, nullable: true }
+              state: { type: string, nullable: true }
+              sync_state: { type: string, nullable: true }
+              write_lag_ms: { type: number, nullable: true }
+              flush_lag_ms: { type: number, nullable: true }
+              replay_lag_ms: { type: number, nullable: true }
+        summary:
+          type: object
+          required:
+            - row_count
+            - max_replay_lag_ms
+          properties:
+            row_count: { type: integer }
+            max_replay_lag_ms: { type: number }
+    summary_fields:
+      - summary.max_replay_lag_ms
+    supports_findings:
+      - replication_lag_elevated
+    affects_domains:
+      - availability
+      - performance
+
+  - name: wal_checkpoint_health
+    version: "2026-03-20"
+    enabled: true
+    profiles: [default, reliability, cost_capacity]
+    category: baseline
+    sql_file: probes/41_wal_checkpoint_health.sql
+    prerequisites:
+      extensions: []
+      capabilities: []
+    payload_contract:
+      type: object
+      required:
+        - bgwriter
+      properties:
+        bgwriter:
+          type: object
+          required:
+            - checkpoints_timed
+            - checkpoints_req
+            - checkpoint_write_time_ms
+            - checkpoint_sync_time_ms
+            - buffers_checkpoint
+            - buffers_clean
+            - buffers_backend
+            - buffers_backend_fsync
+          properties:
+            checkpoints_timed: { type: integer }
+            checkpoints_req: { type: integer }
+            checkpoint_write_time_ms: { type: number }
+            checkpoint_sync_time_ms: { type: number }
+            buffers_checkpoint: { type: integer }
+            buffers_clean: { type: integer }
+            buffers_backend: { type: integer }
+            buffers_backend_fsync: { type: integer }
+        wal:
+          type: object
+          nullable: true
+          properties:
+            wal_records: { type: integer, nullable: true }
+            wal_bytes: { type: integer, nullable: true }
+    summary_fields:
+      - bgwriter.checkpoints_req
+      - bgwriter.buffers_backend
+    supports_findings:
+      - checkpoint_pressure_detected
+    affects_domains:
+      - performance
+      - efficiency
+      - availability
+      - cost
+
+metadata:
+  normalization_guidance:
+    - Normalize intervals and durations to numeric milliseconds or seconds, not textual intervals.
+    - Normalize sizes to integer byte counts wherever practical.
+    - Preserve row arrays for operator review, but expose stable summary fields for rules.
+    - Prefer null over empty string for unknown values.
+    - Keep query text truncated consistently if truncation is required.
+    - If a probe is unavailable, mark it skipped rather than synthesizing an empty payload.
+  implementation_notes:
+    - The SQL runner and normalizer should emit payloads matching these field names exactly.
+    - Summary fields are the canonical fields expected by the rule engine.
+    - Additional fields may be included, but existing field names should remain stable once adopted.

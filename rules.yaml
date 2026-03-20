@@ -1,0 +1,777 @@
+version: "v1"
+schema_version: "2026-03-20"
+
+defaults:
+  severity: info
+  confidence: medium
+  enabled: true
+  evaluation_mode: all_conditions
+  profiles:
+    - default
+  outputs:
+    create_finding: true
+    update_score_domains: true
+
+enums:
+  severities: [info, low, medium, high, critical]
+  confidences: [low, medium, high]
+  operators:
+    - gt
+    - gte
+    - lt
+    - lte
+    - eq
+    - neq
+    - contains
+    - not_contains
+    - in
+    - not_in
+    - exists
+    - not_exists
+    - regex
+  combinators:
+    - all
+    - any
+
+score_domains:
+  - availability
+  - performance
+  - concurrency
+  - storage
+  - efficiency
+  - cost
+  - operational_hygiene
+
+rules:
+
+  - id: long_running_transactions_detected
+    enabled: true
+    profiles: [default, performance, reliability]
+    finding:
+      key: long_running_transactions_detected
+      domain: concurrency
+      title: Long-running transactions detected
+      summary_template: >
+        Found ${summary.row_count} transaction(s) exceeding expected age, with the oldest at
+        ${summary.oldest_xact_age_seconds}s.
+      impact_template: >
+        Long-running transactions can block vacuum progress, increase table bloat, and amplify
+        lock contention.
+      recommendation_template: >
+        Review application transaction boundaries, identify abandoned sessions, and reduce the
+        lifetime of interactive transactions.
+      tags: [transactions, vacuum, contention]
+    evidence:
+      required_probes:
+        - long_running_transactions
+    evaluate:
+      mode: first_match
+      cases:
+        - when:
+            all:
+              - fact: summary.oldest_xact_age_seconds
+                from: long_running_transactions
+                op: gt
+                value: 3600
+          severity: high
+          confidence: high
+          score_effects:
+            concurrency: -20
+            storage: -10
+            availability: -8
+
+        - when:
+            all:
+              - fact: summary.oldest_xact_age_seconds
+                from: long_running_transactions
+                op: gt
+                value: 900
+          severity: medium
+          confidence: high
+          score_effects:
+            concurrency: -12
+            storage: -6
+            availability: -4
+
+        - when:
+            all:
+              - fact: summary.oldest_xact_age_seconds
+                from: long_running_transactions
+                op: gt
+                value: 300
+              - fact: assessment.workload_type
+                from: assessment_context
+                op: eq
+                value: oltp
+          severity: low
+          confidence: medium
+          score_effects:
+            concurrency: -6
+            storage: -3
+
+  - id: idle_in_transaction_sessions_detected
+    enabled: true
+    profiles: [default, performance, reliability]
+    finding:
+      key: idle_in_transaction_sessions_detected
+      domain: concurrency
+      title: Idle in transaction sessions detected
+      summary_template: >
+        Found ${summary.idle_in_transaction} idle-in-transaction session(s); oldest transaction age
+        observed was ${summary.oldest_idle_xact_age_seconds}s.
+      impact_template: >
+        Idle-in-transaction sessions hold transactional resources open and can interfere with
+        vacuum, locking behavior, and connection hygiene.
+      recommendation_template: >
+        Ensure clients commit or roll back promptly and avoid holding transactions open while idle.
+      tags: [transactions, idle-in-transaction, pooling]
+    evidence:
+      required_probes:
+        - connection_pressure
+        - long_running_transactions
+    evaluate:
+      mode: first_match
+      cases:
+        - when:
+            all:
+              - fact: summary.idle_in_transaction
+                from: connection_pressure
+                op: gte
+                value: 3
+              - fact: summary.oldest_idle_xact_age_seconds
+                from: long_running_transactions
+                op: gt
+                value: 900
+          severity: high
+          confidence: high
+          score_effects:
+            concurrency: -18
+            availability: -8
+
+        - when:
+            all:
+              - fact: summary.idle_in_transaction
+                from: connection_pressure
+                op: gte
+                value: 1
+              - fact: summary.oldest_idle_xact_age_seconds
+                from: long_running_transactions
+                op: gt
+                value: 300
+          severity: medium
+          confidence: high
+          score_effects:
+            concurrency: -10
+            availability: -4
+
+  - id: active_lock_blocking_detected
+    enabled: true
+    profiles: [default, performance, reliability]
+    finding:
+      key: active_lock_blocking_detected
+      domain: concurrency
+      title: Active lock blocking detected
+      summary_template: >
+        Found ${summary.blocking_pairs} active blocking pair(s) during sampling.
+      impact_template: >
+        Blocking chains can directly increase request latency and, in severe cases, trigger incidents.
+      recommendation_template: >
+        Identify the blocker query pattern, review transaction scope, and optimize access patterns or
+        indexing to reduce lock duration.
+      tags: [locks, contention, latency]
+    evidence:
+      required_probes:
+        - lock_blocking_chains
+    evaluate:
+      mode: first_match
+      cases:
+        - when:
+            all:
+              - fact: summary.blocking_pairs
+                from: lock_blocking_chains
+                op: gt
+                value: 3
+          severity: high
+          confidence: high
+          score_effects:
+            concurrency: -20
+            performance: -12
+            availability: -8
+
+        - when:
+            all:
+              - fact: summary.blocking_pairs
+                from: lock_blocking_chains
+                op: gt
+                value: 0
+          severity: medium
+          confidence: high
+          score_effects:
+            concurrency: -12
+            performance: -6
+            availability: -3
+
+  - id: deadlocks_observed
+    enabled: true
+    profiles: [default, reliability]
+    finding:
+      key: deadlocks_observed
+      domain: concurrency
+      title: Deadlocks observed
+      summary_template: >
+        The database statistics reported ${stats.deadlocks} deadlock(s) in the current stats window.
+      impact_template: >
+        Deadlocks indicate transactional access patterns that can fail user requests and complicate
+        reliability.
+      recommendation_template: >
+        Review transaction ordering and conflicting write paths, especially around hot rows or tables.
+      tags: [deadlocks, concurrency]
+    evidence:
+      required_probes:
+        - database_activity
+    evaluate:
+      mode: first_match
+      cases:
+        - when:
+            all:
+              - fact: stats.deadlocks
+                from: database_activity
+                op: gt
+                value: 5
+          severity: high
+          confidence: medium
+          score_effects:
+            concurrency: -16
+            availability: -8
+
+        - when:
+            all:
+              - fact: stats.deadlocks
+                from: database_activity
+                op: gt
+                value: 0
+          severity: medium
+          confidence: medium
+          score_effects:
+            concurrency: -8
+            availability: -3
+
+  - id: high_connection_utilization
+    enabled: true
+    profiles: [default, reliability]
+    finding:
+      key: high_connection_utilization
+      domain: concurrency
+      title: High connection utilization
+      summary_template: >
+        Connection utilization was ${summary.utilization_pct}% of max_connections.
+      impact_template: >
+        High connection utilization reduces headroom and raises saturation risk during spikes or
+        incidents.
+      recommendation_template: >
+        Review pooling posture, reduce idle clients, and ensure max_connections aligns with the
+        deployment model.
+      tags: [connections, saturation, pooling]
+    evidence:
+      required_probes:
+        - connection_pressure
+    evaluate:
+      mode: first_match
+      cases:
+        - when:
+            all:
+              - fact: summary.utilization_pct
+                from: connection_pressure
+                op: gte
+                value: 90
+          severity: high
+          confidence: medium
+          score_effects:
+            concurrency: -16
+            availability: -8
+            efficiency: -4
+
+        - when:
+            all:
+              - fact: summary.utilization_pct
+                from: connection_pressure
+                op: gte
+                value: 80
+          severity: medium
+          confidence: medium
+          score_effects:
+            concurrency: -8
+            availability: -4
+            efficiency: -2
+
+  - id: significant_temp_spill_activity
+    enabled: true
+    profiles: [default, performance, cost_capacity]
+    finding:
+      key: significant_temp_spill_activity
+      domain: performance
+      title: Significant temp spill activity detected
+      summary_template: >
+        Query statistics show repeated temp spill activity; top observed spill was
+        ${summary.max_temp_blks_written} temp blocks written.
+      impact_template: >
+        Temp spills often indicate expensive sorts or hashes, increasing latency and I/O cost.
+      recommendation_template: >
+        Review the spilling queries, validate plan shape, and consider targeted query/index changes
+        before adjusting memory settings.
+      tags: [temp-files, sorts, hashing, io]
+    evidence:
+      required_probes:
+        - temp_spill_queries
+    evaluate:
+      mode: first_match
+      cases:
+        - when:
+            all:
+              - fact: summary.max_temp_blks_written
+                from: temp_spill_queries
+                op: gt
+                value: 100000
+          severity: high
+          confidence: medium
+          score_effects:
+            performance: -16
+            efficiency: -10
+            cost: -8
+
+        - when:
+            all:
+              - fact: summary.max_temp_blks_written
+                from: temp_spill_queries
+                op: gt
+                value: 10000
+          severity: medium
+          confidence: medium
+          score_effects:
+            performance: -8
+            efficiency: -5
+            cost: -3
+
+  - id: high_impact_query_total_time
+    enabled: true
+    profiles: [default, performance, cost_capacity]
+    finding:
+      key: high_impact_query_total_time
+      domain: performance
+      title: High-impact query by total execution time
+      summary_template: >
+        A small number of queries dominate cumulative execution time; top query consumed
+        ${summary.top_total_exec_time_ms}ms across ${summary.top_calls} calls.
+      impact_template: >
+        Queries dominating total server time are the best optimization leverage points for performance
+        and cost.
+      recommendation_template: >
+        Start with the top total-time query, inspect its execution plan, and validate indexing and
+        row-access patterns.
+      tags: [queries, total-time, optimization]
+    evidence:
+      required_probes:
+        - top_queries_total_time
+    evaluate:
+      mode: first_match
+      cases:
+        - when:
+            all:
+              - fact: summary.top_total_exec_time_ms
+                from: top_queries_total_time
+                op: gt
+                value: 600000
+          severity: high
+          confidence: medium
+          score_effects:
+            performance: -14
+            efficiency: -8
+            cost: -6
+
+        - when:
+            all:
+              - fact: summary.top_total_exec_time_ms
+                from: top_queries_total_time
+                op: gt
+                value: 120000
+          severity: medium
+          confidence: medium
+          score_effects:
+            performance: -8
+            efficiency: -4
+            cost: -3
+
+  - id: high_latency_queries_detected
+    enabled: true
+    profiles: [default, performance]
+    finding:
+      key: high_latency_queries_detected
+      domain: performance
+      title: High-latency queries detected
+      summary_template: >
+        Top mean-latency query showed ${summary.top_mean_exec_time_ms}ms average execution time.
+      impact_template: >
+        Slow queries directly affect response time, and in OLTP workloads can degrade user-visible
+        service quality.
+      recommendation_template: >
+        Inspect the slowest queries first, compare plan shape to expected selectivity, and confirm
+        whether the workload is OLTP or analytical.
+      tags: [queries, latency, plans]
+    evidence:
+      required_probes:
+        - top_queries_mean_latency
+    evaluate:
+      mode: first_match
+      cases:
+        - when:
+            all:
+              - fact: assessment.workload_type
+                from: assessment_context
+                op: eq
+                value: oltp
+              - fact: summary.top_mean_exec_time_ms
+                from: top_queries_mean_latency
+                op: gt
+                value: 500
+          severity: high
+          confidence: medium
+          score_effects:
+            performance: -18
+            concurrency: -6
+
+        - when:
+            all:
+              - fact: summary.top_mean_exec_time_ms
+                from: top_queries_mean_latency
+                op: gt
+                value: 1000
+          severity: medium
+          confidence: medium
+          score_effects:
+            performance: -10
+            concurrency: -3
+
+  - id: dead_tuple_accumulation_detected
+    enabled: true
+    profiles: [default, performance, reliability]
+    finding:
+      key: dead_tuple_accumulation_detected
+      domain: storage
+      title: Dead tuple accumulation detected
+      summary_template: >
+        Large or active tables show dead tuple accumulation; top observed dead tuple percentage was
+        ${summary.max_dead_tuple_pct}%.
+      impact_template: >
+        Dead tuples can degrade scan performance, increase storage usage, and indicate that vacuum is
+        not keeping up.
+      recommendation_template: >
+        Review autovacuum effectiveness, long-lived transactions, and high-churn tables contributing
+        to dead tuple growth.
+      tags: [vacuum, bloat, dead-tuples]
+    evidence:
+      required_probes:
+        - dead_tuple_ratio
+    evaluate:
+      mode: first_match
+      cases:
+        - when:
+            all:
+              - fact: summary.max_dead_tuple_pct
+                from: dead_tuple_ratio
+                op: gt
+                value: 30
+          severity: high
+          confidence: high
+          score_effects:
+            storage: -18
+            performance: -8
+            availability: -4
+
+        - when:
+            all:
+              - fact: summary.max_dead_tuple_pct
+                from: dead_tuple_ratio
+                op: gt
+                value: 10
+          severity: medium
+          confidence: high
+          score_effects:
+            storage: -10
+            performance: -4
+
+  - id: stale_vacuum_or_analyze_detected
+    enabled: true
+    profiles: [default, performance, reliability]
+    finding:
+      key: stale_vacuum_or_analyze_detected
+      domain: operational_hygiene
+      title: Stale vacuum or analyze activity detected
+      summary_template: >
+        One or more significant tables show stale or missing autovacuum/autoanalyze activity.
+      impact_template: >
+        Stale maintenance can reduce planner quality and allow dead tuple accumulation to persist.
+      recommendation_template: >
+        Verify autovacuum settings and throughput, and confirm that large or hot tables are receiving
+        timely analyze/vacuum coverage.
+      tags: [vacuum, analyze, planner]
+    evidence:
+      required_probes:
+        - stale_maintenance
+    evaluate:
+      mode: first_match
+      cases:
+        - when:
+            all:
+              - fact: summary.tables_missing_autoanalyze
+                from: stale_maintenance
+                op: gt
+                value: 0
+              - fact: summary.tables_over_1m_live_tup
+                from: stale_maintenance
+                op: gt
+                value: 0
+          severity: high
+          confidence: medium
+          score_effects:
+            operational_hygiene: -14
+            storage: -6
+            performance: -4
+
+        - when:
+            all:
+              - fact: summary.stale_tables
+                from: stale_maintenance
+                op: gt
+                value: 0
+          severity: medium
+          confidence: medium
+          score_effects:
+            operational_hygiene: -8
+            storage: -3
+            performance: -2
+
+  - id: potentially_unused_large_indexes
+    enabled: true
+    profiles: [default, cost_capacity]
+    finding:
+      key: potentially_unused_large_indexes
+      domain: storage
+      title: Potentially unused large indexes detected
+      summary_template: >
+        Found ${summary.zero_scan_large_index_count} large index(es) with zero scans in the observed
+        stats window.
+      impact_template: >
+        Unused indexes increase storage footprint and write amplification.
+      recommendation_template: >
+        Validate over a representative stats window before removal, then drop clearly redundant or
+        obsolete indexes carefully.
+      tags: [indexes, storage, write-amplification]
+    evidence:
+      required_probes:
+        - unused_indexes
+    evaluate:
+      mode: first_match
+      cases:
+        - when:
+            all:
+              - fact: summary.zero_scan_large_index_count
+                from: unused_indexes
+                op: gte
+                value: 3
+          severity: medium
+          confidence: low
+          score_effects:
+            storage: -8
+            efficiency: -5
+            cost: -5
+
+        - when:
+            all:
+              - fact: summary.zero_scan_large_index_count
+                from: unused_indexes
+                op: gte
+                value: 1
+          severity: low
+          confidence: low
+          score_effects:
+            storage: -4
+            efficiency: -2
+            cost: -2
+
+  - id: replication_lag_elevated
+    enabled: true
+    profiles: [default, reliability]
+    finding:
+      key: replication_lag_elevated
+      domain: availability
+      title: Replication lag elevated
+      summary_template: >
+        Observed replay lag of ${summary.max_replay_lag_ms}ms across replica connections.
+      impact_template: >
+        Elevated lag can affect failover posture and read freshness when replicas serve reads.
+      recommendation_template: >
+        Review write rate, replica health, and whether read traffic depends on timely replay.
+      tags: [replication, lag, failover]
+    evidence:
+      required_probes:
+        - replication_health
+    evaluate:
+      mode: first_match
+      cases:
+        - when:
+            all:
+              - fact: summary.max_replay_lag_ms
+                from: replication_health
+                op: gt
+                value: 10000
+          severity: high
+          confidence: medium
+          score_effects:
+            availability: -18
+            performance: -4
+
+        - when:
+            all:
+              - fact: summary.max_replay_lag_ms
+                from: replication_health
+                op: gt
+                value: 1000
+          severity: medium
+          confidence: medium
+          score_effects:
+            availability: -8
+            performance: -2
+
+  - id: checkpoint_pressure_detected
+    enabled: true
+    profiles: [default, reliability, cost_capacity]
+    finding:
+      key: checkpoint_pressure_detected
+      domain: efficiency
+      title: Checkpoint pressure detected
+      summary_template: >
+        Requested checkpoints and backend writes indicate elevated checkpoint or write pressure.
+      impact_template: >
+        Excessive checkpoint pressure can increase write latency and backend write work.
+      recommendation_template: >
+        Review checkpoint cadence, WAL volume, and write-heavy query patterns before changing memory
+        or checkpoint settings.
+      tags: [checkpoints, wal, writes]
+    evidence:
+      required_probes:
+        - wal_checkpoint_health
+    evaluate:
+      mode: first_match
+      cases:
+        - when:
+            all:
+              - fact: bgwriter.checkpoints_req
+                from: wal_checkpoint_health
+                op: gt
+                value: 50
+              - fact: bgwriter.buffers_backend
+                from: wal_checkpoint_health
+                op: gt
+                value: 500000
+          severity: high
+          confidence: medium
+          score_effects:
+            efficiency: -16
+            performance: -6
+            availability: -4
+            cost: -4
+
+        - when:
+            all:
+              - fact: bgwriter.checkpoints_req
+                from: wal_checkpoint_health
+                op: gt
+                value: 10
+          severity: medium
+          confidence: medium
+          score_effects:
+            efficiency: -8
+            performance: -3
+            cost: -2
+
+  - id: diagnostic_visibility_limited
+    enabled: true
+    profiles: [default, performance, reliability, cost_capacity]
+    finding:
+      key: diagnostic_visibility_limited
+      domain: operational_hygiene
+      title: Diagnostic visibility is limited
+      summary_template: >
+        Required observability features are missing or incomplete; ${summary.missing_features} feature(s)
+        were not available.
+      impact_template: >
+        Limited observability reduces diagnostic confidence and can delay root-cause analysis.
+      recommendation_template: >
+        Enable and retain key diagnostic views or extensions, especially pg_stat_statements, where
+        supported by platform policy.
+      tags: [observability, diagnostics]
+    evidence:
+      required_probes:
+        - extensions_inventory
+    evaluate:
+      mode: first_match
+      cases:
+        - when:
+            all:
+              - fact: summary.has_pg_stat_statements
+                from: extensions_inventory
+                op: eq
+                value: false
+          severity: medium
+          confidence: high
+          score_effects:
+            operational_hygiene: -10
+
+  - id: storage_concentration_risk
+    enabled: true
+    profiles: [default, cost_capacity]
+    finding:
+      key: storage_concentration_risk
+      domain: storage
+      title: Storage concentration risk identified
+      summary_template: >
+        A small number of relations dominate storage; the top relation consumes
+        ${summary.top_relation_total_bytes} bytes.
+      impact_template: >
+        Storage concentrated in a few large relations can amplify maintenance, bloat, and cost issues.
+      recommendation_template: >
+        Focus storage and maintenance analysis on the largest relations first, especially those with
+        high churn or large index footprints.
+      tags: [storage, large-relations, capacity]
+    evidence:
+      required_probes:
+        - largest_tables
+    evaluate:
+      mode: first_match
+      cases:
+        - when:
+            all:
+              - fact: summary.top_relation_total_bytes
+                from: largest_tables
+                op: gt
+                value: 10737418240
+          severity: medium
+          confidence: high
+          score_effects:
+            storage: -8
+            cost: -6
+            efficiency: -3
+
+metadata:
+  guidance:
+    path_resolution: >
+      Each condition reads a scalar from the named probe payload using dot-path lookup.
+      Example: `summary.oldest_xact_age_seconds` resolves against the normalized payload for
+      the `long_running_transactions` probe.
+    evaluation_notes:
+      - first_match means the first matching case wins and later cases are ignored.
+      - all conditions inside `all` must evaluate true.
+      - missing required probes should cause the rule to be skipped, not failed.
+      - missing facts inside an available probe should cause the case to evaluate false.
+      - score_effects are additive deltas applied to the domain score.
+      - templates use ${...} interpolation from the matched rule context.
