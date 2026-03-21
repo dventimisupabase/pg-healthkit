@@ -8,33 +8,41 @@ This directory contains the SQL probes for pg-healthkit. These are standalone qu
 
 ```
 probes/
-  v1/          # Core v1 probes (run these for every assessment)
-  v1.1/        # Optional probes (run when additional depth is needed)
+  00–09  Instance and platform
+  10–19  Activity and connections
+  20–29  Query analysis
+  30–39  Tables, indexes, storage
+  40–49  Replication and WAL
+  50–59  Security and hygiene
+  60–69  Supabase-specific
 ```
+
+All probes live in a flat directory. The numbering convention groups probes by domain.
 
 ## Probe Numbering Convention
 
-| Range  | Domain                    |
-|--------|---------------------------|
-| 00–09  | Instance and platform     |
-| 10–19  | Activity and connections  |
-| 20–29  | Query analysis            |
-| 30–39  | Tables, indexes, storage  |
-| 40–49  | Replication and WAL       |
-| 50+    | Optional / v1.1           |
+| Range  | Domain                      | Category   |
+|--------|-----------------------------|------------|
+| 00–09  | Instance and platform       | Baseline   |
+| 10–19  | Activity and connections    | Baseline   |
+| 20–29  | Query analysis              | Baseline (requires pg_stat_statements) |
+| 30–39  | Tables, indexes, storage    | Baseline   |
+| 40–49  | Replication and WAL         | Contextual |
+| 50–59  | Security and hygiene        | Baseline   |
+| 60–69  | Supabase-specific           | Contextual |
 
 ## Running Probes with psql
 
 ### Single probe
 
 ```bash
-psql "$DATABASE_URL" -f probes/v1/12_long_running_transactions.sql
+psql "$DATABASE_URL" -f probes/12_long_running_transactions.sql
 ```
 
 ### All v1 probes
 
 ```bash
-for f in probes/v1/*.sql; do
+for f in probes/*.sql; do
   echo "=== $(basename "$f") ==="
   psql "$DATABASE_URL" -f "$f"
   echo
@@ -44,14 +52,14 @@ done
 ### With formatted output
 
 ```bash
-psql "$DATABASE_URL" -x -f probes/v1/00_instance_metadata.sql
+psql "$DATABASE_URL" -x -f probes/00_instance_metadata.sql
 ```
 
 ### Saving output to JSON (requires psql 14+)
 
 ```bash
 psql "$DATABASE_URL" -t -A \
-  -c "SELECT json_agg(row_to_json(t)) FROM ($(cat probes/v1/12_long_running_transactions.sql)) t;"
+  -c "SELECT json_agg(row_to_json(t)) FROM ($(cat probes/12_long_running_transactions.sql)) t;"
 ```
 
 ## Profile-Based Probe Selection

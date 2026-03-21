@@ -32,8 +32,7 @@ For a new contributor or agent, read in this order:
 
 The executable SQL probes — the Phase 1 deliverable. Can be run directly via `psql`:
 
-- `../probes/v1/` — 16 core v1 probes (instance, activity, connections, queries, tables, indexes, replication, WAL)
-- `../probes/v1.1/` — 8 optional probes (cache hit ratio, seq scans, bloat estimate, vacuum/analyze progress, index usage, duplicate indexes, growth proxy)
+- `../probes/` — 25 SQL probes (16 generic + 9 Supabase-specific), organized by numbering convention (00–09 instance, 10–19 activity, 20–29 queries, 30–39 storage, 40–49 replication, 50–59 security, 60–69 Supabase)
 - `../probes/README.md` — execution conventions, profile selection, payload normalization, psql usage
 
 ## Shared Contracts (in `../contracts/`)

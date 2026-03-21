@@ -165,6 +165,11 @@ Emphasize: `replication_health`, `long_running_transactions`, `lock_blocking_cha
 ### `cost_capacity`
 Emphasize: `largest_tables`, `unused_indexes`, `top_queries_total_time`, `temp_spill_queries`, `wal_checkpoint_health`, `replication_health`
 
+### `supabase_default`
+All probes from `default`, plus all Supabase-specific probes (60–69): `rls_policy_column_indexing`, `realtime_replication_slot_health`, `auth_schema_health`, `storage_objects_health`, `system_schema_bloat`, `pgbouncer_pool_health`. Contextual Supabase probes (`pg_cron_job_health`, `extension_version_health`, `pgvector_index_health`) run if prerequisites are met.
+
+This profile uses Supabase-specific scoring weights (see `10_scoring_model.md`) and enables tier-aware threshold adjustments.
+
 ## Implementation Prioritization
 
 ### First Wave (highest value, fewest dependencies)
