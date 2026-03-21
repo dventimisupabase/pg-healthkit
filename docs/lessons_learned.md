@@ -160,3 +160,17 @@ Use conversation tasks as an ephemeral checklist. Mark each step as done. Don't 
 - Design docs were significantly better than trial 01. Only one probe SQL fix was needed (vs. 3 doc fixes in trial 01). The normalizer, data model, and rule engine specs required zero fixes.
 
 **Status:** Complete. All v1 Definition of Done criteria met. All 28 rules fire correctly against synthetic evidence. End-to-end test passes against local PostgreSQL.
+
+### Trial 03 — 2026-03-21
+
+**Scope:** Full v1 implementation (Phases 1-5). All 24 probes, all 28 rules, CLI with arena integration, markdown reporting. Third trial to validate doc stability — zero doc fixes expected.
+
+**Doc fixes:** None. No ambiguities were encountered. All design docs, contracts, and specs were followed without modification.
+
+**New lessons:**
+- Previous trial migrations left artifacts on the Arena database (enum types, tables, functions). The initial schema migration should include `DROP IF EXISTS` cleanup to be idempotent across trials.
+- The Supabase CLI `migration repair` command is needed when previous trial migration versions exist in the remote history but not in the local migrations directory.
+- The probe runner's `sqlFile` path from the registry already includes the `probes/` prefix — the runner's base directory should be the repo root, not the probes directory, to avoid double-pathing.
+- Design docs are now stable enough for zero-fix implementation. The trial protocol's done criteria of "no doc-fix commits needed" was met.
+
+**Status:** Complete. All v1 Definition of Done criteria met. All 28 rules fire correctly against synthetic evidence (12 findings from 19 evidence records, scores computed correctly). End-to-end probe execution passes against local PostgreSQL 17. Zero doc-fix commits.
