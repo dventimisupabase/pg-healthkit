@@ -7,7 +7,7 @@
 WITH vector_columns AS (
   SELECT
     n.nspname AS schemaname,
-    c.relname AS table_name,
+    c.relname AS tablename,
     c.oid AS relid,
     a.attname AS column_name,
     format_type(a.atttypid, a.atttypmod) AS column_type
@@ -36,7 +36,7 @@ vector_indexes AS (
 )
 SELECT
   vc.schemaname,
-  vc.table_name,
+  vc.tablename,
   vc.column_name,
   vc.column_type,
   (SELECT n_live_tup FROM pg_stat_user_tables s WHERE s.relid = vc.relid) AS row_count,
@@ -44,7 +44,7 @@ SELECT
   vi.index_type,
   vi.index_bytes,
   vi.index_def,
-  CASE WHEN vi.index_name IS NULL THEN true ELSE false END AS missing_vector_index
+  vi.index_name IS NOT NULL AS has_index
 FROM vector_columns vc
 LEFT JOIN vector_indexes vi ON vi.indrelid = vc.relid
-ORDER BY vc.schemaname, vc.table_name, vc.column_name;
+ORDER BY vc.schemaname, vc.tablename, vc.column_name;

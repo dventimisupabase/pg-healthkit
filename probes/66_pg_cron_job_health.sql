@@ -7,7 +7,7 @@
 SELECT
   j.jobid,
   j.schedule,
-  j.command,
+  j.command AS jobname,
   j.nodename,
   j.nodeport,
   j.database,
@@ -17,7 +17,7 @@ SELECT
   d.job_pid,
   d.status AS last_status,
   d.return_message,
-  d.start_time,
+  d.start_time AS last_run_time,
   d.end_time,
   EXTRACT(EPOCH FROM (d.end_time - d.start_time))::numeric AS duration_seconds
 FROM cron.job j
