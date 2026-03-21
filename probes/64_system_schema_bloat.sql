@@ -1,7 +1,7 @@
 -- probe: system_schema_bloat
 -- purpose: Detect vacuum/maintenance pressure across all Supabase system schemas.
 -- prerequisites: none
--- profiles: default, reliability
+-- profiles: default, reliability, supabase_default
 -- note: Supabase-specific. System schemas need vacuum like any other tables.
 
 SELECT

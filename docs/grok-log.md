@@ -142,3 +142,25 @@
 
 **New residuals added:**
 - `supabase_default` profile inheritance not encoded in contracts (requires design decision on explicit vs implicit profile inheritance)
+
+---
+
+### 2026-03-20 (pass 7)
+
+**Counts:**
+- Total issues found: 11
+- Already known from residuals: 5
+- New issues found: 6
+- New issues auto-fixed: 3
+- New residuals added: 3
+
+**Fixes made:**
+- Fixed `docs/07_probe_system.md`: removed stale `collected_at` field from "Standardized Evidence Payload" example to match the authoritative canonical envelope in `docs/15_normalizer.md`
+- Fixed 8 Supabase SQL probe headers to add missing `supabase_default` profile to match `probe_registry.yaml`: `realtime_replication_slot_health`, `auth_schema_health`, `storage_objects_health`, `system_schema_bloat`, `pgbouncer_pool_health`, `pg_cron_job_health`, `extension_version_health`, `pgvector_index_health`; also fixed `auth_schema_health` profile list from `default, performance, reliability` to `default, reliability, cost_capacity, supabase_default` to match registry
+- Fixed `probes/63_storage_objects_health.sql`: renamed output column `soft_deleted_pct` to `soft_deleted_ratio` to match `probe_registry.yaml` contract field name
+- Fixed `probes/00_instance_metadata.sql`: renamed output column `autovacuum_enabled` to `autovacuum` to match `probe_registry.yaml` contract field name (`settings.autovacuum`)
+
+**New residuals added:**
+- `wal_checkpoint_health` SQL column names lack `_ms` suffix required by registry (requires decision on SQL alias naming vs normalizer mapping)
+- `pgbouncer_pool_health` SQL probe cannot produce required registry fields `waiting_clients` and `active_connections` (requires implementation strategy decision)
+- `docs/15_normalizer.md` missing probe-specific summary derivation for all 9 Supabase probes (requires domain-specific normalization logic decisions)

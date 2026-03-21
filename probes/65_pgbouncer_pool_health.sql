@@ -1,7 +1,7 @@
 -- probe: pgbouncer_pool_health
 -- purpose: Detect connection pool mode and contention.
 -- prerequisites: PgBouncer/Supavisor metrics accessible
--- profiles: default, performance
+-- profiles: default, performance, supabase_default
 -- note: Supabase-specific. This probe must be run against the PgBouncer admin
 --        database or via Supavisor metrics, not the application database.
 --        The SQL below is for PgBouncer's SHOW commands; adapt for Supavisor.

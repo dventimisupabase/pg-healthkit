@@ -1,7 +1,7 @@
 -- probe: auth_schema_health
 -- purpose: Detect bloat and vacuum lag on Supabase Auth tables.
 -- prerequisites: auth schema exists
--- profiles: default, performance, reliability
+-- profiles: default, reliability, cost_capacity, supabase_default
 -- note: Supabase-specific. Auth tables (sessions, refresh_tokens) churn heavily.
 
 SELECT

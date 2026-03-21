@@ -372,7 +372,6 @@ All probe evidence uses a common wrapper. See `15_normalizer.md` for the full sp
 {
   "probe_name": "long_running_transactions",
   "probe_version": "2026-03-20",
-  "collected_at": "2026-03-20T20:15:00Z",
   "status": "success",
   "summary": { ... },
   "rows": [ ... ],

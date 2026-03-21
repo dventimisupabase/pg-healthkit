@@ -1,7 +1,7 @@
 -- probe: realtime_replication_slot_health
 -- purpose: Detect unconsumed or lagging logical replication slots (Supabase Realtime).
 -- prerequisites: Realtime enabled
--- profiles: default, reliability
+-- profiles: default, reliability, supabase_default
 -- note: Supabase-specific. Inactive slots prevent WAL cleanup and can fill disk.
 
 SELECT

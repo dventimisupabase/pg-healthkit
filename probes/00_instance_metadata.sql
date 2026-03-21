@@ -15,7 +15,7 @@ SELECT
   current_setting('effective_cache_size') AS effective_cache_size,
   current_setting('max_wal_size') AS max_wal_size,
   current_setting('checkpoint_timeout') AS checkpoint_timeout,
-  current_setting('autovacuum') AS autovacuum_enabled,
+  current_setting('autovacuum') AS autovacuum,
   current_setting('random_page_cost') AS random_page_cost,
   current_setting('log_min_duration_statement') AS log_min_duration_statement,
   current_setting('track_io_timing') AS track_io_timing,

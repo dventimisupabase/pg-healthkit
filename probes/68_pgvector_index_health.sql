@@ -1,7 +1,7 @@
 -- probe: pgvector_index_health
 -- purpose: Assess vector index configuration and health.
 -- prerequisites: pgvector extension
--- profiles: default, performance
+-- profiles: default, performance, supabase_default
 -- note: Supabase-specific. Missing vector indexes cause sequential distance scans.
 
 WITH vector_columns AS (

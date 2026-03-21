@@ -1,7 +1,7 @@
 -- probe: pg_cron_job_health
 -- purpose: Detect failed or long-running scheduled jobs.
 -- prerequisites: pg_cron extension
--- profiles: default, reliability
+-- profiles: default, reliability, supabase_default
 -- note: Supabase-specific. Requires pg_cron extension installed.
 
 SELECT

@@ -1,7 +1,7 @@
 -- probe: extension_version_health
 -- purpose: Detect outdated or potentially incompatible extensions.
 -- prerequisites: none
--- profiles: default, reliability
+-- profiles: default, reliability, supabase_default
 -- note: Supabase-specific. Extension upgrades may be tied to platform versions.
 
 SELECT
