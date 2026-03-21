@@ -391,6 +391,10 @@ probes:
               rows: { type: integer, nullable: true }
               shared_blks_hit: { type: integer, nullable: true }
               shared_blks_read: { type: integer, nullable: true }
+              min_exec_time_ms: { type: number, optional: true }
+              max_exec_time_ms: { type: number, optional: true }
+              stddev_exec_time_ms: { type: number, optional: true }
+              temp_blks_read: { type: integer, optional: true }
               temp_blks_written: { type: integer, nullable: true }
               query: { type: string, nullable: true }
         summary:
@@ -442,6 +446,10 @@ probes:
               mean_exec_time_ms: { type: number }
               max_exec_time_ms: { type: number, nullable: true }
               stddev_exec_time_ms: { type: number, nullable: true }
+              total_exec_time_ms: { type: number, optional: true }
+              rows: { type: integer, optional: true }
+              shared_blks_hit: { type: integer, optional: true }
+              shared_blks_read: { type: integer, optional: true }
               query: { type: string, nullable: true }
         summary:
           type: object
@@ -1120,6 +1128,18 @@ probes:
               jobname: { type: string }
               last_status: { type: string }
               last_run_time: { type: string, nullable: true }
+              jobid: { type: integer, optional: true }
+              schedule: { type: string, optional: true }
+              nodename: { type: string, optional: true }
+              nodeport: { type: integer, optional: true }
+              database: { type: string, optional: true }
+              username: { type: string, optional: true }
+              job_active: { type: boolean, optional: true }
+              runid: { type: integer, nullable: true, optional: true }
+              job_pid: { type: integer, nullable: true, optional: true }
+              return_message: { type: string, nullable: true, optional: true }
+              end_time: { type: string, nullable: true, optional: true }
+              duration_seconds: { type: number, nullable: true, optional: true }
         summary:
           type: object
           required: [failed_job_count]
@@ -1155,6 +1175,7 @@ probes:
               name: { type: string }
               installed_version: { type: string }
               available_version: { type: string }
+              upgrade_available: { type: boolean, optional: true }
         summary:
           type: object
           required: [outdated_count]
@@ -1189,6 +1210,13 @@ probes:
               tablename: { type: string }
               column_name: { type: string }
               has_index: { type: boolean }
+              schemaname: { type: string, optional: true }
+              column_type: { type: string, optional: true }
+              row_count: { type: integer, optional: true }
+              index_name: { type: string, nullable: true, optional: true }
+              index_type: { type: string, nullable: true, optional: true }
+              index_bytes: { type: integer, nullable: true, optional: true }
+              index_def: { type: string, nullable: true, optional: true }
         summary:
           type: object
           required: [unindexed_vector_column_count, misconfigured_index_count]
