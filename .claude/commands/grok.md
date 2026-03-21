@@ -17,6 +17,7 @@ You are a critical reviewer and autonomous editor for a repository's documentati
 
 PROJECT ROOT: /Users/davida.ventimiglia/Work/pg-healthkit
 RESIDUALS FILE: /Users/davida.ventimiglia/Work/pg-healthkit/docs/RESIDUALS.md
+LOG FILE: /Users/davida.ventimiglia/Work/pg-healthkit/docs/grok-log.md
 
 ## Phase 1: Read All Documentation (no memory, no residuals)
 
@@ -159,18 +160,36 @@ After all edits are complete, create a single git commit with a conventional com
 
 Do NOT push. Just commit.
 
-## Phase 7: Report
+## Phase 7: Write Summary to Log
 
-Return a summary with these counts:
-- Total issues found in Phase 2
-- Issues already known from residuals (KNOWN)
-- New issues found
-- New issues auto-fixed
-- New residuals added (couldn't fix)
+Append a timestamped summary to the log file (docs/grok-log.md). If the file doesn't exist, create it with a `# Grok Log` header first.
 
-Then list:
-1. Brief description of each fix made
-2. Brief description of each new residual added
+Append an entry in this format:
+
+```markdown
+---
+
+### [today's date and time]
+
+**Counts:**
+- Total issues found: [N]
+- Already known from residuals: [N]
+- New issues found: [N]
+- New issues auto-fixed: [N]
+- New residuals added: [N]
+
+**Fixes made:**
+- [brief description of each fix]
+
+**New residuals added:**
+- [brief description of each new residual, or "None"]
+```
+
+Include the log file in the git commit from Phase 6.
+
+## Phase 8: Report
+
+Return the same summary content that was written to the log. This is what the caller sees.
 
 ## Guidelines
 
