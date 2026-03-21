@@ -39,11 +39,10 @@ The executable SQL probes — the Phase 1 deliverable. Can be run directly via `
 
 These define the boundary between CLI and Arena:
 
-- (Prose contracts moved to docs/ — see `08_cli_contract.md`, `09_rule_engine.md`, `15_normalizer.md`)
 - `../contracts/probe_registry.yaml` — canonical payload contracts per probe
 - `../contracts/rules.yaml` — machine-readable rule definitions
-- `../contracts/probe_registry.yaml` — canonical payload contracts per probe
-- `../contracts/rules.yaml` — machine-readable rule definitions
+
+Prose contract documentation now lives in `docs/` (see `08_cli_contract.md`, `09_rule_engine.md`, `15_normalizer.md`).
 
 ## Archive
 

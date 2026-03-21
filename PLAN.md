@@ -41,7 +41,7 @@ All cross-references between docs must be updated accordingly.
 
 ### Step 1: Create `docs/03_human_checklist.md`
 
-Create the missing Phase 1 deliverable: a standalone, human-usable assessment checklist. Content is derived from the conversation (lines ~369–525) and should be organized into sections A–J:
+Create the missing Phase 1 deliverable: a standalone, human-usable assessment checklist. Content is derived from the conversation (lines ~369–525) and should be organized into sections A–K:
 
 - **A. Context and objectives** — What is the database for? Top 3 business-critical apps? Workload type? Latency/availability expectations? Recent incidents? Primary pain?
 - **B. Platform and topology** — PG version, managed vs self-hosted, HA/failover architecture, replicas and replication mode, backup tooling and restore validation cadence, monitoring stack
