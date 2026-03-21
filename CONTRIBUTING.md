@@ -8,13 +8,19 @@ The primary goal is consistency of contracts, not rapid novelty. Contributors sh
 
 The repository currently contains:
 
-- methodology documents
-- assessment and scoring model
-- SQL probe definitions
-- machine-readable probe registry
-- machine-readable rule catalog
+- methodology documents (personas, workload classification, health domains)
+- assessment model and lifecycle (including data model schema)
+- context ingestion model (evidence provenance, two-track intake)
+- assessment orchestration (workflow, arena design, three-layer architecture)
+- SQL probe definitions (24 probes: 15 generic + 9 Supabase-specific)
+- machine-readable probe registry (`probe_registry.yaml`)
+- machine-readable rule catalog (`rules.yaml`)
+- findings catalog (24 findings with severity gradation and score effects)
+- scoring model (7 domains, persona-weighted, tier-aware)
 - prose descriptions of evaluation and normalization semantics
 - normalizer contracts for converting SQL output into canonical payloads
+- CLI contract (8 commands with JSON payloads and API endpoints)
+- Supabase-specific layers (RLS indexing, Auth schema, Realtime slots, Storage, system schemas, PgBouncer)
 
 Contributions should preserve coherence across these layers.
 
@@ -65,9 +71,17 @@ Use this workflow for substantive changes:
 
 These files are the key sources of truth:
 
-- `01_methodology.md` — conceptual framework
+- `01_methodology.md` — conceptual framework (personas, workloads, domains, diagnostics)
 - `02_assessment_model.md` — lifecycle and object model
+- `03_context_ingestion.md` — how non-SQL context enters the system
+- `03_data_model.md` — SQL schema for the assessment system of record
+- `04_assessment_orchestration.md` — workflow system and arena design
+- `04_probe_system.md` — probe model, classification, and mapping matrices
+- `05_rule_engine.md` — rule design and threshold logic
+- `06_scoring_model.md` — domain scoring, persona weights, Supabase adjustments
 - `07_cli_contract.md` — operator-facing command model
+- `08_probe_catalog.md` — human-readable probe catalog with interpretation guidance
+- `09_findings_catalog.md` — findings with severity gradation and score effects
 - `rules.yaml` — machine-readable evaluation logic
 - `rules.md` — human explanation of rule semantics
 - `probe_registry.yaml` — canonical payload contracts per probe
@@ -96,6 +110,7 @@ Questions to answer before merging:
 - Which score domains does it affect?
 - Are the summary fields stable enough for rules?
 - Is the probe profile-scoped correctly?
+- If Supabase-specific: does it require system schema access? Is it included in the `supabase_default` profile?
 
 ## Adding a New Rule
 
