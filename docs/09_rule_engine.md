@@ -181,7 +181,7 @@ Note: a critical severity case (DDL blockers, very old transactions) is intentio
 | Property       | Value                                                                               |
 |----------------|-------------------------------------------------------------------------------------|
 | **Inputs**     | `database_activity`                                                                 |
-| **Logic**      | medium if deadlocks > 0; high if deadlocks exceed modest threshold for stats window |
+| **Logic**      | high if deadlocks > 5; medium if deadlocks > 0 |
 | **Domains**    | concurrency, availability                                                           |
 | **Confidence** | medium (stats window matters)                                                       |
 
@@ -190,7 +190,7 @@ Note: a critical severity case (DDL blockers, very old transactions) is intentio
 | Property       | Value                                                                                                                                                |
 |----------------|------------------------------------------------------------------------------------------------------------------------------------------------------|
 | **Inputs**     | `connection_pressure`                                                                                                                                |
-| **Logic**      | medium if total_connections / max_connections > 80%; high if > 90%. Increase severity if active connections high and wait events indicate contention |
+| **Logic**      | high if utilization > 90%; medium if > 80% |
 | **Domains**    | concurrency, availability                                                                                                                            |
 | **Confidence** | medium                                                                                                                                               |
 
@@ -199,7 +199,7 @@ Note: a critical severity case (DDL blockers, very old transactions) is intentio
 | Property       | Value                                                                                                                                                                                                              |
 |----------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | **Inputs**     | `database_activity`, `temp_spill_queries`                                                                                                                                                                          |
-| **Logic**      | medium if top queries repeatedly spill substantial temp blocks; high if spills are large and paired with high latency or high total time. **Downgrade in OLAP profile** unless interactive latency is an objective |
+| **Logic**      | high if max temp_blks_written > 100,000; medium if > 10,000. **Downgrade in OLAP profile** unless interactive latency is an objective |
 | **Domains**    | performance, efficiency, cost                                                                                                                                                                                      |
 | **Confidence** | medium                                                                                                                                                                                                             |
 
@@ -208,7 +208,7 @@ Note: a critical severity case (DDL blockers, very old transactions) is intentio
 | Property       | Value                                                                                                                                               |
 |----------------|-----------------------------------------------------------------------------------------------------------------------------------------------------|
 | **Inputs**     | `top_queries_total_time`                                                                                                                            |
-| **Logic**      | medium if small number of queries dominate total execution time; high if one query is a clear outlier and business objective is performance or cost |
+| **Logic**      | high if top total_exec_time > 600,000 ms; medium if > 120,000 ms |
 | **Domains**    | performance, efficiency, cost                                                                                                                       |
 | **Confidence** | medium                                                                                                                                              |
 
@@ -217,7 +217,7 @@ Note: a critical severity case (DDL blockers, very old transactions) is intentio
 | Property       | Value                                                                                                                                                     |
 |----------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------|
 | **Inputs**     | `top_queries_mean_latency`, `temp_spill_queries`, `lock_blocking_chains`                                                                                  |
-| **Logic**      | medium/high based on workload profile and latency expectations. **Increase severity in OLTP; decrease severity in OLAP** unless user-facing path involved |
+| **Logic**      | high if workload = OLTP AND top mean > 500 ms; medium if top mean > 1,000 ms (any workload) |
 | **Domains**    | performance, concurrency                                                                                                                                  |
 | **Confidence** | medium                                                                                                                                                    |
 
@@ -226,7 +226,7 @@ Note: a critical severity case (DDL blockers, very old transactions) is intentio
 | Property       | Value                                                                                                                                                 |
 |----------------|-------------------------------------------------------------------------------------------------------------------------------------------------------|
 | **Inputs**     | `dead_tuple_ratio`, `long_running_transactions`, `largest_tables`                                                                                     |
-| **Logic**      | medium if large active tables show substantial dead tuple percentage; high if paired with old transactions or stale vacuum. Deprioritize small tables |
+| **Logic**      | high if max dead tuple % > 30%; medium if > 10%. Deprioritize small tables |
 | **Domains**    | storage, performance, availability                                                                                                                    |
 | **Confidence** | high                                                                                                                                                  |
 
@@ -235,7 +235,7 @@ Note: a critical severity case (DDL blockers, very old transactions) is intentio
 | Property       | Value                                                                                                                                        |
 |----------------|----------------------------------------------------------------------------------------------------------------------------------------------|
 | **Inputs**     | `stale_maintenance`, `dead_tuple_ratio`                                                                                                      |
-| **Logic**      | medium if large/active relations have null or old autovacuum/autoanalyze; high if paired with dead tuple accumulation or poor query behavior |
+| **Logic**      | high if tables missing autoanalyze AND tables with > 1M live tuples exist; medium if any stale tables detected |
 | **Domains**    | storage, performance, operational hygiene                                                                                                    |
 | **Confidence** | medium/high depending on table activity evidence                                                                                             |
 
@@ -244,7 +244,7 @@ Note: a critical severity case (DDL blockers, very old transactions) is intentio
 | Property       | Value                                                                                                                                                                |
 |----------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | **Inputs**     | `unused_indexes`, `largest_tables`                                                                                                                                   |
-| **Logic**      | low/medium if large indexes show zero scans. **Never high in v1** without longer stats horizon. Severity rises with index size and write-heavy table characteristics |
+| **Logic**      | medium if >= 3 large indexes with zero scans; low if >= 1. **Never high in v1** without longer stats horizon |
 | **Domains**    | storage, efficiency, cost                                                                                                                                            |
 | **Confidence** | medium/low                                                                                                                                                           |
 
@@ -253,7 +253,7 @@ Note: a critical severity case (DDL blockers, very old transactions) is intentio
 | Property       | Value                                                                                                                               |
 |----------------|-------------------------------------------------------------------------------------------------------------------------------------|
 | **Inputs**     | `replication_health`                                                                                                                |
-| **Logic**      | medium/high depending on lag magnitude and consistency. Increase severity if replicas serve reads or failover guarantees are strict |
+| **Logic**      | high if max replay lag > 10,000 ms; medium if > 1,000 ms. Increase severity if replicas serve reads or failover guarantees are strict |
 | **Domains**    | availability, performance                                                                                                           |
 | **Confidence** | medium/high                                                                                                                         |
 
@@ -262,7 +262,7 @@ Note: a critical severity case (DDL blockers, very old transactions) is intentio
 | Property       | Value                                                                                                                                                                                                |
 |----------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | **Inputs**     | `wal_checkpoint_health`, `database_activity`, `instance_metadata`                                                                                                                                    |
-| **Logic**      | medium if requested checkpoints are frequent relative to timed checkpoints; high if buffers_backend and backend fsync behavior indicate pressure. Increase severity if latency symptoms also present |
+| **Logic**      | high if checkpoints_req > 50 AND buffers_backend > 500,000; medium if checkpoints_req > 10 |
 | **Domains**    | performance, efficiency, availability, cost                                                                                                                                                          |
 | **Confidence** | medium                                                                                                                                                                                               |
 
@@ -271,7 +271,7 @@ Note: a critical severity case (DDL blockers, very old transactions) is intentio
 | Property       | Value                                                                                             |
 |----------------|---------------------------------------------------------------------------------------------------|
 | **Inputs**     | `extensions_inventory`                                                                            |
-| **Logic**      | low/medium if key observability extension absent. This is a **meta-finding**, not a system defect |
+| **Logic**      | medium if pg_stat_statements absent. This is a **meta-finding**, not a system defect |
 | **Domains**    | operational hygiene                                                                               |
 | **Confidence** | high                                                                                              |
 
@@ -291,7 +291,7 @@ Note: the medium case intentionally checks only two conditions (track_io_timing 
 | Property       | Value                                                                                                                 |
 |----------------|-----------------------------------------------------------------------------------------------------------------------|
 | **Inputs**     | `largest_tables`, `unused_indexes`                                                                                    |
-| **Logic**      | low/medium if a few relations dominate storage. Becomes more relevant when cost or maintenance is a primary objective |
+| **Logic**      | medium if top relation > 10 GB. Becomes more relevant when cost or maintenance is a primary objective |
 | **Domains**    | storage, cost, efficiency                                                                                             |
 | **Confidence** | high                                                                                                                  |
 

@@ -1,6 +1,6 @@
 # arena/
 
-- DO use Supabase as the backend (Postgres + Edge Functions + Auth)
+- DO use Supabase as the backend (Postgres + Auth)
 - DO use Next.js for the frontend
 - DO read `../docs/04_data_model.md` for the schema — implement it as the first migration
 - DO read `../contracts/rules.yaml` and `../docs/09_rule_engine.md` before implementing the rule engine

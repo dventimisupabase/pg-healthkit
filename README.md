@@ -39,10 +39,10 @@ pg-healthkit/
 
 ### Two Islands
 
-| Island | Purpose | Language/Stack | Key Docs |
-|--------|---------|---------------|----------|
-| **`cli/`** | Execute SQL probes, normalize payloads, upload evidence | Go | `docs/07_probe_system.md`, `docs/08_cli_contract.md`, `docs/15_normalizer.md` |
-| **`arena/`** | Store assessments, evaluate rules, compute scores, generate reports, manage workflow | Supabase + Next.js | `docs/04_data_model.md`, `docs/09_rule_engine.md` |
+| Island       | Purpose                                                                              | Language/Stack     | Key Docs                                                                      |
+|--------------|--------------------------------------------------------------------------------------|--------------------|-------------------------------------------------------------------------------|
+| **`cli/`**   | Execute SQL probes, normalize payloads, upload evidence                              | Go                 | `docs/07_probe_system.md`, `docs/08_cli_contract.md`, `docs/15_normalizer.md` |
+| **`arena/`** | Store assessments, evaluate rules, compute scores, generate reports, manage workflow | Supabase + Next.js | `docs/04_data_model.md`, `docs/09_rule_engine.md`                             |
 
 The two islands depend on **`contracts/`**, never on each other directly.
 
@@ -50,10 +50,10 @@ The two islands depend on **`contracts/`**, never on each other directly.
 
 `contracts/` contains only machine-readable files. All prose documentation lives in `docs/`.
 
-| Contract | Purpose |
-|----------|---------|
+| Contract                        | Purpose                                                                               |
+|---------------------------------|---------------------------------------------------------------------------------------|
 | `contracts/probe_registry.yaml` | Canonical payload contracts per probe — what the CLI produces and the Arena validates |
-| `contracts/rules.yaml` | Machine-readable rule definitions — what the Arena evaluates |
+| `contracts/rules.yaml`          | Machine-readable rule definitions — what the Arena evaluates                          |
 
 ### Inception Docs
 

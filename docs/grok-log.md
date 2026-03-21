@@ -330,3 +330,42 @@
 
 **New residuals added:**
 - None
+
+---
+
+### 2026-03-21 (pass 14)
+
+**Counts:**
+- Total issues found: 18
+- Already known from residuals: 8
+- New issues found: 10
+- New issues auto-fixed: 10
+- New residuals added: 0
+
+**Fixes made:**
+- Fixed `docs/09_rule_engine.md`: updated 10 rule Logic descriptions to match actual `rules.yaml` conditions instead of vague or aspirational prose:
+  - `deadlocks_observed`: changed "high if deadlocks exceed modest threshold" to "high if deadlocks > 5; medium if deadlocks > 0"
+  - `high_connection_utilization`: removed aspirational "Increase severity if active connections high and wait events indicate contention" clause not in rules.yaml
+  - `significant_temp_spill_activity`: changed "high if spills are large and paired with high latency or high total time" to "high if max temp_blks_written > 100,000; medium if > 10,000"
+  - `high_impact_query_total_time`: changed "high if one query is a clear outlier and business objective is performance or cost" to "high if top total_exec_time > 600,000 ms; medium if > 120,000 ms"
+  - `high_latency_queries_detected`: changed "medium/high based on workload profile and latency expectations" to "high if workload = OLTP AND top mean > 500 ms; medium if top mean > 1,000 ms (any workload)"
+  - `dead_tuple_accumulation_detected`: changed "high if paired with old transactions or stale vacuum" to "high if max dead tuple % > 30%; medium if > 10%"
+  - `stale_vacuum_or_analyze_detected`: changed "high if paired with dead tuple accumulation or poor query behavior" to "high if tables missing autoanalyze AND tables with > 1M live tuples exist; medium if any stale tables detected"
+  - `potentially_unused_large_indexes`: changed "Severity rises with index size and write-heavy table characteristics" to "medium if >= 3 large indexes with zero scans; low if >= 1"
+  - `replication_lag_elevated`: changed "medium/high depending on lag magnitude and consistency" to "high if max replay lag > 10,000 ms; medium if > 1,000 ms"
+  - `checkpoint_pressure_detected`: changed "medium if requested checkpoints are frequent relative to timed checkpoints; high if buffers_backend indicate pressure" to "high if checkpoints_req > 50 AND buffers_backend > 500,000; medium if checkpoints_req > 10"
+  - `diagnostic_visibility_limited`: changed "low/medium if key observability extension absent" to "medium if pg_stat_statements absent" (rules.yaml has no low case)
+  - `storage_concentration_risk`: changed "low/medium if a few relations dominate storage" to "medium if top relation > 10 GB" (rules.yaml has no low case)
+
+**Known residuals re-confirmed (8):**
+- `active_lock_blocking_detected` missing critical severity case in rules.yaml (requires payload design decisions)
+- `diagnostic_configuration_weak` rule medium case missing pg_stat_statements condition (cross-probe dependency question)
+- Methodology doc scoring weights example only shows reliability profile
+- `probes/README.md` profile selection table has drifted from probe_registry.yaml
+- `supabase_default` profile inheritance not encoded in contracts (requires design decision)
+- `wal_checkpoint_health` SQL column names lack `_ms` suffix required by registry (requires naming decision)
+- `pgbouncer_pool_health` SQL probe cannot produce required registry fields `waiting_clients` and `active_connections` (requires implementation strategy)
+- Generic rules in `rules.yaml` do not include `supabase_default` profile (same root cause as profile inheritance residual)
+
+**New residuals added:**
+- None
