@@ -29,7 +29,7 @@ supabase db health init \
   --project-ref <project_ref> \
   --created-by <email-or-handle> \
   --title "Performance review for checkout latency" \
-  --objective "performance" \
+  --profile "performance" \
   --primary-persona "application_developer" \
   --workload-type "oltp"
 ```
@@ -41,7 +41,7 @@ supabase db health init \
   "project_ref": "abcd1234",
   "created_by": "alice@example.com",
   "title": "Performance review for checkout latency",
-  "objective": "performance",
+  "assessment_profile": "performance",
   "primary_persona": "application_developer",
   "workload_type": "oltp",
   "platform_context": {
@@ -244,7 +244,7 @@ supabase db health show --assessment-id <uuid>
     "status": "review",
     "primary_persona": "application_developer",
     "workload_type": "oltp",
-    "objective": "performance"
+    "assessment_profile": "performance"
   },
   "scores": {
     "overall_score": 62.5,
@@ -403,7 +403,7 @@ supabase db health input import \
 # 3. Run probes and upload evidence
 supabase db health probe run \
   --assessment-id <uuid> \
-  --profile oltp \
+  --profile default \
   --upload
 
 # 4. Trigger analysis
