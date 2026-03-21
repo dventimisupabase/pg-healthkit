@@ -369,3 +369,31 @@
 
 **New residuals added:**
 - None
+
+---
+
+### 2026-03-21 (pass 15)
+
+**Counts:**
+- Total issues found: 10
+- Already known from residuals: 8
+- New issues found: 2
+- New issues auto-fixed: 2
+- New residuals added: 0
+
+**Fixes made:**
+- Fixed `docs/15_normalizer.md`: corrected claim that `storage_objects_health` "has no `rows` array in the contract" — the registry defines a `rows` property with a full schema (it is optional, not absent); updated to say "`rows` array is optional in the contract (defined but not required)"
+- Fixed `docs/01_methodology.md`: added missing `grey` risk level to Risk Profile output — scoring model (`10_scoring_model.md`) and report template (`16_report_template.md`) both include "grey = unknown" but methodology doc only listed "red / yellow / green"
+
+**Known residuals re-confirmed (8):**
+- `active_lock_blocking_detected` missing critical severity case in rules.yaml (requires payload design decisions)
+- `diagnostic_configuration_weak` rule medium case missing pg_stat_statements condition (cross-probe dependency question)
+- Methodology doc scoring weights example only shows default profile
+- `probes/README.md` profile selection table has drifted from probe_registry.yaml
+- `supabase_default` profile inheritance not encoded in contracts (requires design decision)
+- `wal_checkpoint_health` SQL column names lack `_ms` suffix required by registry (requires naming decision)
+- `pgbouncer_pool_health` SQL probe cannot produce required registry fields `waiting_clients` and `active_connections` (requires implementation strategy)
+- Generic rules in `rules.yaml` do not include `supabase_default` profile (same root cause as profile inheritance residual)
+
+**New residuals added:**
+- None

@@ -220,7 +220,7 @@ See `10_scoring_model.md` for all profiles (reliability, cost_capacity, performa
 
 **Output:**
 - Health Score (composite)
-- Risk Profile (red / yellow / green per domain)
+- Risk Profile (red / yellow / green / grey per domain; grey = unknown)
 
 Do not overfit numeric precision. The score is a communication device, not science.
 

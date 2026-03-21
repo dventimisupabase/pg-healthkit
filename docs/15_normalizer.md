@@ -262,7 +262,7 @@ Derive:
 - `summary.soft_deleted_ratio` — value of `soft_deleted_ratio` from the singleton row; emit `0` if no rows
 - `summary.dead_tuple_pct` — value of `dead_tuple_pct` from the singleton row; emit `0` if no rows
 
-The SQL probe returns a single row with columns `schemaname`, `relname`, `total_rows` (integer), `soft_deleted_rows` (integer), `soft_deleted_ratio` (number), `n_live_tup`, `n_dead_tup`, `dead_tuple_pct` (number), `last_autovacuum`, `last_autoanalyze`, and `total_bytes`. Coerce `soft_deleted_ratio` and `dead_tuple_pct` to number (null becomes `0`). This probe has no `rows` array in the contract; all data goes into `summary`.
+The SQL probe returns a single row with columns `schemaname`, `relname`, `total_rows` (integer), `soft_deleted_rows` (integer), `soft_deleted_ratio` (number), `n_live_tup`, `n_dead_tup`, `dead_tuple_pct` (number), `last_autovacuum`, `last_autoanalyze`, and `total_bytes`. Coerce `soft_deleted_ratio` and `dead_tuple_pct` to number (null becomes `0`). The `rows` array is optional in the contract (defined but not required); all rule-relevant data goes into `summary`.
 
 ### system_schema_bloat
 Derive:
