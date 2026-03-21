@@ -4,13 +4,20 @@ Critically analyze this repository's documentation, auto-fix what can be fixed, 
 
 ## Usage
 
-`/grok [N]` — run N passes (default: 1). Each pass spawns an independent subagent.
+`/grok [N] [cutoff]` — run up to N passes (default: 1), stopping early if new items found drops to cutoff or below (default: 0). Use cutoff -1 to force all N passes.
 
 ## What To Do
 
-Parse the iteration count from: $ARGUMENTS
+Parse arguments from: $ARGUMENTS
 
-If the argument is empty or not a positive integer, default to 1.
+- First argument: iteration count N (default: 1, must be a positive integer)
+- Second argument: early stopping cutoff (default: 0, must be an integer >= -1)
+
+Examples:
+- `/grok` → 1 pass, cutoff 0
+- `/grok 5` → up to 5 passes, stop when new items = 0
+- `/grok 10 2` → up to 10 passes, stop when new items <= 2
+- `/grok 10 -1` → force all 10 passes regardless
 
 ### Run the passes
 
@@ -23,13 +30,16 @@ For each iteration (1 through N):
 3. Wait for it to complete fully (the subagent finishes, commits, and returns its report).
 4. Parse the `NEW_ITEMS=[N]` line from the first line of the subagent's response. Record that number for this pass.
 5. Briefly announce: `Pass [X]: [N] new items found`
-6. Only then proceed to the next iteration.
+6. **Early stopping check**: If the new items count for this pass is <= cutoff AND cutoff >= 0, this is the last pass. Announce: `Stopping early — new items ([N]) <= cutoff ([cutoff])` and proceed to Present Results.
+7. Only then proceed to the next iteration.
 
 ### Present Results
 
-**If N = 1 (single pass):** Present the subagent's summary directly. Remind the user to check `docs/RESIDUALS.md` if new residuals were added.
+Let P = the actual number of passes completed (which may be less than N due to early stopping).
 
-**If N >= 2 (multiple passes):** Read `docs/grok-log.md` and produce a distilled summary plus a convergence graph.
+**If P = 1 (single pass):** Present the subagent's summary directly. Remind the user to check `docs/RESIDUALS.md` if new residuals were added.
+
+**If P >= 2 (multiple passes):** Read `docs/grok-log.md` and produce a distilled summary plus a convergence graph.
 
 The convergence graph is an ASCII bar chart showing new items found per pass:
 
@@ -50,13 +60,20 @@ Scale bars proportionally to the maximum value. Use `█` characters. At least 1
   Pass 6 │ 0
 ```
 
+If early stopping triggered, annotate the last pass:
+
+```
+  Pass 6 │████ 1  ← stopped (cutoff: 2)
+```
+
 If the trend is decreasing, add: `Trend: converging 👍`
 If the trend is flat or increasing, add: `Trend: not yet converging — consider reviewing docs/RESIDUALS.md`
+If early stopping triggered, also add: `Early stop after [P] of [N] passes`
 
 Full output structure for multi-pass:
 
 ```
-## Grok Complete — [N] passes
+## Grok Complete — [P] of [N] passes
 
 ### Convergence
 
