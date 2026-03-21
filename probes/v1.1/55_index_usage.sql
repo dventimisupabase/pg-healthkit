@@ -1,0 +1,14 @@
+-- Probe: index_usage
+-- Purpose: Show all index usage statistics ordered by scan frequency.
+-- Prerequisites: None
+-- Category: v1.1 optional
+
+SELECT
+  s.schemaname,
+  s.relname AS table_name,
+  s.indexrelname AS index_name,
+  s.idx_scan,
+  pg_size_pretty(pg_relation_size(s.indexrelid)) AS index_size
+FROM pg_stat_user_indexes s
+ORDER BY s.idx_scan ASC, pg_relation_size(s.indexrelid) DESC
+LIMIT 50;

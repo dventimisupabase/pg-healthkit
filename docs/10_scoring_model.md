@@ -20,7 +20,7 @@ Seven orthogonal scoring domains:
 
 ## Scale
 
-Each domain scored 0–100.
+Each domain scored 0–100, or `null` for unknown.
 
 | Score Range | Interpretation                               |
 |-------------|----------------------------------------------|
@@ -29,15 +29,26 @@ Each domain scored 0–100.
 | 50–69       | Moderate concern — action recommended        |
 | 25–49       | High concern — near-term action needed       |
 | 0–24        | Critical risk — immediate attention required |
+| `null`      | Unknown — insufficient evidence              |
+
+### Unknown / Insufficient Evidence
+
+A domain score of `null` means no probes contributing to that domain produced usable evidence. This is distinct from a score of 100 (healthy). A score of 100 means "we checked and found no issues." A score of `null` means "we could not check."
+
+This distinction matters operationally:
+- A domain with `null` should display as "Unknown" or "N/A" in reports, not as healthy
+- The overall composite score should exclude `null` domains from the weighted average (reweight across scored domains only)
+- The `diagnostic_visibility_limited` finding should be raised when key domains are unscorable due to missing evidence
+- Probes that were skipped or failed contribute to `null` domains; probes that ran successfully and found nothing contribute to high scores
 
 ## Scoring Mechanism
 
 ### v1 Implementation
 
-1. Initialize each domain score to **100**
+1. Initialize each domain score to **100** if at least one contributing probe succeeded, or **null** if no contributing probes ran
 2. Apply all matched rule deltas (additive, negative)
-3. Clamp each final domain score to **0–100**
-4. Compute overall score from **weighted** domain scores
+3. Clamp each final domain score to **0–100** (null domains remain null)
+4. Compute overall score from **weighted** domain scores, excluding null domains and redistributing their weight proportionally across scored domains
 5. Weights are determined by the assessment profile
 
 The rule engine applies score_effects per matched rule case. See `rules.yaml` for the specific deltas.
@@ -151,10 +162,10 @@ Do not hide scoring logic behind a single opaque number.
 
 A scored assessment produces:
 
-1. **Per-domain scores** — each domain 0–100
-2. **Overall score** — weighted composite
+1. **Per-domain scores** — each domain 0–100 or null (unknown)
+2. **Overall score** — weighted composite across scored domains only
 3. **Rationale** — human-readable explanation of why scores are what they are
-4. **Risk profile** — red/yellow/green per domain for quick visualization
+4. **Risk profile** — red/yellow/green/grey per domain (grey = unknown)
 
 ## Design Principles
 

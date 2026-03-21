@@ -26,6 +26,14 @@ For a new contributor or agent, read in this order:
 - `IMPLEMENTATION_PLAN.md` — practical build order, CLI milestones, test strategy
 - `sample_report_template.md` — canonical report format
 
+## SQL Probe Pack (in `../probes/`)
+
+The executable SQL probes — the Phase 1 deliverable. Can be run directly via `psql`:
+
+- `../probes/v1/` — 16 core v1 probes (instance, activity, connections, queries, tables, indexes, replication, WAL)
+- `../probes/v1.1/` — 8 optional probes (cache hit ratio, seq scans, bloat estimate, vacuum/analyze progress, index usage, duplicate indexes, growth proxy)
+- `../probes/README.md` — execution conventions, profile selection, payload normalization, psql usage
+
 ## Shared Contracts (in `../contracts/`)
 
 These define the boundary between CLI and Arena:
