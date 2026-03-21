@@ -41,21 +41,19 @@ pg-healthkit/
 
 | Island | Purpose | Language/Stack | Key Docs |
 |--------|---------|---------------|----------|
-| **`cli/`** | Execute SQL probes, normalize payloads, upload evidence | Go | `docs/06_probe_system.md`, `docs/07_cli_contract.md`, `contracts/normalizer_spec.md` |
-| **`arena/`** | Store assessments, evaluate rules, compute scores, generate reports, manage workflow | Supabase + Next.js | `docs/03_data_model.md`, `docs/08_rule_engine.md` |
+| **`cli/`** | Execute SQL probes, normalize payloads, upload evidence | Go | `docs/07_probe_system.md`, `docs/08_cli_contract.md`, `docs/15_normalizer.md` |
+| **`arena/`** | Store assessments, evaluate rules, compute scores, generate reports, manage workflow | Supabase + Next.js | `docs/04_data_model.md`, `docs/09_rule_engine.md` |
 
 The two islands depend on **`contracts/`**, never on each other directly.
 
 ### Shared Contracts
 
+`contracts/` contains only machine-readable files. All prose documentation lives in `docs/`.
+
 | Contract | Purpose |
 |----------|---------|
-| `contracts/cli_contract.md` | CLI commands, API endpoints, JSON payloads — the interface between CLI and Arena |
 | `contracts/probe_registry.yaml` | Canonical payload contracts per probe — what the CLI produces and the Arena validates |
 | `contracts/rules.yaml` | Machine-readable rule definitions — what the Arena evaluates |
-| `contracts/rules.md` | Rule evaluation semantics |
-| `contracts/normalizer_spec.md` | How raw SQL output is transformed into canonical payloads |
-| `contracts/normalizer_interface_contract.md` | Boundary between SQL runner and normalizer |
 
 ### Inception Docs
 

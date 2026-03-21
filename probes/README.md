@@ -182,5 +182,4 @@ When adding a new probe:
 - `docs/07_probe_system.md` — probe model, profiles, and mappings
 - `docs/11_probe_catalog.md` — detailed interpretation guidance per probe
 - `contracts/probe_registry.yaml` — machine-readable payload contracts
-- `contracts/normalizer_spec.md` — full normalization specification
-- `contracts/normalizer_interface_contract.md` — runner-to-normalizer boundary
+- `docs/15_normalizer.md` — full normalization specification and interface contract

@@ -2,8 +2,8 @@
 
 - DO write Go
 - DO read `../contracts/probe_registry.yaml` before implementing any probe
-- DO read `../contracts/normalizer_spec.md` before implementing normalization
-- DO read `../contracts/cli_contract.md` for command surface and JSON payloads
+- DO read `../docs/15_normalizer.md` before implementing normalization
+- DO read `../docs/08_cli_contract.md` for command surface and JSON payloads
 - DO execute SQL probes, normalize results, validate against registry, upload to Arena
 - DO make probes executable standalone via `psql`
 - DO name SQL files `NN_probe_name.sql` in `probes/`

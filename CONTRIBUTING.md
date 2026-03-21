@@ -90,12 +90,11 @@ These files are the key sources of truth:
 - `docs/16_report_template.md` — report output contract and presentation semantics
 
 **Shared contracts (`contracts/`):**
-- `contracts/cli_contract.md` — operator-facing command model and API endpoints
+- `docs/08_cli_contract.md` — operator-facing command model and API endpoints
 - `contracts/rules.yaml` — machine-readable evaluation logic
-- `contracts/rules.md` — human explanation of rule semantics
+- `docs/09_rule_engine.md` — human explanation of rule semantics
 - `contracts/probe_registry.yaml` — canonical payload contracts per probe
-- `contracts/normalizer_spec.md` — normalization rules
-- `contracts/normalizer_interface_contract.md` — boundary between SQL runner and normalizer
+- `docs/15_normalizer.md` — normalization rules, interface boundary, and probe-specific summary derivation
 
 Avoid editing one of these in isolation if the change crosses boundaries.
 
@@ -126,7 +125,7 @@ Questions to answer before merging:
 When adding a rule:
 
 1. Add the rule to `contracts/rules.yaml`
-2. Add human-readable explanation to `contracts/rules.md` if semantics are new
+2. Add human-readable explanation to `docs/09_rule_engine.md` if semantics are new
 3. Confirm the referenced probe fields exist in `contracts/probe_registry.yaml`
 4. Add tests for:
    - matching case

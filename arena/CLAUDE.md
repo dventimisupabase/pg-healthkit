@@ -3,8 +3,8 @@
 - DO use Supabase as the backend (Postgres + Edge Functions + Auth)
 - DO use Next.js for the frontend
 - DO read `../docs/03_data_model.md` for the schema — implement it as the first migration
-- DO read `../contracts/rules.yaml` and `../contracts/rules.md` before implementing the rule engine
-- DO read `../contracts/cli_contract.md` — the Arena implements these API endpoints
+- DO read `../contracts/rules.yaml` and `../docs/09_rule_engine.md` before implementing the rule engine
+- DO read `../docs/08_cli_contract.md` — the Arena implements these API endpoints
 - DO validate incoming evidence payloads against `../contracts/probe_registry.yaml`
 - DO store assessments, inputs, evidence, findings, scores, reports, and events
 - DO implement evidence → findings and findings → scores as SQL views and functions in the database

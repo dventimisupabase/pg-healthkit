@@ -131,9 +131,191 @@ After normalization, validate the payload against `probe_registry.yaml`. Validat
 
 The normalizer may add fields beyond the registry contract, but must not remove existing fields, change field meaning or units, or rename fields silently. If a contract changes, bump the version in the registry and adjust rules accordingly.
 
-## Detailed Specifications
+## Probe-Specific Summary Derivation
 
-This document provides the conceptual model. For complete specifications:
+### instance_metadata
+No derived `summary` required unless later added. Use direct object fields and `settings`.
 
-- `contracts/normalizer_spec.md` — full transformation rules, probe-specific summary derivation, and determinism requirements
-- `contracts/normalizer_interface_contract.md` — raw input/output shapes, error handling, metadata contract, Go interface signatures, and end-to-end transformation examples
+### extensions_inventory
+Derive:
+- `summary.extension_count`
+- `summary.has_pg_stat_statements`
+- `summary.missing_features` — `1` if `pg_stat_statements` is absent, else `0`
+
+### database_activity
+No `rows` array is required if the probe is naturally a singleton object. Expose `datname` and `stats`.
+
+### connection_pressure
+Derive:
+- `summary.total_connections`
+- `summary.active`
+- `summary.idle`
+- `summary.idle_in_transaction`
+- `summary.max_connections`
+- `summary.utilization_pct` = `total_connections / max_connections * 100`
+
+### long_running_transactions
+Derive:
+- `summary.row_count`
+- `summary.oldest_xact_age_seconds`
+- `summary.oldest_idle_xact_age_seconds` — max `xact_age_seconds` among rows where `state = "idle in transaction"`
+
+### lock_blocking_chains
+Derive:
+- `summary.blocking_pairs` = `len(rows)`
+
+### top_queries_total_time
+Derive:
+- `summary.row_count`
+- `summary.top_total_exec_time_ms`
+- `summary.top_calls`
+
+Values come from the first row after sorting descending by `total_exec_time_ms`.
+
+### top_queries_mean_latency
+Derive:
+- `summary.row_count`
+- `summary.top_mean_exec_time_ms`
+
+### temp_spill_queries
+Derive:
+- `summary.row_count`
+- `summary.max_temp_blks_written`
+
+### largest_tables
+Derive:
+- `summary.row_count`
+- `summary.top_relation_total_bytes`
+
+### dead_tuple_ratio
+Derive:
+- `summary.row_count`
+- `summary.max_dead_tuple_pct`
+
+### stale_maintenance
+Derive:
+- `summary.row_count`
+- `summary.stale_tables` — rows that met the stale filter
+- `summary.tables_missing_autoanalyze` — rows with `last_autoanalyze = null`
+- `summary.tables_over_1m_live_tup` — rows with `n_live_tup > 1000000`
+
+### unused_indexes
+Derive:
+- `summary.row_count`
+- `summary.zero_scan_large_index_count` — "large" means `index_bytes >= 104857600` (100 MiB)
+
+### replication_health
+Derive:
+- `summary.row_count`
+- `summary.max_replay_lag_ms` — if replay lag is absent for all rows, emit `0`
+
+### role_inventory
+Derive:
+- `summary.row_count`
+- `summary.superuser_count` — count of rows where `rolsuper = true`
+
+### wal_checkpoint_health
+No generic `summary` required. Expose `bgwriter` and optional `wal`.
+
+## Raw Input Contract
+
+The SQL runner must produce a raw probe result:
+
+```json
+{
+  "probe_name": "top_queries_mean_latency",
+  "probe_version": "2026-03-20",
+  "status": "success",
+  "columns": ["queryid", "calls", "mean_exec_time_ms", "query"],
+  "rows": [["777", 62, 933.2, "select ..."]],
+  "metadata": {
+    "duration_ms": 18,
+    "database_name": "postgres",
+    "collector_version": "0.1.0"
+  }
+}
+```
+
+Rows may be emitted as arrays (with `columns`) or as objects. Both are acceptable.
+
+## Error Handling
+
+**Recoverable issues** (e.g., unexpected null in a nullable column): coerce to null, record a warning in metadata, continue.
+
+**Non-recoverable issues** (e.g., required numeric field cannot be parsed): emit `status: failed`, preserve error details, do not emit a partial success payload.
+
+## Go Interface
+
+```go
+type RawProbeResult struct {
+    ProbeName    string
+    ProbeVersion string
+    Status       string
+    Columns      []string
+    Rows         any
+    Metadata     map[string]any
+    SkipReason   string
+    Error        map[string]any
+}
+
+type CanonicalProbePayload struct {
+    ProbeName    string
+    ProbeVersion string
+    Status       string
+    Summary      map[string]any
+    Rows         []map[string]any
+    Metadata     map[string]any
+    SkipReason   string
+    Error        map[string]any
+}
+```
+
+## Example Transformation
+
+### Raw input
+```json
+{
+  "probe_name": "unused_indexes",
+  "probe_version": "2026-03-20",
+  "status": "success",
+  "columns": ["schemaname", "table_name", "index_name", "idx_scan", "index_bytes"],
+  "rows": [
+    ["public", "orders", "orders_legacy_status_idx", "0", "125829120"],
+    ["public", "events", "events_tmp_idx", "4", "33554432"]
+  ],
+  "metadata": { "duration_ms": 7, "collector_version": "0.1.0" }
+}
+```
+
+### Canonical output
+```json
+{
+  "probe_name": "unused_indexes",
+  "probe_version": "2026-03-20",
+  "status": "success",
+  "summary": {
+    "row_count": 2,
+    "zero_scan_large_index_count": 1
+  },
+  "rows": [
+    { "schemaname": "public", "table_name": "orders", "index_name": "orders_legacy_status_idx", "idx_scan": 0, "index_bytes": 125829120 },
+    { "schemaname": "public", "table_name": "events", "index_name": "events_tmp_idx", "idx_scan": 4, "index_bytes": 33554432 }
+  ],
+  "metadata": {
+    "duration_ms": 7,
+    "collector_version": "0.1.0",
+    "normalizer_version": "0.1.0",
+    "contract_version": "v1",
+    "warnings": []
+  }
+}
+```
+
+## Testing Guidance
+
+Each probe should have at least three tests:
+1. Success case with representative rows
+2. Success case with zero rows
+3. Skipped or failed case
+
+For probes with summary derivation, add tests for null values, edge thresholds, and mixed-type raw values.

@@ -6,7 +6,7 @@ Convert evidence into findings. The diagnostic layer is where most "health check
 
 The rule engine sits between normalized probe evidence and human-actionable findings. It is intentionally declarative: SQL probes collect evidence, the rule engine interprets it, reporting renders the results.
 
-See `contracts/rules.yaml` for the machine-readable rule definitions and `contracts/rules.md` for the full evaluation semantics.
+See `contracts/rules.yaml` for the machine-readable rule definitions.
 
 ## Evaluation Model
 
