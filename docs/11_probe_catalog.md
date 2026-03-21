@@ -155,6 +155,7 @@ This document provides the human-readable probe catalog with purpose, interpreta
 | `replication_lag_elevated`              | `replication_health`                               | —                                             |
 | `checkpoint_pressure_detected`          | `wal_checkpoint_health`                            | `database_activity`, `instance_metadata`      |
 | `diagnostic_visibility_limited`         | `extensions_inventory`                             | —                                             |
+| `diagnostic_configuration_weak`         | `instance_metadata`                                | —                                             |
 | `storage_concentration_risk`            | `largest_tables`                                   | `unused_indexes`                              |
 | `excessive_superuser_roles`             | `role_inventory`                                   | —                                             |
 

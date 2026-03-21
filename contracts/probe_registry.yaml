@@ -72,7 +72,7 @@ probes:
             - random_page_cost
           properties:
             track_io_timing: { type: string }
-            log_min_duration_statement: { type: string }
+            log_min_duration_statement: { type: integer, description: "Coerced from string to integer; -1 means disabled" }
             random_page_cost: { type: string }
             shared_preload_libraries: { type: string }
     summary_fields:

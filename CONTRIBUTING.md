@@ -52,7 +52,7 @@ Examples:
 
 - adding or renaming a normalized field usually requires updates to `probe_registry.yaml`, `rules.yaml`, and any relevant prose docs
 - adding a new probe usually requires SQL, registry metadata, normalization guidance, and tests
-- adding a new rule usually requires both `rules.yaml` and supporting prose in `rules.md`
+- adding a new rule usually requires both `rules.yaml` and supporting prose in `docs/09_rule_engine.md`
 - changing units, thresholds, or summary field semantics requires explicit documentation
 
 ## Recommended Workflow

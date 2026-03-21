@@ -55,3 +55,24 @@
 
 **New residuals added:**
 - None
+
+---
+
+### 2026-03-20 (pass 3)
+
+**Counts:**
+- Total issues found: 10
+- Already known from residuals: 5
+- New issues found: 5
+- New issues auto-fixed: 5
+- New residuals added: 0
+
+**Fixes made:**
+- Fixed `contracts/probe_registry.yaml`: changed `summary.log_min_duration_statement` type from `string` to `integer` to match `rules.yaml` (which compares with integer `-1`) and `docs/15_normalizer.md` (which says "coerce to integer")
+- Fixed `docs/07_probe_system.md`: corrected stale reference to nonexistent `normalizer_interface_contract.md`; updated to `15_normalizer.md`
+- Fixed `docs/07_probe_system.md`: updated `instance_metadata` row in Probe-to-Finding Mapping table — changed primary from `—` to `diagnostic_configuration_weak`, removed stale `diagnostic_visibility_limited` from corroboration column
+- Fixed `docs/11_probe_catalog.md`: added missing `diagnostic_configuration_weak` finding to Probe-to-Finding Mapping Matrix (primary probe: `instance_metadata`)
+- Fixed `CONTRIBUTING.md`: corrected stale reference to `rules.md` to `docs/09_rule_engine.md`
+
+**New residuals added:**
+- None

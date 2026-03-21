@@ -84,7 +84,7 @@ See `probe_registry.yaml` for the machine-readable contracts.
 
 | Probe                       | Supports (primary)                                                            | Supports (corroboration)                                                                       |
 |-----------------------------|-------------------------------------------------------------------------------|------------------------------------------------------------------------------------------------|
-| `instance_metadata`         | —                                                                             | `high_connection_utilization`, `checkpoint_pressure_detected`, `diagnostic_visibility_limited` |
+| `instance_metadata`         | `diagnostic_configuration_weak`                                               | `high_connection_utilization`, `checkpoint_pressure_detected`                                  |
 | `extensions_inventory`      | `diagnostic_visibility_limited`                                               | —                                                                                              |
 | `database_activity`         | `deadlocks_observed`                                                          | `significant_temp_spill_activity`, `checkpoint_pressure_detected`                              |
 | `connection_pressure`       | `high_connection_utilization`, `idle_in_transaction_sessions_detected`        | —                                                                                              |
@@ -366,7 +366,7 @@ This is a system-wide principle, not specific to any single probe:
 
 ## Standardized Evidence Payload
 
-All probe evidence uses a common wrapper. See `normalizer_interface_contract.md` for the full specification.
+All probe evidence uses a common wrapper. See `15_normalizer.md` for the full specification.
 
 ```json
 {
