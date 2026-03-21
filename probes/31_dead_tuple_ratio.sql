@@ -1,7 +1,7 @@
--- Probe: dead_tuple_ratio
--- Purpose: Detect likely vacuum lag and bloat pressure.
--- Prerequisites: None
--- Profiles: default, performance, reliability
+-- probe: dead_tuple_ratio
+-- purpose: Detect likely vacuum lag and bloat pressure.
+-- prerequisites: none
+-- profiles: default, performance, reliability
 
 SELECT
   schemaname,

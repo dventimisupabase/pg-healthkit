@@ -1,8 +1,7 @@
--- Probe: lock_blocking_chains
--- Purpose: Detect active blocking and lock contention.
--- Prerequisites: None
--- Profiles: default, performance, reliability
--- Note: Absence at sample time is not evidence of absence.
+-- probe: lock_blocking_chains
+-- purpose: Detect active blocking and lock contention.
+-- prerequisites: none
+-- profiles: default, performance, reliability
 
 WITH blocked AS (
   SELECT
@@ -25,8 +24,8 @@ SELECT
   blocker.pid AS blocker_pid,
   blocker.usename AS blocker_user,
   blocker.application_name AS blocker_app,
-  LEFT(b.blocked_query, 300) AS blocked_query,
-  LEFT(blocker.query, 300) AS blocker_query
+  LEFT(b.blocked_query, 500) AS blocked_query,
+  LEFT(blocker.query, 500) AS blocker_query
 FROM blocked b
 JOIN LATERAL unnest(b.blockers) AS blocker_pid(pid) ON true
 JOIN pg_stat_activity blocker ON blocker.pid = blocker_pid.pid
