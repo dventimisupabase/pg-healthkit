@@ -87,6 +87,8 @@ These questions must be answered before interpreting any evidence. Context defin
 
 **Key probes:** `connection_pressure`, `long_running_transactions`, `lock_blocking_chains`
 
+---
+
 ## G. Resource Efficiency
 
 - [ ] Cache hit ratio (shared_buffers efficiency)

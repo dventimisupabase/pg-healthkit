@@ -221,3 +221,22 @@
 
 **New residuals added:**
 - None
+
+---
+
+### 2026-03-21 (pass 10)
+
+**Counts:**
+- Total issues found: 11
+- Already known from residuals: 8
+- New issues found: 3
+- New issues auto-fixed: 3
+- New residuals added: 0
+
+**Fixes made:**
+- Fixed `docs/03_human_checklist.md`: added missing `---` horizontal rule separator between sections F (Connections and Concurrency) and G (Resource Efficiency) to match all other section boundaries
+- Fixed `docs/11_probe_catalog.md`: removed incorrect `top_queries_mean_latency` corroboration for `rls_policy_columns_unindexed` finding (changed to `—` to match `docs/07_probe_system.md` and `rules.yaml` which only requires `rls_policy_column_indexing`)
+- Fixed `docs/11_probe_catalog.md`: changed `pool_contention_detected` corroboration from `connection_pressure` to `top_queries_total_time` to match `docs/07_probe_system.md` Supabase Probe-to-Finding Mapping table
+
+**New residuals added:**
+- None
