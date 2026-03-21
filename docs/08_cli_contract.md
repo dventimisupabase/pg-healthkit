@@ -189,6 +189,8 @@ The CLI should upload partial success cleanly. If 12 probes run and 2 fail, the 
 
 Server-side analysis is recommended over CLI-side analysis in v1. This centralizes rule evolution and ensures findings can always be reproduced server-side.
 
+The `analyze` command is safe to re-run. Re-running it after updating customer context (via `input set` or `input import`) triggers the business-context-adjusted scoring pass (Pass 2). See `10_scoring_model.md` for the two-pass scoring model.
+
 ### Command
 
 ```bash
@@ -276,6 +278,135 @@ Even if a formal public API is not built immediately, the CLI should behave as t
 | `GET`   | `/assessments/{id}`                      | Get summary       |
 | `GET`   | `/assessments/{id}/findings`             | List findings     |
 | `GET`   | `/assessments/{id}/scores`               | Get scores        |
+
+## Error Response Contract
+
+All error responses use a consistent JSON envelope. The CLI should parse this shape for every non-2xx response.
+
+### Error Envelope
+
+```json
+{
+  "error": {
+    "code": "not_found",
+    "message": "Assessment with id 08f0af86-... does not exist.",
+    "details": {}
+  }
+}
+```
+
+| Field              | Type   | Description                                                                 |
+|--------------------|--------|-----------------------------------------------------------------------------|
+| `error.code`       | string | Machine-readable error class (see table below)                              |
+| `error.message`    | string | Human-readable description, safe to display to operators                    |
+| `error.details`    | object | Optional structured context (e.g., which fields failed validation)          |
+
+### HTTP Status Codes
+
+| Status | When                                                                                     |
+|--------|------------------------------------------------------------------------------------------|
+| `400`  | Malformed request body, missing required fields, invalid enum values                     |
+| `401`  | Missing or invalid authentication credentials                                            |
+| `403`  | Authenticated but not authorized for this assessment or operation                        |
+| `404`  | Assessment, evidence, or finding ID does not exist                                       |
+| `409`  | Conflict — e.g., assessment is in a state that does not allow the requested operation    |
+| `422`  | Payload validation failed — evidence does not match probe registry contract              |
+| `500`  | Server-side error (rule evaluation failure, database error, unexpected exception)        |
+
+### Error Codes
+
+| Code                       | HTTP Status | Description                                                        |
+|----------------------------|-------------|--------------------------------------------------------------------|
+| `bad_request`              | 400         | Generic malformed request                                          |
+| `missing_field`            | 400         | Required field absent — `details.field` names the missing field    |
+| `invalid_value`            | 400         | Field present but invalid — `details.field`, `details.expected`    |
+| `unauthorized`             | 401         | Authentication required or credentials invalid                     |
+| `forbidden`                | 403         | Caller lacks permission for this resource                          |
+| `not_found`                | 404         | Referenced resource does not exist                                 |
+| `state_conflict`           | 409         | Operation not valid for current assessment status                  |
+| `evidence_validation_failed` | 422       | Evidence payload does not match registry — `details.probe_name`, `details.violations` |
+| `analysis_error`           | 500         | Rule evaluation or scoring failed — `details.rule_id` if available |
+| `internal_error`           | 500         | Unexpected server error                                            |
+
+### Validation Error Details
+
+For `422` responses from evidence upload, `details` should include enough information to diagnose:
+
+```json
+{
+  "error": {
+    "code": "evidence_validation_failed",
+    "message": "Evidence for probe 'long_running_transactions' failed contract validation.",
+    "details": {
+      "probe_name": "long_running_transactions",
+      "violations": [
+        { "field": "summary.oldest_xact_age_seconds", "expected": "number", "actual": "string" }
+      ]
+    }
+  }
+}
+```
+
+### CLI Behavior on Errors
+
+The CLI should:
+- Display `error.message` to the operator on any non-2xx response
+- Exit with a non-zero status code
+- Log `error.code` and `error.details` at debug verbosity for troubleshooting
+- Not retry on 4xx errors (client's fault); optionally retry once on 5xx with backoff
+
+## Authentication and Authorization
+
+### Authentication Model
+
+The CLI authenticates to the Arena using **Supabase service-role keys**. This is the simplest viable model for v1, consistent with how the Supabase CLI already authenticates to Management API endpoints.
+
+| Component     | Credential                | How Obtained                                              |
+|---------------|---------------------------|-----------------------------------------------------------|
+| CLI → Arena   | Supabase service-role JWT | From the Arena project's API settings or `SUPABASE_SERVICE_ROLE_KEY` env var |
+| Arena → DB    | Postgres connection       | Internal to the Supabase project (automatic)              |
+
+The CLI sends the service-role key in the `Authorization` header:
+
+```
+Authorization: Bearer <SUPABASE_SERVICE_ROLE_KEY>
+```
+
+> **Why service-role, not anon key?** The Arena stores assessment data that should not be publicly accessible. The anon key's RLS policies would require per-assessment row-level rules that add complexity without clear benefit in v1. The service-role key bypasses RLS, which is acceptable because the CLI is an operator tool, not a customer-facing application.
+
+### Authorization Model
+
+For v1, authorization is coarse-grained:
+
+| Principal          | Access Level                                           |
+|--------------------|--------------------------------------------------------|
+| Service-role CLI   | Full read/write to all assessments within the Arena project |
+| Authenticated user (future) | Scoped to assessments they created or are assigned to |
+
+The service-role key grants full access. This is appropriate for v1 because:
+- The CLI is run by internal operators, not external customers
+- The Arena project is an internal tool, not a customer-facing application
+- Assessment data is not multi-tenant in v1
+
+### Future Considerations
+
+When the system matures to support multiple operators or customer-visible dashboards:
+
+1. **Per-operator auth** — Use Supabase Auth with user JWTs. Add `created_by` and `assigned_to` checks via RLS policies on the `assessments` table.
+2. **Organization scoping** — Use `organization_ref` on assessments to scope access by org. RLS policies would enforce `auth.jwt() ->> 'org_id' = organization_ref`.
+3. **Read-only customer access** — Expose a read-only view of completed assessments to customers via the anon key with RLS policies restricting to `status = 'completed'` and matching `project_ref`.
+
+These are not v1 requirements but the data model already has the fields (`created_by`, `assigned_to`, `organization_ref`) to support them.
+
+### Credential Management
+
+The CLI should resolve credentials in this order:
+
+1. `--service-role-key` flag (explicit, highest priority)
+2. `SUPABASE_SERVICE_ROLE_KEY` environment variable
+3. Linked project credentials from `supabase link` (if integrated into the Supabase CLI)
+
+If no credentials are available, the CLI should fail with a clear error message before attempting any API call.
 
 ## State Transitions
 
@@ -428,22 +559,20 @@ pg_healthkit/
     main.go
     db.go
     runner.go
-    rules.go
-    scoring.go
-    report.go
+    normalize.go
+  arena/
+    supabase/
+      migrations/       # schema
+      functions/         # rule evaluation, scoring, reporting
   contracts/
     probe_registry.yaml
     rules.yaml
-    rules.md
-    normalizer_spec.md
-    normalizer_interface_contract.md
-    cli_contract.md
   docs/
     01_methodology.md
     ...
 ```
 
-SQL probes are stored as versioned files. Rule evaluation and scoring live in Go packages. Contracts define the boundary between components.
+SQL probes are stored as versioned files. The CLI handles probe execution and normalization. Rule evaluation, scoring, and reporting live in Arena SQL functions. Contracts (YAML) define the boundary between components.
 
 ## What the CLI Should NOT Do in v1
 
