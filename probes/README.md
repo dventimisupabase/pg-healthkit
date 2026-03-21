@@ -64,14 +64,7 @@ psql "$DATABASE_URL" -t -A \
 
 ## Profile-Based Probe Selection
 
-Not all probes need to run for every assessment. Select probes based on the assessment profile:
-
-| Profile         | Always Run                                       | If Available                                        |
-|-----------------|--------------------------------------------------|-----------------------------------------------------|
-| `default`       | 00–01, 10–13, 30–33, 40–41, 50                   | 20–22 (require pg_stat_statements)                  |
-| `performance`   | 11–13, 20–22, 31–32                             | 10, 30                                              |
-| `reliability`   | 00, 11–13, 31–32, 40–41                         | 10                                                  |
-| `cost_capacity` | 00, 20, 22, 30, 33, 40–41                       | 21                                                  |
+Not all probes need to run for every assessment. See `contracts/probe_registry.yaml` for the authoritative definition of which probes are included in each assessment profile.
 
 ## Prerequisites and Skip Handling
 

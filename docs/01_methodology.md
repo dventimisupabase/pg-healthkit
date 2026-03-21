@@ -204,19 +204,7 @@ To make assessments customer-facing and repeatable, introduce scoring:
 - Each domain scored 0–100
 - Weighted by persona intent
 
-Example weights for a DBA/SRE review:
-
-| Domain              | Weight |
-|---------------------|--------|
-| Availability        | 25%    |
-| Concurrency         | 20%    |
-| Storage             | 15%    |
-| Performance         | 15%    |
-| Operational Hygiene | 10%    |
-| Efficiency          | 10%    |
-| Cost                | 5%     |
-
-For a CTO-focused review, cost and capacity get heavier weight; performance and maintenance lower unless tied to customer impact.
+Weights vary by assessment profile (e.g., DBA/SRE vs CTO); see `10_scoring_model.md` for the authoritative profile weight definitions.
 
 **Output:**
 - Health Score (composite)

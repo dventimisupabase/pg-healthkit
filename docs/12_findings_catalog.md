@@ -72,7 +72,6 @@ Increase severity if state is `idle in transaction`.
 |---------------------------------------|----------|------------|
 | Blocked count > 3                     | high     | high       |
 | Any blocking pair exists              | medium   | high       |
-| Blockers include DDL or very old xact | critical | high       |
 
 **Cause:** Concurrent transactions competing for the same rows, or DDL operations running during active workload without proper coordination.
 **Impact:** Blocking chains can directly increase request latency and, in severe cases, trigger incidents.
@@ -321,7 +320,7 @@ Becomes more relevant when cost or maintenance is a primary objective.
 
 | Condition                                                                                  | Severity | Confidence |
 |--------------------------------------------------------------------------------------------|----------|------------|
-| `track_io_timing = off` AND `log_min_duration_statement = -1` AND `pg_stat_statements` absent | medium   | high       |
+| `track_io_timing = off` AND `log_min_duration_statement = -1` | medium   | high       |
 | Any one of these is suboptimal                                                             | low      | high       |
 
 **Cause:** Key diagnostic settings are disabled in the PostgreSQL configuration.

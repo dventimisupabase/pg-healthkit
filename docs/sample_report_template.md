@@ -80,7 +80,51 @@
 
 ---
 
-## 4. Supporting Observations
+## 4. Action Plan
+
+### Immediate (Critical / High Findings)
+
+{{#action_plan.immediate}}
+- **{{action}}**
+  - Addresses: `{{finding_key}}` ({{severity}})
+  - Tradeoffs: {{tradeoffs}}
+{{/action_plan.immediate}}
+
+### Short-term (Medium Findings)
+
+{{#action_plan.short_term}}
+- **{{action}}**
+  - Addresses: `{{finding_key}}` ({{severity}})
+  - Tradeoffs: {{tradeoffs}}
+{{/action_plan.short_term}}
+
+### Long-term (Low Findings / Improvements)
+
+{{#action_plan.long_term}}
+- **{{action}}**
+  - Addresses: `{{finding_key}}` ({{severity}})
+  - Tradeoffs: {{tradeoffs}}
+{{/action_plan.long_term}}
+
+---
+
+## 5. Domain Score Detail
+
+{{#domain_scores}}
+
+### {{domain}} — **{{score}} / 100** ({{risk_level}})
+
+| Finding | Severity | Score Delta |
+|---------|----------|------------:|
+{{#contributing_findings}}
+| {{title}} (`{{key}}`) | {{severity}} | {{score_delta}} |
+{{/contributing_findings}}
+
+{{/domain_scores}}
+
+---
+
+## 6. Supporting Observations
 
 ### Top Queries (by Total Time)
 {{#top_queries_total_time}}
@@ -105,7 +149,7 @@
 
 ---
 
-## 5. Interpretation Notes
+## 7. Interpretation Notes
 
 - Scores are initialized at 100 and reduced by rule-based deductions.
 - Severity reflects operational impact; confidence reflects evidence reliability.
@@ -114,7 +158,7 @@
 
 ---
 
-## 6. Methodology Reference
+## 8. Methodology Reference
 
 This report is generated using:
 
@@ -130,7 +174,7 @@ For details, refer to:
 
 ---
 
-## 7. Appendix: Probe Execution Summary
+## 9. Appendix: Probe Execution Summary
 
 | Probe Name | Status | Notes |
 |------------|--------|-------|

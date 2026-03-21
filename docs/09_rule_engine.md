@@ -168,7 +168,7 @@ Remediation advice without tradeoffs is incomplete. For example, "drop this unus
 | Property       | Value                                                                                                                                                      |
 |----------------|------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | **Inputs**     | `lock_blocking_chains`                                                                                                                                     |
-| **Logic**      | high if blocking chains present and blocked count > 3; medium if any blocking pair exists; critical if blockers include DDL or transaction age is very old |
+| **Logic**      | high if blocking chains present and blocked count > 3; medium if any blocking pair exists |
 | **Domains**    | concurrency, performance, availability                                                                                                                     |
 | **Confidence** | high                                                                                                                                                       |
 
