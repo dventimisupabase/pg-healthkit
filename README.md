@@ -69,9 +69,9 @@ See `docs/README.md` for the full document inventory and recommended reading ord
 
 **Assessment Profiles:** `default`, `performance`, `reliability`, `cost_capacity`, `supabase_default`.
 
-**Probes:** 25 SQL-based evidence collectors (16 generic PostgreSQL + 9 Supabase-specific).
+**Probes:** 24 SQL-based evidence collectors (16 generic PostgreSQL + 8 Supabase-specific).
 
-**Findings:** 30 interpretive results with severity, confidence, and score effects (17 generic + 13 Supabase-specific).
+**Findings:** 28 interpretive results with severity, confidence, and score effects (17 generic + 11 Supabase-specific).
 
 ## Supabase-Specific Features
 
@@ -80,7 +80,6 @@ See `docs/README.md` for the full document inventory and recommended reading ord
 - **Auth schema health** — monitors vacuum and bloat on auth tables
 - **Storage objects health** — detects soft-delete pressure on storage.objects
 - **System schema bloat** — monitors platform-managed schemas
-- **PgBouncer/Supavisor pool health** — detects pool mode misconfiguration
 - **Tier-aware scoring** — adjusts thresholds based on Supabase instance tier
 - **Feature interaction awareness** — PostgREST + RLS, Realtime + writes, Auth + traffic
 

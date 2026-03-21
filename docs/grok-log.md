@@ -397,3 +397,22 @@
 
 **New residuals added:**
 - None
+
+---
+
+### 2026-03-21 (pass 16)
+
+**Counts:**
+- Total issues found: 4
+- Already known from residuals: 0
+- New issues found: 4
+- New issues auto-fixed: 4
+- New residuals added: 0
+
+**Fixes made:**
+- Fixed `docs/README.md`: changed probe count from "25 SQL probes (16 generic + 9 Supabase-specific)" to "24 SQL probes (16 generic + 8 Supabase-specific)" to match `probe_registry.yaml` after deletion of `pgbouncer_pool_health` probe
+- Fixed `README.md`: changed probe count from "25 (16 generic + 9 Supabase)" to "24 (16 generic + 8 Supabase)"; changed finding count from "30 (17 generic + 13 Supabase)" to "28 (17 generic + 11 Supabase)" to match `rules.yaml` and `12_findings_catalog.md`; removed stale "PgBouncer/Supavisor pool health" feature line (probe was deleted)
+- Fixed `CONTRIBUTING.md`: changed probe count from "25 (16 generic + 9 Supabase)" to "24 (16 generic + 8 Supabase)"; changed finding count from "30 (17 generic + 13 Supabase)" to "28 (17 generic + 11 Supabase)"; removed stale "PgBouncer" from Supabase-specific layers list
+
+**New residuals added:**
+- None

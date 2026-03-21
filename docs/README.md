@@ -19,9 +19,8 @@ For a new contributor or agent, read in this order:
 11. `11_probe_catalog.md` — detailed probe descriptions with interpretation
 12. `12_findings_catalog.md` — findings with severity and score effects
 13. `13_roadmap.md` — phased delivery plan
-14. `14_cross_assessment_model.md` — cross-assessment benchmarking (future)
-15. `15_normalizer.md` — normalization model and transformation pipeline
-16. `16_report_template.md` — report output contract and presentation semantics
+14. `15_normalizer.md` — normalization model and transformation pipeline
+15. `16_report_template.md` — report output contract and presentation semantics
 
 ## Supporting Documents
 
@@ -32,7 +31,7 @@ For a new contributor or agent, read in this order:
 
 The executable SQL probes — the Phase 1 deliverable. Can be run directly via `psql`:
 
-- `../probes/` — 25 SQL probes (16 generic + 9 Supabase-specific), organized by numbering convention (00–09 instance, 10–19 activity, 20–29 queries, 30–39 storage, 40–49 replication, 50–59 security, 60–69 Supabase)
+- `../probes/` — 24 SQL probes (16 generic + 8 Supabase-specific), organized by numbering convention (00–09 instance, 10–19 activity, 20–29 queries, 30–39 storage, 40–49 replication, 50–59 security, 60–69 Supabase)
 - `../probes/README.md` — execution conventions, profile selection, payload normalization, psql usage
 
 ## Shared Contracts (in `../contracts/`)

@@ -12,15 +12,15 @@ The repository currently contains:
 - assessment model and lifecycle (including data model schema)
 - context ingestion model (evidence provenance, two-track intake)
 - assessment orchestration (workflow, arena design, three-layer architecture)
-- SQL probe definitions (25 probes: 16 generic + 9 Supabase-specific)
+- SQL probe definitions (24 probes: 16 generic + 8 Supabase-specific)
 - machine-readable probe registry (`probe_registry.yaml`)
 - machine-readable rule catalog (`rules.yaml`)
-- findings catalog (30 findings with severity gradation and score effects: 17 generic + 13 Supabase-specific)
+- findings catalog (28 findings with severity gradation and score effects: 17 generic + 11 Supabase-specific)
 - scoring model (7 domains, persona-weighted, tier-aware)
 - prose descriptions of evaluation and normalization semantics
 - normalizer contracts for converting SQL output into canonical payloads
 - CLI contract (8 commands with JSON payloads and API endpoints)
-- Supabase-specific layers (RLS indexing, Auth schema, Realtime slots, Storage, system schemas, PgBouncer)
+- Supabase-specific layers (RLS indexing, Auth schema, Realtime slots, Storage, system schemas)
 
 Contributions should preserve coherence across these layers.
 
@@ -85,7 +85,6 @@ These files are the key sources of truth:
 - `docs/11_probe_catalog.md` — human-readable probe catalog with interpretation guidance
 - `docs/12_findings_catalog.md` — findings with severity gradation and score effects
 - `docs/13_roadmap.md` — phased delivery plan
-- `docs/14_cross_assessment_model.md` — cross-assessment benchmarking (future)
 - `docs/15_normalizer.md` — normalization model and transformation pipeline
 - `docs/16_report_template.md` — report output contract and presentation semantics
 
