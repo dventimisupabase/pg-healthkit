@@ -1,7 +1,7 @@
 -- probe: role_inventory
 -- purpose: Detect superuser sprawl, unused roles, and risky role configurations.
 -- prerequisites: none
--- profiles: default, reliability, cost_capacity
+-- profiles: default, reliability
 
 SELECT
   rolname,

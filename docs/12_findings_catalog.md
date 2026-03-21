@@ -363,7 +363,6 @@ Becomes more relevant when cost or maintenance is a primary objective.
 |----------------------------------------|----------|------------|
 | > 5 unindexed RLS policy columns       | high     | high       |
 | > 2 unindexed RLS policy columns       | medium   | high       |
-| Any unindexed RLS policy column        | low      | high       |
 
 **Cause:** Missing indexes on columns referenced in RLS USING/WITH CHECK clauses.
 **Impact:** Every API call through PostgREST pays the RLS tax; missing indexes on policy columns turn this into a sequential scan on every request.
@@ -417,8 +416,7 @@ Becomes more relevant when cost or maintenance is a primary objective.
 
 | Condition                                     | Severity | Confidence |
 |-----------------------------------------------|----------|------------|
-| soft_deleted_ratio > 20% AND table size > 1GB | high     | medium     |
-| soft_deleted_ratio > 10%                      | medium   | medium     |
+| soft_deleted_ratio > 20%                      | high     | medium     |
 
 **Cause:** Large number of soft-deleted objects in storage.objects that have not been purged.
 **Impact:** storage.objects can grow very large in file-heavy applications; soft-deleted rows waste storage and slow queries.
@@ -435,8 +433,7 @@ Becomes more relevant when cost or maintenance is a primary objective.
 
 | Condition                                                                       | Severity | Confidence |
 |---------------------------------------------------------------------------------|----------|------------|
-| Any system table > 1M rows with no autovacuum in 7 days OR dead_tuple_pct > 30% | high     | high       |
-| dead_tuple_pct > 10%                                                            | medium   | high       |
+| max dead_tuple_pct > 30% across system schema tables                            | high     | high       |
 
 **Cause:** Platform-managed tables (auth, storage, realtime) not receiving adequate autovacuum coverage.
 **Impact:** System schemas are managed by the platform but still need vacuum; high dead tuple ratios indicate maintenance gaps.
@@ -453,14 +450,13 @@ Becomes more relevant when cost or maintenance is a primary objective.
 
 | Condition                                         | Severity | Confidence |
 |---------------------------------------------------|----------|------------|
-| Transaction mode with high planning time overhead | medium   | medium     |
-| Transaction mode detected (informational)         | low      | medium     |
+| Transaction mode detected                         | low      | medium     |
 
 **Cause:** Connection pooler (PgBouncer/Supavisor) configured in transaction mode when prepared statements are required.
 **Impact:** Transaction mode breaks prepared statement caching, causing repeated planning overhead for every query.
 **Recommendation:** Use session mode for workloads requiring prepared statements, or optimize application to use transaction-mode-safe patterns.
 **Urgency:** structural
-**Score effects (medium):** performance -8, concurrency -5
+**Score effects (low):** performance -4
 
 ---
 
@@ -471,14 +467,13 @@ Becomes more relevant when cost or maintenance is a primary objective.
 
 | Condition                                        | Severity | Confidence |
 |--------------------------------------------------|----------|------------|
-| Multiple recent failures or critical job failing | high     | high       |
-| Any job failure detected                         | medium   | medium     |
+| Any job failure detected                         | medium   | high       |
 
 **Cause:** Scheduled pg_cron jobs failing due to logic errors, permission issues, or resource contention.
 **Impact:** Failed background jobs can indicate logic errors, resource contention, or silent failures in maintenance tasks.
 **Recommendation:** Check `cron.job_run_details` for specific error messages and validate job dependencies.
 **Urgency:** short_term
-**Score effects (high):** operational_hygiene -10, availability -5
+**Score effects (medium):** operational_hygiene -10, availability -5
 
 ---
 
@@ -489,14 +484,13 @@ Becomes more relevant when cost or maintenance is a primary objective.
 
 | Condition                                         | Severity | Confidence |
 |---------------------------------------------------|----------|------------|
-| Critical extensions outdated by multiple versions | medium   | medium     |
 | Any extension outdated                            | low      | low        |
 
 **Cause:** Database extensions have available upgrades that have not been applied.
 **Impact:** Outdated extensions may miss security patches, bug fixes, or performance improvements.
 **Recommendation:** Upgrade extensions during a scheduled maintenance window after testing for compatibility.
 **Urgency:** structural
-**Score effects (medium):** operational_hygiene -8
+**Score effects (low):** operational_hygiene -4
 
 ---
 
@@ -507,8 +501,7 @@ Becomes more relevant when cost or maintenance is a primary objective.
 
 | Condition                                                          | Severity | Confidence |
 |--------------------------------------------------------------------|----------|------------|
-| Large tables (> 100K rows) with vector columns but no vector index | high     | high       |
-| Any table with vector columns but no vector index                  | medium   | medium     |
+| Any unindexed vector column detected                               | high     | high       |
 
 **Cause:** Vector columns exist on large tables but lack specialized HNSW or IVFFlat indexes.
 **Impact:** Missing vector indexes cause expensive sequential distance scans, dramatically increasing latency for AI/search features.

@@ -68,12 +68,17 @@ See `probe_registry.yaml` for the machine-readable contracts.
 |----|--------------------|--------------------------------------------------|-----------------------------------------------------------------------------------------|
 | 14 | `role_inventory`   | Detect superuser sprawl, unused roles, and risky role configurations | High signal for security hygiene; superuser count should be minimal |
 
+### Baseline Probes (WAL and checkpoint)
+
+| #  | Probe                   | Purpose                                          | Key Insight                                                                          |
+|----|-------------------------|--------------------------------------------------|--------------------------------------------------------------------------------------|
+| 16 | `wal_checkpoint_health` | Assess checkpoint and background writer pressure | Less directly actionable than transaction/locking probes; improves operational depth |
+
 ### Contextual Probes
 
 | #  | Probe                   | Purpose                                          | Key Insight                                                                          |
 |----|-------------------------|--------------------------------------------------|--------------------------------------------------------------------------------------|
 | 15 | `replication_health`    | Assess lag and replica posture                   | Severity depends on workload and whether replicas serve reads                        |
-| 16 | `wal_checkpoint_health` | Assess checkpoint and background writer pressure | Less directly actionable than transaction/locking probes; improves operational depth |
 
 ## Probe-to-Finding Mapping
 
@@ -276,7 +281,7 @@ Good but not required for a credible first release:
 
 > **Note on Platform Scope:** Probes with `platform` execution scope may require access to platform-specific APIs (e.g., Supabase Management API) or metrics endpoints in addition to a standard database connection.
 
-### Contextual (v1.1)
+### Baseline (v1.1, prerequisite-gated)
 
 #### 23. pg_cron_job_health
 

@@ -305,7 +305,7 @@ Remediation advice without tradeoffs is incomplete. For example, "drop this unus
 | Property       | Value                                                                    |
 |----------------|--------------------------------------------------------------------------|
 | **Inputs**     | `rls_policy_column_indexing`                                             |
-| **Logic**      | high if > 5 unindexed RLS policy columns; medium if > 2; low if any |
+| **Logic**      | high if > 5 unindexed RLS policy columns; medium if > 2 |
 | **Domains**    | performance, efficiency                                                  |
 | **Confidence** | high                                                                     |
 
@@ -334,7 +334,7 @@ This is possibly the single highest-impact Supabase-specific finding. RLS is ena
 | Property       | Value                                                                                     |
 |----------------|-------------------------------------------------------------------------------------------|
 | **Inputs**     | `storage_objects_health`                                                                  |
-| **Logic**      | high if soft_deleted_ratio > 20% and table size > 1GB; medium if soft_deleted_ratio > 10% |
+| **Logic**      | high if soft_deleted_ratio > 20% |
 | **Domains**    | storage, cost                                                                             |
 | **Confidence** | medium                                                                                    |
 
@@ -343,7 +343,7 @@ This is possibly the single highest-impact Supabase-specific finding. RLS is ena
 | Property       | Value                                                                                                                   |
 |----------------|-------------------------------------------------------------------------------------------------------------------------|
 | **Inputs**     | `system_schema_bloat`                                                                                                   |
-| **Logic**      | high if any system table > 1M rows with no autovacuum in 7 days or dead_tuple_pct > 30%; medium if dead_tuple_pct > 10% |
+| **Logic**      | high if max dead_tuple_pct > 30% across system schema tables |
 | **Domains**    | storage, performance, operational_hygiene                                                                               |
 | **Confidence** | high                                                                                                                    |
 
@@ -352,7 +352,7 @@ This is possibly the single highest-impact Supabase-specific finding. RLS is ena
 | Property       | Value                                                                                                                                                                                           |
 |----------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | **Inputs**     | `pgbouncer_pool_health`                                                                                                                                                                         |
-| **Logic**      | medium if pool_mode = transaction AND application shows signs of prepared statement overhead (high planning time relative to execution time); low as informational if transaction mode detected |
+| **Logic**      | low if pool_mode = transaction (informational) |
 | **Domains**    | performance, concurrency                                                                                                                                                                        |
 | **Confidence** | medium                                                                                                                                                                                          |
 

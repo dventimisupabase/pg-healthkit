@@ -1,7 +1,7 @@
 -- probe: rls_policy_column_indexing
 -- purpose: Detect missing indexes on columns used in RLS USING clauses.
 -- prerequisites: none
--- profiles: default, performance
+-- profiles: default, performance, supabase_default
 -- note: Supabase-specific. RLS is enabled by default; missing indexes on
 --        policy columns cause sequential scans on every API request.
 
@@ -56,12 +56,12 @@ indexed_columns AS (
 )
 SELECT
   pc.schemaname,
-  pc.relname,
+  pc.relname AS tablename,
   pc.column_name,
   CASE
     WHEN ic.attnum IS NOT NULL THEN true
     ELSE false
-  END AS is_indexed
+  END AS has_index
 FROM policy_columns pc
 LEFT JOIN indexed_columns ic
   ON ic.indrelid = pc.relid
