@@ -817,10 +817,12 @@ probes:
               rolvaliduntil: { type: string, nullable: true }
         summary:
           type: object
-          required: [superuser_count]
+          required: [row_count, superuser_count]
           properties:
+            row_count: { type: integer }
             superuser_count: { type: integer }
     summary_fields:
+      - summary.row_count
       - summary.superuser_count
     supports_findings:
       - excessive_superuser_roles

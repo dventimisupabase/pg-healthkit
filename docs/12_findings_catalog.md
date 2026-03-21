@@ -103,7 +103,7 @@ Confidence is medium because stats window matters — deadlock count is cumulati
 ### 5. high_connection_utilization
 
 **Domain:** concurrency
-**Inputs:** `connection_pressure`, `instance_metadata`
+**Inputs:** `connection_pressure`
 
 | Condition         | Severity | Confidence |
 |-------------------|----------|------------|
@@ -377,9 +377,8 @@ Becomes more relevant when cost or maintenance is a primary objective.
 
 | Condition                        | Severity | Confidence |
 |----------------------------------|----------|------------|
-| Inactive slot with lag > 1GB     | critical | high       |
-| Lag > 500MB or inactive > 1 hour | high     | high       |
-| Lag > 100MB                      | medium   | high       |
+| Inactive slot with lag > 1 GiB   | critical | high       |
+| Lag > 512 MiB                    | high     | high       |
 
 **Cause:** Unconsumed replication slots prevent WAL cleanup, often due to an inactive logical replication consumer (like Supabase Realtime).
 **Impact:** Unconsumed or inactive slots prevent WAL cleanup and can fill disk, leading to database unavailability.
@@ -396,8 +395,8 @@ Becomes more relevant when cost or maintenance is a primary objective.
 
 | Condition                                                | Severity | Confidence |
 |----------------------------------------------------------|----------|------------|
-| dead_tuple_pct > 30% OR row count > 5M with stale vacuum | high     | high       |
-| dead_tuple_pct > 10% OR row count > 1M                   | medium   | high       |
+| dead_tuple_pct > 30%                                      | high     | high       |
+| dead_tuple_pct > 10%                                      | medium   | high       |
 
 **Cause:** High churn on auth tables (sessions and refresh_tokens) exceeding autovacuum reclaim rate.
 **Impact:** Auth tables experience high churn; stale vacuum on these tables slows login flows and bloats storage.
@@ -534,7 +533,7 @@ Becomes more relevant when cost or maintenance is a primary objective.
 
 | Condition                                        | Severity | Confidence |
 |--------------------------------------------------|----------|------------|
-| Waiting clients > 10 AND wait duration > 1 second | high     | high       |
+| Waiting clients > 10                               | high     | high       |
 | Waiting clients > 0                              | medium   | medium     |
 
 **Cause:** Connection pool is undersized relative to demand, causing clients to queue for available connections.
@@ -572,7 +571,7 @@ Becomes more relevant when cost or maintenance is a primary objective.
 
 | Condition                                            | Severity | Confidence |
 |------------------------------------------------------|----------|------------|
-| storage.objects dead_tuple_pct > 30% AND size > 1 GB | high     | high       |
+| storage.objects dead_tuple_pct > 30%                 | high     | high       |
 | storage.objects dead_tuple_pct > 15%                 | medium   | medium     |
 
 **Cause:** High churn on storage.objects (frequent uploads, deletions, or metadata updates) outpacing autovacuum reclaim rate.

@@ -98,3 +98,27 @@
 
 **New residuals added:**
 - None
+
+---
+
+### 2026-03-20 (pass 5)
+
+**Counts:**
+- Total issues found: 13
+- Already known from residuals: 5
+- New issues found: 8
+- New issues auto-fixed: 8
+- New residuals added: 0
+
+**Fixes made:**
+- Fixed `docs/sample_report_template.md`: renamed template variable `action_plan.long_term` to `action_plan.structural` to match the urgency enum used in `rules.yaml` (section title was already fixed in pass 4 but variable name was missed)
+- Fixed `docs/12_findings_catalog.md`: simplified `auth_table_bloat_detected` conditions to match `rules.yaml` — removed "OR row count > 5M with stale vacuum" and "OR row count > 1M" conditions not present in the contract
+- Fixed `docs/12_findings_catalog.md`: simplified `storage_objects_bloat` high condition to match `rules.yaml` — removed "AND size > 1 GB" condition not present in the contract
+- Fixed `docs/12_findings_catalog.md`: simplified `pool_contention_detected` high condition to match `rules.yaml` — removed "AND wait duration > 1 second" condition not present in the contract (registry has no `wait_duration` field)
+- Fixed `docs/09_rule_engine.md` and `docs/12_findings_catalog.md`: changed `high_connection_utilization` inputs from "`connection_pressure`, `instance_metadata`" to "`connection_pressure`" to match `rules.yaml` which only requires `connection_pressure`
+- Fixed `docs/09_rule_engine.md` and `docs/12_findings_catalog.md`: corrected `replication_slot_inactive_or_lagging` thresholds from "500MB" to "512 MiB" and "1GB" to "1 GiB" to match `rules.yaml` byte values (536870912 and 1073741824); removed non-existent medium case ("lag > 100MB") from both docs
+- Fixed `contracts/probe_registry.yaml`: added missing `row_count` to `role_inventory` summary to match `docs/15_normalizer.md` derivation rules and the pattern of all other probes with row arrays
+- Fixed `contracts/rules.yaml`: changed `defaults.evaluation_mode` from `all_conditions` to `first_match` to match actual usage (every rule in the file uses `mode: first_match`)
+
+**New residuals added:**
+- None

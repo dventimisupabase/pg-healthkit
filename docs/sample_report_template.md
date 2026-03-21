@@ -100,11 +100,11 @@
 
 ### Structural (Low Findings / Improvements)
 
-{{#action_plan.long_term}}
+{{#action_plan.structural}}
 - **{{action}}**
   - Addresses: `{{finding_key}}` ({{severity}})
   - Tradeoffs: {{tradeoffs}}
-{{/action_plan.long_term}}
+{{/action_plan.structural}}
 
 ---
 

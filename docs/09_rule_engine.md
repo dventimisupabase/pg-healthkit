@@ -185,7 +185,7 @@ Remediation advice without tradeoffs is incomplete. For example, "drop this unus
 
 | Property       | Value                                                                                                                                                |
 |----------------|------------------------------------------------------------------------------------------------------------------------------------------------------|
-| **Inputs**     | `connection_pressure`, `instance_metadata`                                                                                                           |
+| **Inputs**     | `connection_pressure`                                                                                                                                |
 | **Logic**      | medium if total_connections / max_connections > 80%; high if > 90%. Increase severity if active connections high and wait events indicate contention |
 | **Domains**    | concurrency, availability                                                                                                                            |
 | **Confidence** | medium                                                                                                                                               |
@@ -316,7 +316,7 @@ This is possibly the single highest-impact Supabase-specific finding. RLS is ena
 | Property       | Value                                                                                                     |
 |----------------|-----------------------------------------------------------------------------------------------------------|
 | **Inputs**     | `realtime_replication_slot_health`                                                                        |
-| **Logic**      | critical if inactive slot with lag > 1GB; high if lag > 500MB or inactive > 1 hour; medium if lag > 100MB |
+| **Logic**      | critical if inactive slot with lag > 1 GiB; high if lag > 512 MiB |
 | **Domains**    | availability, storage                                                                                     |
 | **Confidence** | high                                                                                                      |
 
@@ -325,7 +325,7 @@ This is possibly the single highest-impact Supabase-specific finding. RLS is ena
 | Property       | Value                                                                                                                                                   |
 |----------------|---------------------------------------------------------------------------------------------------------------------------------------------------------|
 | **Inputs**     | `auth_schema_health`                                                                                                                                    |
-| **Logic**      | high if auth.sessions or auth.refresh_tokens dead_tuple_pct > 30% or row count > 5M with stale vacuum; medium if dead_tuple_pct > 10% or row count > 1M |
+| **Logic**      | high if max dead_tuple_pct > 30%; medium if dead_tuple_pct > 10% |
 | **Domains**    | storage, performance, availability                                                                                                                      |
 | **Confidence** | high                                                                                                                                                    |
 
@@ -361,7 +361,7 @@ This is possibly the single highest-impact Supabase-specific finding. RLS is ena
 | Property       | Value                                                                                                   |
 |----------------|---------------------------------------------------------------------------------------------------------|
 | **Inputs**     | `pgbouncer_pool_health`                                                                                 |
-| **Logic**      | high if waiting clients > 10 and wait duration > 1 second; medium if any clients waiting                |
+| **Logic**      | high if waiting clients > 10; medium if any clients waiting                |
 | **Domains**    | concurrency, performance                                                                                |
 | **Confidence** | high                                                                                                    |
 
@@ -388,7 +388,7 @@ This is possibly the single highest-impact Supabase-specific finding. RLS is ena
 | Property       | Value                                                                                                     |
 |----------------|-----------------------------------------------------------------------------------------------------------|
 | **Inputs**     | `storage_objects_health`                                                                                  |
-| **Logic**      | high if storage.objects dead_tuple_pct > 30% and size > 1GB; medium if dead_tuple_pct > 15%              |
+| **Logic**      | high if storage.objects dead_tuple_pct > 30%; medium if dead_tuple_pct > 15%              |
 | **Domains**    | storage, cost                                                                                             |
 | **Confidence** | high                                                                                                      |
 

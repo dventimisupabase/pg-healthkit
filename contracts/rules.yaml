@@ -5,7 +5,7 @@ defaults:
   severity: info
   confidence: medium
   enabled: true
-  evaluation_mode: all_conditions
+  evaluation_mode: first_match
   profiles:
     - default
   outputs:
