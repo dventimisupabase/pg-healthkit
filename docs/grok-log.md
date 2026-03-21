@@ -240,3 +240,32 @@
 
 **New residuals added:**
 - None
+
+---
+
+### 2026-03-21 (pass 11)
+
+**Counts:**
+- Total issues found: 11
+- Already known from residuals: 8
+- New issues found: 3
+- New issues auto-fixed: 3
+- New residuals added: 0
+
+**Fixes made:**
+- Fixed `docs/07_probe_system.md`: changed "Contextual Supabase probes" to "Prerequisite-gated Supabase probes" for `pg_cron_job_health`, `extension_version_health`, `pgvector_index_health` — these are `category: baseline` in `probe_registry.yaml`, not contextual; calling them "contextual" contradicted the registry and the section header that was already fixed in pass 2
+- Fixed `docs/sample_report_template.md`: added missing `{{cause}}` section in findings detail between Summary and Impact — every rule in `rules.yaml` has a `cause_template`, the data model (`04_data_model.md`) has `cause_text`, and `12_findings_catalog.md` defines Cause for every finding, but the report template was omitting it
+- Fixed `docs/16_report_template.md`: added missing "Cause" field to Section 3 finding detail list — the section lists Summary, Impact, Recommendation but omitted Cause, which is present in every rule's `cause_template` and is explicitly mentioned in the Section 3 description of `02_assessment_model.md`
+
+**Known residuals re-confirmed (8):**
+- `active_lock_blocking_detected` missing critical severity case in rules.yaml (requires payload design decisions)
+- `diagnostic_configuration_weak` rule medium case missing pg_stat_statements condition (cross-probe dependency question)
+- Methodology doc scoring weights example only shows reliability profile
+- `probes/README.md` profile selection table has drifted from probe_registry.yaml
+- `supabase_default` profile inheritance not encoded in contracts (requires design decision)
+- `wal_checkpoint_health` SQL column names lack `_ms` suffix required by registry (requires naming decision)
+- `pgbouncer_pool_health` SQL probe cannot produce required registry fields `waiting_clients` and `active_connections` (requires implementation strategy)
+- Generic rules in `rules.yaml` do not include `supabase_default` profile — if the rule engine uses literal profile matching, no generic rules will fire for `supabase_default` assessments (same root cause as profile inheritance residual)
+
+**New residuals added:**
+- None
