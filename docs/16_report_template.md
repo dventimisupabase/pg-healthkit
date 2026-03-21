@@ -69,6 +69,16 @@ A prioritized remediation plan derived from findings, split by urgency:
 
 Each action item should reference the finding(s) that motivate it and include tradeoffs where applicable. The action plan is a distinct output from the findings detail — findings explain what is wrong and why, while the action plan tells the reader what to do and in what order.
 
+### 5. Domain Score Detail
+
+Per-domain score breakdown with contributing findings:
+
+- **Score** — 0–100 or null (unknown)
+- **Contributing findings** — which findings reduced this domain's score and by how much
+- **Risk level** — red / yellow / green / grey (grey = unknown)
+
+This section bridges the executive summary scores and the detailed findings, making it clear why each domain scored the way it did.
+
 ### 6. Supporting Observations
 
 Raw high-signal data that provides context but is not a finding:

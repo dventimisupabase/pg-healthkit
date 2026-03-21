@@ -183,13 +183,15 @@ This profile uses Supabase-specific scoring weights (see `10_scoring_model.md`) 
 8. `stale_maintenance`
 9. `role_inventory`
 
-### Second Wave (requires pg_stat_statements)
-10. `database_activity`
+### Second Wave (baseline, lower priority)
+10. `database_activity` (queries `pg_stat_database`, does not require pg_stat_statements)
+
+### Third Wave (requires pg_stat_statements)
 11. `top_queries_total_time`
 12. `top_queries_mean_latency`
 13. `temp_spill_queries`
 
-### Third Wave (more operational depth)
+### Fourth Wave (more operational depth)
 14. `replication_health`
 15. `wal_checkpoint_health`
 16. `unused_indexes`

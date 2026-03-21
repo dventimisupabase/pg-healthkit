@@ -273,18 +273,20 @@ Start with the highest-value probes first:
 8. `stale_maintenance`
 9. `role_inventory`
 
-### Wave 2 — Generic (requires pg_stat_statements)
-10. `database_activity`
+### Wave 2 — Generic (baseline, lower priority)
+10. `database_activity` (queries `pg_stat_database`, does not require pg_stat_statements)
+
+### Wave 3 — Generic (requires pg_stat_statements)
 11. `top_queries_total_time`
 12. `top_queries_mean_latency`
 13. `temp_spill_queries`
 
-### Wave 3 — Generic (operational depth)
+### Wave 4 — Generic (operational depth)
 14. `replication_health`
 15. `wal_checkpoint_health`
 16. `unused_indexes`
 
-### Wave 4 — Supabase-specific (critical)
+### Wave 5 — Supabase-specific (critical)
 17. `rls_policy_column_indexing` — arguably the highest-impact Supabase probe; implement early
 18. `realtime_replication_slot_health`
 19. `auth_schema_health`
@@ -292,12 +294,12 @@ Start with the highest-value probes first:
 21. `system_schema_bloat`
 22. `pgbouncer_pool_health`
 
-### Wave 5 — Supabase-specific (contextual)
+### Wave 6 — Supabase-specific (contextual)
 23. `pg_cron_job_health`
 24. `extension_version_health`
 25. `pgvector_index_health`
 
-For Supabase deployments, Wave 4 should be prioritized alongside or immediately after Wave 1, since `rls_policy_column_indexing` and `auth_schema_health` catch the most common Supabase-specific issues.
+For Supabase deployments, Wave 5 should be prioritized alongside or immediately after Wave 1, since `rls_policy_column_indexing` and `auth_schema_health` catch the most common Supabase-specific issues.
 
 ## First Rules to Implement
 
