@@ -303,3 +303,30 @@
 
 **New residuals added:**
 - None
+
+---
+
+### 2026-03-21 (pass 13)
+
+**Counts:**
+- Total issues found: 9
+- Already known from residuals: 8
+- New issues found: 1
+- New issues auto-fixed: 1
+- New residuals added: 0
+
+**Fixes made:**
+- Fixed `docs/IMPLEMENTATION_PLAN.md`: added 4 missing Supabase rules to "First Rules to Implement" list — `pgvector_index_misconfigured` (#27), `pool_contention_detected` (#28), `auth_session_explosion` (#29), `storage_objects_bloat` (#30) — all present in `rules.yaml` and `12_findings_catalog.md` but were absent from the implementation plan
+
+**Known residuals re-confirmed (8):**
+- `active_lock_blocking_detected` missing critical severity case in rules.yaml (requires payload design decisions)
+- `diagnostic_configuration_weak` rule medium case missing pg_stat_statements condition (cross-probe dependency question)
+- Methodology doc scoring weights example only shows reliability profile
+- `probes/README.md` profile selection table has drifted from probe_registry.yaml
+- `supabase_default` profile inheritance not encoded in contracts (requires design decision)
+- `wal_checkpoint_health` SQL column names lack `_ms` suffix required by registry (requires naming decision)
+- `pgbouncer_pool_health` SQL probe cannot produce required registry fields `waiting_clients` and `active_connections` (requires implementation strategy)
+- Generic rules in `rules.yaml` do not include `supabase_default` profile (same root cause as profile inheritance residual)
+
+**New residuals added:**
+- None

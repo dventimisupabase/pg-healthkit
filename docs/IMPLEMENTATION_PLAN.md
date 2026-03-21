@@ -335,6 +335,10 @@ For Supabase deployments, Wave 5 should be prioritized alongside or immediately 
 24. `pg_cron_job_failures`
 25. `extension_version_outdated`
 26. `pgvector_missing_index`
+27. `pgvector_index_misconfigured`
+28. `pool_contention_detected`
+29. `auth_session_explosion`
+30. `storage_objects_bloat`
 
 These are the best candidates for an early credible report. For Supabase assessments, rules 18–20 are as high-priority as the generic top 12.
 
