@@ -412,3 +412,7 @@ This document provides the human-readable probe catalog with purpose, interpreta
 | `pg_cron_job_failures`                 | `pg_cron_job_health`               | —                                       |
 | `extension_version_outdated`           | `extension_version_health`         | `extensions_inventory`                  |
 | `pgvector_missing_index`               | `pgvector_index_health`            | `largest_tables`                        |
+| `pgvector_index_misconfigured`         | `pgvector_index_health`            | —                                       |
+| `pool_contention_detected`             | `pgbouncer_pool_health`            | `connection_pressure`                   |
+| `auth_session_explosion`               | `auth_schema_health`               | `largest_tables`                        |
+| `storage_objects_bloat`                | `storage_objects_health`           | `dead_tuple_ratio`                      |

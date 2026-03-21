@@ -1,6 +1,6 @@
 # V1 Findings Catalog
 
-This document defines the 15 v1 findings with their logic, inputs, severity gradation, and domain effects. For the machine-readable rule definitions, see `rules.yaml`.
+This document defines the v1 findings with their logic, inputs, severity gradation, and domain effects. There are 17 generic findings and 13 Supabase-specific findings (30 total). For the machine-readable rule definitions, see `rules.yaml`.
 
 ## Finding Structure
 
@@ -314,7 +314,7 @@ Becomes more relevant when cost or maintenance is a primary objective.
 
 ---
 
-### 15b. diagnostic_configuration_weak
+### 16. diagnostic_configuration_weak
 
 **Domain:** operational_hygiene
 **Inputs:** `instance_metadata`
@@ -332,7 +332,7 @@ Becomes more relevant when cost or maintenance is a primary objective.
 
 ---
 
-### 16. excessive_superuser_roles
+### 17. excessive_superuser_roles
 
 **Domain:** operational_hygiene
 **Inputs:** `role_inventory`
@@ -354,7 +354,7 @@ Becomes more relevant when cost or maintenance is a primary objective.
 
 ## Supabase-Specific Findings
 
-### 17. rls_policy_columns_unindexed
+### 18. rls_policy_columns_unindexed
 
 **Domain:** performance
 **Inputs:** `rls_policy_column_indexing`
@@ -373,7 +373,7 @@ Becomes more relevant when cost or maintenance is a primary objective.
 
 ---
 
-### 18. replication_slot_inactive_or_lagging
+### 19. replication_slot_inactive_or_lagging
 
 **Domain:** availability
 **Inputs:** `realtime_replication_slot_health`
@@ -392,7 +392,7 @@ Becomes more relevant when cost or maintenance is a primary objective.
 
 ---
 
-### 19. auth_table_bloat_detected
+### 20. auth_table_bloat_detected
 
 **Domain:** storage
 **Inputs:** `auth_schema_health`
@@ -410,7 +410,7 @@ Becomes more relevant when cost or maintenance is a primary objective.
 
 ---
 
-### 20. storage_soft_delete_pressure
+### 21. storage_soft_delete_pressure
 
 **Domain:** storage
 **Inputs:** `storage_objects_health`
@@ -428,7 +428,7 @@ Becomes more relevant when cost or maintenance is a primary objective.
 
 ---
 
-### 21. system_schema_vacuum_stale
+### 22. system_schema_vacuum_stale
 
 **Domain:** operational_hygiene
 **Inputs:** `system_schema_bloat`
@@ -446,7 +446,7 @@ Becomes more relevant when cost or maintenance is a primary objective.
 
 ---
 
-### 22. pool_mode_misconfiguration
+### 23. pool_mode_misconfiguration
 
 **Domain:** performance
 **Inputs:** `pgbouncer_pool_health`
@@ -464,7 +464,7 @@ Becomes more relevant when cost or maintenance is a primary objective.
 
 ---
 
-### 23. pg_cron_job_failures
+### 24. pg_cron_job_failures
 
 **Domain:** operational_hygiene
 **Inputs:** `pg_cron_job_health`
@@ -482,7 +482,7 @@ Becomes more relevant when cost or maintenance is a primary objective.
 
 ---
 
-### 24. extension_version_outdated
+### 25. extension_version_outdated
 
 **Domain:** operational_hygiene
 **Inputs:** `extension_version_health`
@@ -500,7 +500,7 @@ Becomes more relevant when cost or maintenance is a primary objective.
 
 ---
 
-### 25. pgvector_missing_index
+### 26. pgvector_missing_index
 
 **Domain:** performance
 **Inputs:** `pgvector_index_health`
@@ -515,6 +515,78 @@ Becomes more relevant when cost or maintenance is a primary objective.
 **Recommendation:** Add HNSW or IVFFlat indexes to all frequently queried vector columns.
 **Urgency:** short_term
 **Score effects (high):** performance -15, efficiency -8
+
+---
+
+### 27. pgvector_index_misconfigured
+
+**Domain:** performance
+**Inputs:** `pgvector_index_health`
+
+| Condition                                                          | Severity | Confidence |
+|--------------------------------------------------------------------|----------|------------|
+| HNSW index with default parameters on table > 500K rows           | medium   | medium     |
+| IVFFlat index with lists < sqrt(row_count)                        | medium   | medium     |
+
+**Cause:** Vector index parameters were left at defaults or set without accounting for dataset size, leading to suboptimal recall or excessive memory usage.
+**Impact:** Misconfigured vector indexes degrade search quality (low recall) or consume unnecessary memory, affecting both accuracy and performance of AI/search features.
+**Recommendation:** Review HNSW `m` and `ef_construction` parameters relative to dataset size. For IVFFlat, ensure `lists` is approximately sqrt(row_count). Benchmark recall vs latency after changes.
+**Urgency:** structural
+**Score effects (medium):** performance -8, efficiency -5
+
+---
+
+### 28. pool_contention_detected
+
+**Domain:** concurrency
+**Inputs:** `pgbouncer_pool_health`
+
+| Condition                                        | Severity | Confidence |
+|--------------------------------------------------|----------|------------|
+| Waiting clients > 10 AND wait duration > 1 second | high     | high       |
+| Waiting clients > 0                              | medium   | medium     |
+
+**Cause:** Connection pool is undersized relative to demand, causing clients to queue for available connections.
+**Impact:** Pool contention adds latency to every queued request and can cascade into timeouts under load.
+**Recommendation:** Increase pool size, reduce per-connection hold time, or add a secondary pooler. Investigate whether idle-in-transaction sessions are consuming pool slots unnecessarily.
+**Urgency:** short_term
+**Score effects (high):** concurrency -15, performance -8
+
+---
+
+### 29. auth_session_explosion
+
+**Domain:** storage
+**Inputs:** `auth_schema_health`
+
+| Condition                                          | Severity | Confidence |
+|----------------------------------------------------|----------|------------|
+| auth.sessions row count > 10M                      | high     | high       |
+| auth.sessions row count > 5M with growth > 1M/week | medium   | medium     |
+
+**Cause:** Auth sessions accumulating without adequate cleanup, often due to short-lived anonymous sessions or missing session expiration policies.
+**Impact:** Excessive session table size degrades login performance, increases vacuum pressure, and inflates storage costs.
+**Recommendation:** Review session retention policies, enable or tune session cleanup jobs, and investigate whether anonymous session creation rate is expected.
+**Urgency:** short_term
+**Score effects (high):** storage -12, performance -8, availability -5
+
+---
+
+### 30. storage_objects_bloat
+
+**Domain:** storage
+**Inputs:** `storage_objects_health`
+
+| Condition                                            | Severity | Confidence |
+|------------------------------------------------------|----------|------------|
+| storage.objects dead_tuple_pct > 30% AND size > 1 GB | high     | high       |
+| storage.objects dead_tuple_pct > 15%                 | medium   | medium     |
+
+**Cause:** High churn on storage.objects (frequent uploads, deletions, or metadata updates) outpacing autovacuum reclaim rate.
+**Impact:** Bloated storage.objects table slows file listing queries and wastes disk space beyond the actual file metadata footprint.
+**Recommendation:** Tune autovacuum for storage.objects (lower threshold, higher scale factor for this table). Investigate whether soft-delete cleanup is running.
+**Urgency:** short_term
+**Score effects (high):** storage -12, cost -6
 
 ## Most Actionable Findings (v1 priority)
 

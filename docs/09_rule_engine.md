@@ -356,6 +356,42 @@ This is possibly the single highest-impact Supabase-specific finding. RLS is ena
 | **Domains**    | performance, concurrency                                                                                                                                                                        |
 | **Confidence** | medium                                                                                                                                                                                          |
 
+### pool_contention_detected
+
+| Property       | Value                                                                                                   |
+|----------------|---------------------------------------------------------------------------------------------------------|
+| **Inputs**     | `pgbouncer_pool_health`                                                                                 |
+| **Logic**      | high if waiting clients > 10 and wait duration > 1 second; medium if any clients waiting                |
+| **Domains**    | concurrency, performance                                                                                |
+| **Confidence** | high                                                                                                    |
+
+### auth_session_explosion
+
+| Property       | Value                                                                                                                      |
+|----------------|----------------------------------------------------------------------------------------------------------------------------|
+| **Inputs**     | `auth_schema_health`                                                                                                       |
+| **Logic**      | high if auth.sessions row count > 10M; medium if > 5M with growth > 1M/week                                               |
+| **Domains**    | storage, performance, availability                                                                                         |
+| **Confidence** | high                                                                                                                       |
+
+### pgvector_index_misconfigured
+
+| Property       | Value                                                                                                                         |
+|----------------|-------------------------------------------------------------------------------------------------------------------------------|
+| **Inputs**     | `pgvector_index_health`                                                                                                       |
+| **Logic**      | medium if HNSW index with default parameters on table > 500K rows; medium if IVFFlat with lists < sqrt(row_count)            |
+| **Domains**    | performance, efficiency                                                                                                       |
+| **Confidence** | medium                                                                                                                        |
+
+### storage_objects_bloat
+
+| Property       | Value                                                                                                     |
+|----------------|-----------------------------------------------------------------------------------------------------------|
+| **Inputs**     | `storage_objects_health`                                                                                  |
+| **Logic**      | high if storage.objects dead_tuple_pct > 30% and size > 1GB; medium if dead_tuple_pct > 15%              |
+| **Domains**    | storage, cost                                                                                             |
+| **Confidence** | high                                                                                                      |
+
 ## Rule Attributes
 
 Every rule must carry:
