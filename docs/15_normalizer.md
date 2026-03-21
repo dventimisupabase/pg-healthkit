@@ -107,21 +107,7 @@ The normalizer defines a clean boundary between two components:
 
 **Normalizer** — converts raw rows to named objects, coerces types, derives summaries, validates against registry. Makes no severity or scoring decisions.
 
-The suggested Go interface:
-
-```go
-type Normalizer interface {
-    Normalize(raw RawProbeResult) (CanonicalProbePayload, error)
-}
-```
-
-A registry-aware variant:
-
-```go
-type RegistryAwareNormalizer interface {
-    NormalizeWithContract(probeName string, raw RawProbeResult, contract ProbeContract) (CanonicalProbePayload, error)
-}
-```
+The normalizer accepts a raw probe result and the probe's contract from the registry, and returns a canonical payload. A registry-aware implementation can validate and coerce fields using the contract's type information.
 
 ## Validation
 
@@ -316,31 +302,11 @@ Rows may be emitted as arrays (with `columns`) or as objects. Both are acceptabl
 
 **Non-recoverable issues** (e.g., required numeric field cannot be parsed): emit `status: failed`, preserve error details, do not emit a partial success payload.
 
-## Go Interface
+## Type Contracts
 
-```go
-type RawProbeResult struct {
-    ProbeName    string
-    ProbeVersion string
-    Status       string
-    Columns      []string
-    Rows         any
-    Metadata     map[string]any
-    SkipReason   string
-    Error        map[string]any
-}
+The raw probe result carries: probe name, version, status (`success`/`skipped`/`failed`), column names, rows (array of arrays or objects), metadata, skip reason, and error details.
 
-type CanonicalProbePayload struct {
-    ProbeName    string
-    ProbeVersion string
-    Status       string
-    Summary      map[string]any
-    Rows         []map[string]any
-    Metadata     map[string]any
-    SkipReason   string
-    Error        map[string]any
-}
-```
+The canonical payload carries: probe name, version, status, summary (scalar fields for rule evaluation), rows (array of objects with named fields), metadata (duration, versions, warnings), skip reason, and error details.
 
 ## Example Transformation
 
