@@ -46,7 +46,7 @@ rules:
 
   - id: long_running_transactions_detected
     enabled: true
-    profiles: [default, performance, reliability]
+    profiles: [default, performance, reliability, supabase_default]
     finding:
       key: long_running_transactions_detected
       domain: concurrency
@@ -114,7 +114,7 @@ rules:
 
   - id: idle_in_transaction_sessions_detected
     enabled: true
-    profiles: [default, performance, reliability]
+    profiles: [default, performance, reliability, supabase_default]
     finding:
       key: idle_in_transaction_sessions_detected
       domain: concurrency
@@ -172,7 +172,7 @@ rules:
 
   - id: active_lock_blocking_detected
     enabled: true
-    profiles: [default, performance, reliability]
+    profiles: [default, performance, reliability, supabase_default]
     finding:
       key: active_lock_blocking_detected
       domain: concurrency
@@ -222,7 +222,7 @@ rules:
 
   - id: deadlocks_observed
     enabled: true
-    profiles: [default, reliability]
+    profiles: [default, reliability, supabase_default]
     finding:
       key: deadlocks_observed
       domain: concurrency
@@ -270,7 +270,7 @@ rules:
 
   - id: high_connection_utilization
     enabled: true
-    profiles: [default, reliability]
+    profiles: [default, reliability, supabase_default]
     finding:
       key: high_connection_utilization
       domain: concurrency
@@ -321,7 +321,7 @@ rules:
 
   - id: significant_temp_spill_activity
     enabled: true
-    profiles: [default, performance, cost_capacity]
+    profiles: [default, performance, cost_capacity, supabase_default]
     finding:
       key: significant_temp_spill_activity
       domain: performance
@@ -372,7 +372,7 @@ rules:
 
   - id: high_impact_query_total_time
     enabled: true
-    profiles: [default, performance, cost_capacity]
+    profiles: [default, performance, cost_capacity, supabase_default]
     finding:
       key: high_impact_query_total_time
       domain: performance
@@ -424,7 +424,7 @@ rules:
 
   - id: high_latency_queries_detected
     enabled: true
-    profiles: [default, performance]
+    profiles: [default, performance, supabase_default]
     finding:
       key: high_latency_queries_detected
       domain: performance
@@ -477,7 +477,7 @@ rules:
 
   - id: dead_tuple_accumulation_detected
     enabled: true
-    profiles: [default, performance, reliability]
+    profiles: [default, performance, reliability, supabase_default]
     finding:
       key: dead_tuple_accumulation_detected
       domain: storage
@@ -528,7 +528,7 @@ rules:
 
   - id: stale_vacuum_or_analyze_detected
     enabled: true
-    profiles: [default, performance, reliability]
+    profiles: [default, performance, reliability, supabase_default]
     finding:
       key: stale_vacuum_or_analyze_detected
       domain: operational_hygiene
@@ -582,7 +582,7 @@ rules:
 
   - id: potentially_unused_large_indexes
     enabled: true
-    profiles: [default, cost_capacity]
+    profiles: [default, cost_capacity, supabase_default]
     finding:
       key: potentially_unused_large_indexes
       domain: storage
@@ -633,7 +633,7 @@ rules:
 
   - id: replication_lag_elevated
     enabled: true
-    profiles: [default, reliability]
+    profiles: [default, reliability, supabase_default]
     finding:
       key: replication_lag_elevated
       domain: availability
@@ -680,7 +680,7 @@ rules:
 
   - id: checkpoint_pressure_detected
     enabled: true
-    profiles: [default, reliability, cost_capacity]
+    profiles: [default, reliability, cost_capacity, supabase_default]
     finding:
       key: checkpoint_pressure_detected
       domain: efficiency
@@ -735,7 +735,7 @@ rules:
 
   - id: diagnostic_visibility_limited
     enabled: true
-    profiles: [default, performance, reliability, cost_capacity]
+    profiles: [default, performance, reliability, cost_capacity, supabase_default]
     finding:
       key: diagnostic_visibility_limited
       domain: operational_hygiene
@@ -771,7 +771,7 @@ rules:
 
   - id: diagnostic_configuration_weak
     enabled: true
-    profiles: [default, performance, reliability, cost_capacity]
+    profiles: [default, performance, reliability, cost_capacity, supabase_default]
     finding:
       key: diagnostic_configuration_weak
       domain: operational_hygiene
@@ -825,7 +825,7 @@ rules:
 
   - id: storage_concentration_risk
     enabled: true
-    profiles: [default, cost_capacity]
+    profiles: [default, cost_capacity, supabase_default]
     finding:
       key: storage_concentration_risk
       domain: storage
@@ -863,7 +863,7 @@ rules:
 
   - id: excessive_superuser_roles
     enabled: true
-    profiles: [default, reliability]
+    profiles: [default, reliability, supabase_default]
     finding:
       key: excessive_superuser_roles
       domain: operational_hygiene

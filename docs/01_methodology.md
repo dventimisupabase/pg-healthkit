@@ -204,7 +204,19 @@ To make assessments customer-facing and repeatable, introduce scoring:
 - Each domain scored 0–100
 - Weighted by persona intent
 
-Weights vary by assessment profile (e.g., DBA/SRE vs CTO); see `10_scoring_model.md` for the authoritative profile weight definitions.
+Weights vary by assessment profile (e.g., DBA/SRE vs CTO). The default profile weights are:
+
+| Domain              | Weight |
+|---------------------|--------|
+| Availability        | 20%    |
+| Performance         | 20%    |
+| Concurrency         | 15%    |
+| Storage             | 15%    |
+| Operational Hygiene | 10%    |
+| Efficiency          | 10%    |
+| Cost                | 10%    |
+
+See `10_scoring_model.md` for all profiles (reliability, cost_capacity, performance, supabase_default) and the full scoring specification.
 
 **Output:**
 - Health Score (composite)

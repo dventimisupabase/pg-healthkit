@@ -174,6 +174,8 @@ Remediation advice without tradeoffs is incomplete. For example, "drop this unus
 | **Domains**    | concurrency, performance, availability                                                                                                                     |
 | **Confidence** | high                                                                                                                                                       |
 
+Note: a critical severity case (DDL blockers, very old transactions) is intentionally deferred to a future phase.
+
 ### deadlocks_observed
 
 | Property       | Value                                                                               |
@@ -281,6 +283,8 @@ Remediation advice without tradeoffs is incomplete. For example, "drop this unus
 | **Logic**      | medium if `track_io_timing = off` AND `log_min_duration_statement = -1`; low if any one of these is suboptimal. Complements `diagnostic_visibility_limited` with configuration signals |
 | **Domains**    | operational hygiene                                                                                                                                                                                                    |
 | **Confidence** | high                                                                                                                                                                                                                   |
+
+Note: the medium case intentionally checks only two conditions (track_io_timing and log_min_duration_statement). A third condition (pg_stat_statements absent) was considered but omitted to avoid a cross-probe dependency on extensions_inventory.
 
 ### storage_concentration_risk
 

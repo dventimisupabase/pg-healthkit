@@ -74,6 +74,8 @@ Increase severity if state is `idle in transaction`.
 | Blocking pairs > 3                    | high     | high       |
 | Any blocking pair exists              | medium   | high       |
 
+Note: a critical severity case (DDL blockers, very old transactions) is intentionally deferred to a future phase.
+
 **Cause:** Concurrent transactions competing for the same rows, or DDL operations running during active workload without proper coordination.
 **Impact:** Blocking chains can directly increase request latency and, in severe cases, trigger incidents.
 **Recommendation:** Identify the blocker query pattern, review transaction scope, and optimize access patterns or indexing to reduce lock duration.
@@ -323,6 +325,8 @@ Becomes more relevant when cost or maintenance is a primary objective.
 |--------------------------------------------------------------------------------------------|----------|------------|
 | `track_io_timing = off` AND `log_min_duration_statement = -1` | medium   | high       |
 | Any one of these is suboptimal                                                             | low      | high       |
+
+Note: the medium case intentionally checks only two conditions (track_io_timing and log_min_duration_statement). A third condition (pg_stat_statements absent) was considered but omitted to avoid a cross-probe dependency on extensions_inventory.
 
 **Cause:** Key diagnostic settings are disabled in the PostgreSQL configuration.
 **Impact:** Weak diagnostic configuration makes root-cause analysis difficult and hides performance bottlenecks.
