@@ -122,3 +122,23 @@
 
 **New residuals added:**
 - None
+
+---
+
+### 2026-03-20 (pass 6)
+
+**Counts:**
+- Total issues found: 5
+- Already known from residuals: 0
+- New issues found: 5
+- New issues auto-fixed: 4
+- New residuals added: 1
+
+**Fixes made:**
+- Fixed `probes/README.md`: changed 40-49 range category from "Contextual" to "Mixed (contextual and baseline)" since `wal_checkpoint_health` (41) is baseline per `probe_registry.yaml` while `replication_health` (40) is contextual
+- Fixed `probes/README.md`: renamed "Canonical envelope" section to "Raw evidence envelope (manual collection)" and added clarification that this format differs from the canonical normalized payload defined in `docs/15_normalizer.md` (the raw format includes `collected_at` and `columns` fields not present in the canonical format)
+- Fixed `docs/09_rule_engine.md`: removed "AND `pg_stat_statements` absent" from the `diagnostic_configuration_weak` medium case description to match `rules.yaml` which only checks two conditions (`track_io_timing = off` AND `log_min_duration_statement = -1`)
+- Fixed `docs/02_assessment_model.md`: updated Finding Structure example to use correct field names from the data model (`finding_key` instead of `id`, `impact_text` instead of `impact`, `recommendation_text` instead of `recommendation`, `cause_text`, `summary`, `evidence_refs`) and the canonical finding key `long_running_transactions_detected`
+
+**New residuals added:**
+- `supabase_default` profile inheritance not encoded in contracts (requires design decision on explicit vs implicit profile inheritance)

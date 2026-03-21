@@ -114,16 +114,17 @@ Each finding should have:
 
 ```json
 {
-  "id": "long_running_transactions",
+  "finding_key": "long_running_transactions_detected",
   "domain": "concurrency",
   "severity": "high",
   "title": "Long-running transactions detected",
-  "evidence": {
-    "count": 3,
-    "oldest_age_seconds": 18420
-  },
-  "impact": "May block vacuum and contribute to table bloat and lock contention.",
-  "recommendation": "Investigate client transaction boundaries; terminate abandoned sessions where appropriate.",
+  "summary": "Transactions older than 1 hour were present during evidence collection.",
+  "cause_text": "Application transaction boundaries are too broad, or sessions are being abandoned without rollback.",
+  "impact_text": "May block vacuum and contribute to table bloat and lock contention.",
+  "recommendation_text": "Investigate client transaction boundaries; terminate abandoned sessions where appropriate.",
+  "evidence_refs": [
+    { "probe_name": "long_running_transactions", "evidence_id": "uuid" }
+  ],
   "confidence": "high"
 }
 ```

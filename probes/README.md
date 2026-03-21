@@ -27,7 +27,7 @@ All probes live in a flat directory. The numbering convention groups probes by d
 | 10–19  | Activity and connections    | Baseline   |
 | 20–29  | Query analysis              | Baseline (requires pg_stat_statements) |
 | 30–39  | Tables, indexes, storage    | Baseline   |
-| 40–49  | Replication and WAL         | Contextual |
+| 40–49  | Replication and WAL         | Mixed (contextual and baseline) |
 | 50–59  | Security and hygiene        | Baseline   |
 | 60–69  | Supabase-specific           | Baseline   |
 
@@ -97,7 +97,9 @@ The `pg_stat_wal` query (second query in 41) requires PostgreSQL 14+. On older v
 
 When the results of these probes are stored as assessment evidence (whether by CLI or manually), normalize the output as follows:
 
-### Canonical envelope
+### Raw evidence envelope (manual collection)
+
+This envelope is for manual `psql`-based collection. It includes `collected_at` and `columns` fields that are appropriate for the raw/manual format. For the canonical normalized payload format used by the CLI normalizer, see `docs/15_normalizer.md`.
 
 ```json
 {
