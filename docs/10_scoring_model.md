@@ -137,7 +137,7 @@ Scores should be transparent, not opaque. The score payload includes weights, ra
 
 ```json
 {
-  "scoring_profile": "oltp_default",
+  "scoring_profile": "default",
   "availability_score": 78,
   "performance_score": 48,
   "concurrency_score": 55,

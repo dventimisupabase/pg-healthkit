@@ -71,9 +71,9 @@ See `docs/README.md` for the full document inventory and recommended reading ord
 
 **Assessment Profiles:** `default`, `performance`, `reliability`, `cost_capacity`, `supabase_default`.
 
-**Probes:** 24 SQL-based evidence collectors (15 generic PostgreSQL + 9 Supabase-specific).
+**Probes:** 25 SQL-based evidence collectors (16 generic PostgreSQL + 9 Supabase-specific).
 
-**Findings:** 24 interpretive results with severity, confidence, and score effects.
+**Findings:** 25 interpretive results with severity, confidence, and score effects.
 
 ## Supabase-Specific Features
 

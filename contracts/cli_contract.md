@@ -120,7 +120,7 @@ supabase db health input import \
 ```bash
 supabase db health probe run \
   --assessment-id <uuid> \
-  --profile oltp \
+  --profile default \
   --target database \
   --upload
 ```

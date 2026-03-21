@@ -51,6 +51,7 @@ rules:
       key: long_running_transactions_detected
       domain: concurrency
       title: Long-running transactions detected
+      urgency: short_term
       summary_template: >
         Found ${summary.row_count} transaction(s) exceeding expected age, with the oldest at
         ${summary.oldest_xact_age_seconds}s.
@@ -116,6 +117,7 @@ rules:
       key: idle_in_transaction_sessions_detected
       domain: concurrency
       title: Idle in transaction sessions detected
+      urgency: short_term
       summary_template: >
         Found ${summary.idle_in_transaction} idle-in-transaction session(s); oldest transaction age
         observed was ${summary.oldest_idle_xact_age_seconds}s.
@@ -171,6 +173,7 @@ rules:
       key: active_lock_blocking_detected
       domain: concurrency
       title: Active lock blocking detected
+      urgency: immediate
       summary_template: >
         Found ${summary.blocking_pairs} active blocking pair(s) during sampling.
       impact_template: >
@@ -218,6 +221,7 @@ rules:
       key: deadlocks_observed
       domain: concurrency
       title: Deadlocks observed
+      urgency: short_term
       summary_template: >
         The database statistics reported ${stats.deadlocks} deadlock(s) in the current stats window.
       impact_template: >
@@ -263,6 +267,7 @@ rules:
       key: high_connection_utilization
       domain: concurrency
       title: High connection utilization
+      urgency: short_term
       summary_template: >
         Connection utilization was ${summary.utilization_pct}% of max_connections.
       impact_template: >
@@ -311,6 +316,7 @@ rules:
       key: significant_temp_spill_activity
       domain: performance
       title: Significant temp spill activity detected
+      urgency: short_term
       summary_template: >
         Query statistics show repeated temp spill activity; top observed spill was
         ${summary.max_temp_blks_written} temp blocks written.
@@ -359,6 +365,7 @@ rules:
       key: high_impact_query_total_time
       domain: performance
       title: High-impact query by total execution time
+      urgency: structural
       summary_template: >
         A small number of queries dominate cumulative execution time; top query consumed
         ${summary.top_total_exec_time_ms}ms across ${summary.top_calls} calls.
@@ -408,6 +415,7 @@ rules:
       key: high_latency_queries_detected
       domain: performance
       title: High-latency queries detected
+      urgency: short_term
       summary_template: >
         Top mean-latency query showed ${summary.top_mean_exec_time_ms}ms average execution time.
       impact_template: >
@@ -458,6 +466,7 @@ rules:
       key: dead_tuple_accumulation_detected
       domain: storage
       title: Dead tuple accumulation detected
+      urgency: short_term
       summary_template: >
         Large or active tables show dead tuple accumulation; top observed dead tuple percentage was
         ${summary.max_dead_tuple_pct}%.
@@ -506,6 +515,7 @@ rules:
       key: stale_vacuum_or_analyze_detected
       domain: operational_hygiene
       title: Stale vacuum or analyze activity detected
+      urgency: short_term
       summary_template: >
         One or more significant tables show stale or missing autovacuum/autoanalyze activity.
       impact_template: >
@@ -557,6 +567,7 @@ rules:
       key: potentially_unused_large_indexes
       domain: storage
       title: Potentially unused large indexes detected
+      urgency: structural
       summary_template: >
         Found ${summary.zero_scan_large_index_count} large index(es) with zero scans in the observed
         stats window.
@@ -605,6 +616,7 @@ rules:
       key: replication_lag_elevated
       domain: availability
       title: Replication lag elevated
+      urgency: immediate
       summary_template: >
         Observed replay lag of ${summary.max_replay_lag_ms}ms across replica connections.
       impact_template: >
@@ -649,6 +661,7 @@ rules:
       key: checkpoint_pressure_detected
       domain: efficiency
       title: Checkpoint pressure detected
+      urgency: structural
       summary_template: >
         Requested checkpoints and backend writes indicate elevated checkpoint or write pressure.
       impact_template: >
@@ -701,6 +714,7 @@ rules:
       key: diagnostic_visibility_limited
       domain: operational_hygiene
       title: Diagnostic visibility is limited
+      urgency: structural
       summary_template: >
         Required observability features are missing or incomplete; ${summary.missing_features} feature(s)
         were not available.
@@ -727,6 +741,63 @@ rules:
           score_effects:
             operational_hygiene: -10
 
+  - id: diagnostic_configuration_weak
+    enabled: true
+    profiles: [default, performance, reliability, cost_capacity]
+    finding:
+      key: diagnostic_configuration_weak
+      domain: operational_hygiene
+      title: Diagnostic configuration is weak
+      urgency: structural
+      summary_template: >
+        One or more recommended PostgreSQL diagnostic settings are disabled or suboptimal.
+      impact_template: >
+        Weak diagnostic configuration makes root-cause analysis difficult and hides performance bottlenecks.
+      recommendation_template: >
+        Enable track_io_timing, configure log_min_duration_statement (e.g., to 100ms), and ensure
+        pg_stat_statements is active.
+      tags: [observability, diagnostics, configuration]
+    evidence:
+      required_probes:
+        - instance_metadata
+        - extensions_inventory
+    evaluate:
+      mode: first_match
+      cases:
+        - when:
+            all:
+              - fact: summary.track_io_timing
+                from: instance_metadata
+                op: eq
+                value: "off"
+              - fact: summary.log_min_duration_statement
+                from: instance_metadata
+                op: eq
+                value: -1
+              - fact: summary.has_pg_stat_statements
+                from: extensions_inventory
+                op: eq
+                value: false
+          severity: medium
+          confidence: high
+          score_effects:
+            operational_hygiene: -10
+
+        - when:
+            any:
+              - fact: summary.track_io_timing
+                from: instance_metadata
+                op: eq
+                value: "off"
+              - fact: summary.log_min_duration_statement
+                from: instance_metadata
+                op: eq
+                value: -1
+          severity: low
+          confidence: high
+          score_effects:
+            operational_hygiene: -4
+
   - id: storage_concentration_risk
     enabled: true
     profiles: [default, cost_capacity]
@@ -734,6 +805,7 @@ rules:
       key: storage_concentration_risk
       domain: storage
       title: Storage concentration risk identified
+      urgency: structural
       summary_template: >
         A small number of relations dominate storage; the top relation consumes
         ${summary.top_relation_total_bytes} bytes.
@@ -769,6 +841,7 @@ rules:
       key: excessive_superuser_roles
       domain: operational_hygiene
       title: Excessive superuser roles detected
+      urgency: short_term
       summary_template: >
         Found ${summary.superuser_count} roles with SUPERUSER privileges.
       impact_template: >
@@ -812,6 +885,7 @@ rules:
       key: rls_policy_columns_unindexed
       domain: performance
       title: Unindexed RLS policy columns detected
+      urgency: short_term
       summary_template: >
         Found ${summary.unindexed_policy_column_count} unindexed column(s) referenced in RLS policies.
       impact_template: >
@@ -857,6 +931,7 @@ rules:
       key: replication_slot_inactive_or_lagging
       domain: availability
       title: Inactive or lagging replication slot detected
+      urgency: immediate
       summary_template: >
         Replication slot lag detected; max lag is ${summary.max_lag_bytes} bytes.
       impact_template: >
@@ -905,6 +980,7 @@ rules:
       key: auth_table_bloat_detected
       domain: storage
       title: Supabase Auth table bloat detected
+      urgency: short_term
       summary_template: >
         High dead tuple ratio in auth schema; max dead tuple percentage is ${summary.max_dead_tuple_pct}%.
       impact_template: >
@@ -950,6 +1026,7 @@ rules:
       key: storage_soft_delete_pressure
       domain: storage
       title: Storage soft-delete pressure detected
+      urgency: short_term
       summary_template: >
         Soft-deleted rows account for ${summary.soft_deleted_ratio}% of storage.objects.
       impact_template: >
@@ -982,6 +1059,7 @@ rules:
       key: system_schema_vacuum_stale
       domain: operational_hygiene
       title: System schema vacuum is stale
+      urgency: short_term
       summary_template: >
         High dead tuple ratio in system schemas; max observed is ${summary.max_dead_tuple_pct}%.
       impact_template: >
@@ -1015,6 +1093,7 @@ rules:
       key: pool_mode_misconfiguration
       domain: performance
       title: Connection pool mode misconfiguration
+      urgency: structural
       summary_template: >
         Connection pool is in ${summary.pool_mode} mode.
       impact_template: >
@@ -1047,6 +1126,7 @@ rules:
       key: pg_cron_job_failures
       domain: operational_hygiene
       title: pg_cron job failures detected
+      urgency: short_term
       summary_template: >
         Found ${summary.failed_job_count} failed scheduled job(s).
       impact_template: >
@@ -1079,6 +1159,7 @@ rules:
       key: extension_version_outdated
       domain: operational_hygiene
       title: Outdated extensions detected
+      urgency: structural
       summary_template: >
         Found ${summary.outdated_count} extension(s) with available upgrades.
       impact_template: >
@@ -1110,6 +1191,7 @@ rules:
       key: pgvector_missing_index
       domain: performance
       title: Missing pgvector index detected
+      urgency: short_term
       summary_template: >
         Found ${summary.unindexed_vector_column_count} unindexed vector column(s).
       impact_template: >

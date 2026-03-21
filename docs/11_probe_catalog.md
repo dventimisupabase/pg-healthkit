@@ -112,7 +112,15 @@ This document provides the human-readable probe catalog with purpose, interpreta
 
 **Interpretation:** This is explicitly medium-confidence unless stats age is known and representative. Never recommend dropping indexes based solely on a short observation window.
 
-## 14. replication_health
+## 14. role_inventory
+
+**Purpose:** Detect superuser sprawl, unused roles, and risky role configurations.
+
+**Collects:** Role name, superuser flag, create-role flag, create-db flag, replication flag, login flag, password expiry (VALID UNTIL).
+
+**Interpretation:** Superuser roles bypass all permission checks including RLS. More than one superuser role (beyond the default `postgres`) is a security hygiene concern. Roles with `LOGIN` + `SUPERUSER` + no `VALID UNTIL` are highest risk. Unused roles (exist but never connect) should be flagged for cleanup.
+
+## 15. replication_health
 
 **Purpose:** Assess lag and replica posture.
 
@@ -121,21 +129,13 @@ This document provides the human-readable probe catalog with purpose, interpreta
 
 **Interpretation:** Severity depends heavily on workload and whether replicas serve reads. Async replication with moderate lag may be fine if replicas are only for failover.
 
-## 15. wal_checkpoint_health
+## 16. wal_checkpoint_health
 
 **Purpose:** Assess checkpoint and background writer pressure.
 
 **Collects:** Checkpoints timed/requested, checkpoint write/sync time, buffers checkpoint/clean/backend, buffers_backend_fsync. Optionally WAL stats (newer PG versions).
 
 **Interpretation:** Useful but less directly actionable than transaction/locking/query probes. Keep it in v1 because it improves operational depth. High buffers_backend means backends are doing their own writes — checkpoint tuning may be off.
-
-## 16. role_inventory
-
-**Purpose:** Detect superuser sprawl, unused roles, and risky role configurations.
-
-**Collects:** Role name, superuser flag, create-role flag, create-db flag, replication flag, login flag, password expiry (VALID UNTIL).
-
-**Interpretation:** Superuser roles bypass all permission checks including RLS. More than one superuser role (beyond the default `postgres`) is a security hygiene concern. Roles with `LOGIN` + `SUPERUSER` + no `VALID UNTIL` are highest risk. Unused roles (exist but never connect) should be flagged for cleanup.
 
 ## Probe-to-Finding Mapping Matrix
 
@@ -315,7 +315,7 @@ This document provides the human-readable probe catalog with purpose, interpreta
 
 ## Supabase-Specific Probes
 
-### 16. rls_policy_column_indexing
+### 17. rls_policy_column_indexing
 
 **Purpose:** Detect missing indexes on columns used in RLS USING clauses.
 
@@ -323,7 +323,7 @@ This document provides the human-readable probe catalog with purpose, interpreta
 
 **Interpretation:** RLS is enabled by default in Supabase. Missing indexes on RLS filter columns cause sequential scans on every query through that table. This is arguably the #1 Supabase-specific performance issue. High signal, high confidence.
 
-### 17. realtime_replication_slot_health
+### 18. realtime_replication_slot_health
 
 **Purpose:** Detect unconsumed or lagging logical replication slots used by Supabase Realtime.
 
@@ -333,7 +333,7 @@ This document provides the human-readable probe catalog with purpose, interpreta
 
 **Interpretation:** Supabase Realtime uses logical replication. Unconsumed or inactive slots prevent WAL cleanup and can fill disk. This is a common cause of disk pressure incidents.
 
-### 18. auth_schema_health
+### 19. auth_schema_health
 
 **Purpose:** Detect bloat and vacuum lag on Supabase Auth tables.
 
@@ -343,7 +343,7 @@ This document provides the human-readable probe catalog with purpose, interpreta
 
 **Interpretation:** Auth tables experience high churn (especially sessions and refresh_tokens). Stale vacuum on these tables slows login flows and bloats storage. Weight by whether Supabase Auth is the active auth provider.
 
-### 19. storage_objects_health
+### 20. storage_objects_health
 
 **Purpose:** Detect growth pressure and cleanup lag on storage.objects.
 
@@ -353,7 +353,7 @@ This document provides the human-readable probe catalog with purpose, interpreta
 
 **Interpretation:** storage.objects can grow very large in file-heavy applications. Soft-deleted rows that aren't cleaned up waste storage and slow queries against the table.
 
-### 20. system_schema_bloat
+### 21. system_schema_bloat
 
 **Purpose:** Detect vacuum/maintenance pressure across all Supabase system schemas.
 
@@ -361,7 +361,7 @@ This document provides the human-readable probe catalog with purpose, interpreta
 
 **Interpretation:** System schemas are managed by the platform but still need vacuum like any other tables. Customers often don't monitor these because they "belong to Supabase." High dead tuple ratios on system tables indicate platform-level maintenance gaps.
 
-### 21. pgbouncer_pool_health
+### 22. pgbouncer_pool_health
 
 **Purpose:** Detect connection pool mode and contention.
 
@@ -371,7 +371,7 @@ This document provides the human-readable probe catalog with purpose, interpreta
 
 **Interpretation:** Transaction mode breaks prepared statement caching (causing repeated planning overhead). Session mode limits connection reuse. High waiting client count indicates pool undersizing.
 
-### 22. pg_cron_job_health
+### 23. pg_cron_job_health
 
 **Purpose:** Detect failed or long-running scheduled jobs.
 
@@ -381,7 +381,7 @@ This document provides the human-readable probe catalog with purpose, interpreta
 
 **Interpretation:** Failed cron jobs may indicate schema issues, permission problems, or resource contention. Long-running jobs can spike CPU/lock pressure during execution windows.
 
-### 23. extension_version_health
+### 24. extension_version_health
 
 **Purpose:** Detect outdated or potentially incompatible extensions.
 
@@ -389,7 +389,7 @@ This document provides the human-readable probe catalog with purpose, interpreta
 
 **Interpretation:** Outdated extensions may miss security patches or performance improvements. On Supabase, extension upgrades are sometimes tied to platform version upgrades.
 
-### 24. pgvector_index_health
+### 25. pgvector_index_health
 
 **Purpose:** Assess vector index configuration and health.
 

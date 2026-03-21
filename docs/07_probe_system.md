@@ -44,18 +44,23 @@ See `probe_registry.yaml` for the machine-readable contracts.
 | 4  | `connection_pressure`       | Understand connection management risk                                  | High idle count is not bad if pooler is present; high idle-in-transaction is almost always bad |
 | 5  | `long_running_transactions` | Detect transaction behavior that harms vacuum, contention, reliability | One of the best v1 probes. High signal, low ambiguity                                          |
 | 6  | `lock_blocking_chains`      | Detect active blocking and lock contention                             | Very strong probe. Absence at sample time is not evidence of absence                           |
-| 7  | `largest_tables`            | Identify storage concentration and maintenance hotspots                | Often a context probe feeding other findings                                                   |
-| 8  | `dead_tuple_ratio`          | Detect vacuum lag and bloat pressure                                   | Strong, especially paired with long transactions or stale maintenance                          |
-| 9  | `stale_maintenance`         | Detect inadequate vacuum/analyze coverage                              | Null timestamps on tiny/cold tables may be harmless; weight by size and activity               |
-| 10 | `unused_indexes`            | Detect write/storage waste                                             | Explicitly medium-confidence unless stats age is known                                         |
 
 ### Baseline Probes (require pg_stat_statements)
 
 | #  | Probe                      | Purpose                                              | Key Insight                                                                       |
 |----|----------------------------|------------------------------------------------------|-----------------------------------------------------------------------------------|
-| 11 | `top_queries_total_time`   | Identify queries consuming most total execution time | Leverage probe — feeds recommendations more than health severity                  |
-| 12 | `top_queries_mean_latency` | Identify slow queries per-call                       | Interpret in context; slow means different things in OLTP vs OLAP                 |
-| 13 | `temp_spill_queries`       | Detect queries spilling to temp files                | Lower confidence for global config recommendations unless repeated across queries |
+| 7  | `top_queries_total_time`   | Identify queries consuming most total execution time | Leverage probe — feeds recommendations more than health severity                  |
+| 8  | `top_queries_mean_latency` | Identify slow queries per-call                       | Interpret in context; slow means different things in OLTP vs OLAP                 |
+| 9  | `temp_spill_queries`       | Detect queries spilling to temp files                | Lower confidence for global config recommendations unless repeated across queries |
+
+### Baseline Probes (storage and maintenance)
+
+| #  | Probe                       | Purpose                                                                | Key Insight                                                                                    |
+|----|-----------------------------|------------------------------------------------------------------------|------------------------------------------------------------------------------------------------|
+| 10 | `largest_tables`            | Identify storage concentration and maintenance hotspots                | Often a context probe feeding other findings                                                   |
+| 11 | `dead_tuple_ratio`          | Detect vacuum lag and bloat pressure                                   | Strong, especially paired with long transactions or stale maintenance                          |
+| 12 | `stale_maintenance`         | Detect inadequate vacuum/analyze coverage                              | Null timestamps on tiny/cold tables may be harmless; weight by size and activity               |
+| 13 | `unused_indexes`            | Detect write/storage waste                                             | Explicitly medium-confidence unless stats age is known                                         |
 
 ### Baseline Probes (security and hygiene)
 
@@ -202,7 +207,7 @@ Good but not required for a credible first release:
 
 ### Critical (v1)
 
-#### 1. rls_policy_column_indexing
+#### 17. rls_policy_column_indexing
 
 **Purpose:** Detect missing indexes on columns used in RLS USING clauses.
 **Prerequisites:** None.
@@ -212,7 +217,7 @@ Good but not required for a credible first release:
 **Affected domains:** performance, efficiency.
 **Interpretation:** RLS is enabled by default in Supabase. Missing indexes on RLS filter columns cause sequential scans on every query through that table. This is arguably the #1 Supabase-specific performance issue. High signal, high confidence.
 
-#### 2. realtime_replication_slot_health
+#### 18. realtime_replication_slot_health
 
 **Purpose:** Detect unconsumed or lagging logical replication slots used by Supabase Realtime.
 **Prerequisites:** Realtime enabled.
@@ -222,7 +227,7 @@ Good but not required for a credible first release:
 **Affected domains:** availability, storage.
 **Interpretation:** Supabase Realtime uses logical replication. Unconsumed or inactive slots prevent WAL cleanup and can fill disk. This is a common cause of disk pressure incidents.
 
-#### 3. auth_schema_health
+#### 19. auth_schema_health
 
 **Purpose:** Detect bloat and vacuum lag on Supabase Auth tables.
 **Prerequisites:** auth schema exists.
@@ -232,7 +237,7 @@ Good but not required for a credible first release:
 **Affected domains:** storage, performance, availability.
 **Interpretation:** Auth tables experience high churn (especially sessions and refresh_tokens). Stale vacuum on these tables slows login flows and bloats storage. Weight by whether Supabase Auth is the active auth provider.
 
-#### 4. storage_objects_health
+#### 20. storage_objects_health
 
 **Purpose:** Detect growth pressure and cleanup lag on storage.objects.
 **Prerequisites:** storage schema exists.
@@ -242,7 +247,7 @@ Good but not required for a credible first release:
 **Affected domains:** storage, cost.
 **Interpretation:** storage.objects can grow very large in file-heavy applications. Soft-deleted rows that aren't cleaned up waste storage and slow queries against the table.
 
-#### 5. system_schema_bloat
+#### 21. system_schema_bloat
 
 **Purpose:** Detect vacuum/maintenance pressure across all Supabase system schemas.
 **Prerequisites:** None.
@@ -252,7 +257,7 @@ Good but not required for a credible first release:
 **Affected domains:** storage, performance, operational_hygiene.
 **Interpretation:** System schemas are managed by the platform but still need vacuum like any other tables. Customers often don't monitor these because they "belong to Supabase." High dead tuple ratios on system tables indicate platform-level maintenance gaps.
 
-#### 6. pgbouncer_pool_health
+#### 22. pgbouncer_pool_health
 
 **Purpose:** Detect connection pool mode and contention.
 **Prerequisites:** PgBouncer/Supavisor metrics accessible.
@@ -262,9 +267,11 @@ Good but not required for a credible first release:
 **Affected domains:** concurrency, performance.
 **Interpretation:** Transaction mode breaks prepared statement caching (causing repeated planning overhead). Session mode limits connection reuse. High waiting client count indicates pool undersizing.
 
+> **Note on Platform Scope:** Probes with `platform` execution scope may require access to platform-specific APIs (e.g., Supabase Management API) or metrics endpoints in addition to a standard database connection.
+
 ### Contextual (v1.1)
 
-#### 7. pg_cron_job_health
+#### 23. pg_cron_job_health
 
 **Purpose:** Detect failed or long-running scheduled jobs.
 **Prerequisites:** pg_cron extension.
@@ -274,7 +281,7 @@ Good but not required for a credible first release:
 **Affected domains:** availability, operational_hygiene.
 **Interpretation:** Failed cron jobs may indicate schema issues, permission problems, or resource contention. Long-running jobs can spike CPU/lock pressure during execution windows.
 
-#### 8. extension_version_health
+#### 24. extension_version_health
 
 **Purpose:** Detect outdated or potentially incompatible extensions.
 **Prerequisites:** None.
@@ -284,7 +291,7 @@ Good but not required for a credible first release:
 **Affected domains:** operational_hygiene, availability.
 **Interpretation:** Outdated extensions may miss security patches or performance improvements. On Supabase, extension upgrades are sometimes tied to platform version upgrades.
 
-#### 9. pgvector_index_health
+#### 25. pgvector_index_health
 
 **Purpose:** Assess vector index configuration and health.
 **Prerequisites:** pgvector extension.

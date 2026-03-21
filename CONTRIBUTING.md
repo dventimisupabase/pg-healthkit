@@ -12,10 +12,10 @@ The repository currently contains:
 - assessment model and lifecycle (including data model schema)
 - context ingestion model (evidence provenance, two-track intake)
 - assessment orchestration (workflow, arena design, three-layer architecture)
-- SQL probe definitions (24 probes: 15 generic + 9 Supabase-specific)
+- SQL probe definitions (25 probes: 16 generic + 9 Supabase-specific)
 - machine-readable probe registry (`probe_registry.yaml`)
 - machine-readable rule catalog (`rules.yaml`)
-- findings catalog (24 findings with severity gradation and score effects)
+- findings catalog (25 findings with severity gradation and score effects)
 - scoring model (7 domains, persona-weighted, tier-aware)
 - prose descriptions of evaluation and normalization semantics
 - normalizer contracts for converting SQL output into canonical payloads

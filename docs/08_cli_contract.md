@@ -127,7 +127,7 @@ supabase db health input import \
 ```bash
 supabase db health probe run \
   --assessment-id <uuid> \
-  --profile oltp \
+  --profile default \
   --target database \
   --upload
 ```
@@ -342,7 +342,7 @@ Scoring payloads should be transparent. Do not hide scoring logic behind a singl
 
 ```json
 {
-  "scoring_profile": "oltp_default",
+  "scoring_profile": "default",
   "availability_score": 78,
   "performance_score": 48,
   "concurrency_score": 55,
@@ -421,24 +421,7 @@ pg_healthkit/
   probes/
     00_instance_metadata.sql
     01_extensions_inventory.sql
-    10_database_activity.sql
-    11_connection_pressure.sql
-    12_long_running_transactions.sql
-    13_lock_blocking_chains.sql
-    20_top_queries_total_time.sql
-    21_top_queries_mean_latency.sql
-    22_temp_spill_queries.sql
-    30_largest_tables.sql
-    31_dead_tuple_ratio.sql
-    32_stale_maintenance.sql
-    33_unused_indexes.sql
-    40_replication_health.sql
-    41_wal_checkpoint_health.sql
-  rules/
-    default.yaml
-    oltp.yaml
-    olap.yaml
-  reports/
+    ...
   cli/
     main.go
     db.go
@@ -449,8 +432,13 @@ pg_healthkit/
   contracts/
     probe_registry.yaml
     rules.yaml
+    rules.md
     normalizer_spec.md
     normalizer_interface_contract.md
+    cli_contract.md
+  docs/
+    01_methodology.md
+    ...
 ```
 
 SQL probes are stored as versioned files. Rule evaluation and scoring live in Go packages. Contracts define the boundary between components.

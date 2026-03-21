@@ -38,6 +38,8 @@ Each finding includes:
 Increase severity if state is `idle in transaction`.
 
 **Cause:** Application transaction boundaries are too broad, or sessions are being abandoned without rollback.
+**Impact:** Long-running transactions can block vacuum progress, increase table bloat, and amplify lock contention.
+**Recommendation:** Review application transaction boundaries, identify abandoned sessions, and reduce the lifetime of interactive transactions.
 **Urgency:** short_term
 **Score effects (high):** concurrency -20, storage -10, availability -8
 
@@ -54,6 +56,8 @@ Increase severity if state is `idle in transaction`.
 | idle-in-transaction count ≥ 1 AND oldest > 5 min  | medium   | high       |
 
 **Cause:** Client applications are not closing transactions promptly, or connection pool configuration allows idle-in-transaction sessions to persist.
+**Impact:** Idle-in-transaction sessions hold transactional resources open and can interfere with vacuum, locking behavior, and connection hygiene.
+**Recommendation:** Ensure clients commit or roll back promptly and avoid holding transactions open while idle.
 **Urgency:** short_term
 **Score effects (high):** concurrency -18, availability -8
 
@@ -71,6 +75,8 @@ Increase severity if state is `idle in transaction`.
 | Blockers include DDL or very old xact | critical | high       |
 
 **Cause:** Concurrent transactions competing for the same rows, or DDL operations running during active workload without proper coordination.
+**Impact:** Blocking chains can directly increase request latency and, in severe cases, trigger incidents.
+**Recommendation:** Identify the blocker query pattern, review transaction scope, and optimize access patterns or indexing to reduce lock duration.
 **Urgency:** immediate
 **Score effects (high):** concurrency -20, performance -12, availability -8
 
@@ -89,6 +95,8 @@ Increase severity if state is `idle in transaction`.
 Confidence is medium because stats window matters — deadlock count is cumulative since last stats reset.
 
 **Cause:** Application lock ordering is inconsistent, or transactions hold locks across user-facing wait points.
+**Impact:** Deadlocks indicate transactional access patterns that can fail user requests and complicate reliability.
+**Recommendation:** Review transaction ordering and conflicting write paths, especially around hot rows or tables.
 **Urgency:** short_term
 **Score effects (high):** concurrency -16, availability -8
 
@@ -107,6 +115,8 @@ Confidence is medium because stats window matters — deadlock count is cumulati
 Increase severity if active connections are high and wait events indicate contention.
 
 **Cause:** Missing or misconfigured connection pooling, or max_connections set too low for actual demand.
+**Impact:** High connection utilization reduces headroom and raises saturation risk during spikes or incidents.
+**Recommendation:** Review pooling posture, reduce idle clients, and ensure max_connections aligns with the deployment model.
 **Urgency:** short_term
 **Score effects (high):** concurrency -16, availability -8, efficiency -4
 
@@ -125,6 +135,8 @@ Increase severity if active connections are high and wait events indicate conten
 **Workload-sensitive:** Downgrade in OLAP profile unless interactive latency is an objective.
 
 **Cause:** Sort or hash operations exceed work_mem, forcing spill to disk. May also indicate missing indexes causing large intermediate result sets.
+**Impact:** Temp spills often indicate expensive sorts or hashes, increasing latency and I/O cost.
+**Recommendation:** Review the spilling queries, validate plan shape, and consider targeted query/index changes before adjusting memory settings.
 **Urgency:** short_term
 **Score effects (high):** performance -16, efficiency -10, cost -8
 
@@ -141,6 +153,8 @@ Increase severity if active connections are high and wait events indicate conten
 | Top total_exec_time > 120,000 ms | medium   | medium     |
 
 **Cause:** Inefficient query plans, missing indexes, or suboptimal query design causing a small number of queries to dominate server time.
+**Impact:** Queries dominating total server time are the best optimization leverage points for performance and cost.
+**Recommendation:** Start with the top total-time query, inspect its execution plan, and validate indexing and row-access patterns.
 **Urgency:** structural
 **Score effects (high):** performance -14, efficiency -8, cost -6
 
@@ -159,6 +173,8 @@ Increase severity if active connections are high and wait events indicate conten
 **Workload-sensitive:** Increase severity in OLTP; decrease in OLAP unless user-facing path involved.
 
 **Cause:** Missing indexes, suboptimal query plans, or lock contention causing queries to wait.
+**Impact:** Slow queries directly affect response time, and in OLTP workloads can degrade user-visible service quality.
+**Recommendation:** Inspect the slowest queries first, compare plan shape to expected selectivity, and confirm whether the workload is OLTP or analytical.
 **Urgency:** short_term
 **Score effects (high):** performance -18, concurrency -6
 
@@ -177,6 +193,8 @@ Increase severity if active connections are high and wait events indicate conten
 Deprioritize small tables. Increase severity if paired with long transactions or stale vacuum.
 
 **Cause:** Autovacuum cannot reclaim dead tuples because long-running transactions hold back the visibility horizon, or autovacuum settings are insufficient for write volume.
+**Impact:** Dead tuples can degrade scan performance, increase storage usage, and indicate that vacuum is not keeping up.
+**Recommendation:** Review autovacuum effectiveness, long-lived transactions, and high-churn tables contributing to dead tuple growth.
 **Urgency:** short_term
 **Score effects (high):** storage -18, performance -8, availability -4
 
@@ -193,6 +211,8 @@ Deprioritize small tables. Increase severity if paired with long transactions or
 | any stale tables detected                       | medium   | medium     |
 
 **Cause:** Autovacuum thresholds are too conservative for table write volume, or autovacuum workers are saturated and cannot keep up.
+**Impact:** Stale maintenance can reduce planner quality and allow dead tuple accumulation to persist.
+**Recommendation:** Verify autovacuum settings and throughput, and confirm that large or hot tables are receiving timely analyze/vacuum coverage.
 **Urgency:** short_term
 **Score effects (high):** operational_hygiene -14, storage -6, performance -4
 
@@ -211,6 +231,8 @@ Deprioritize small tables. Increase severity if paired with long transactions or
 **Never high in v1** without longer stats horizon. "Large" means ≥ 100 MiB.
 
 **Cause:** Indexes created during earlier development or schema iterations that are no longer used by any query path.
+**Impact:** Unused indexes increase storage footprint and write amplification.
+**Recommendation:** Validate over a representative stats window before removal, then drop clearly redundant or obsolete indexes carefully.
 **Urgency:** structural
 **Score effects (medium):** storage -8, efficiency -5, cost -5
 
@@ -229,6 +251,8 @@ Deprioritize small tables. Increase severity if paired with long transactions or
 Increase severity if replicas serve reads or failover guarantees are strict.
 
 **Cause:** Network latency between primary and replica, high write volume exceeding replica apply rate, or replica resource contention.
+**Impact:** Elevated lag can affect failover posture and read freshness when replicas serve reads.
+**Recommendation:** Review write rate, replica health, and whether read traffic depends on timely replay.
 **Urgency:** immediate
 **Score effects (high):** availability -18, performance -4
 
@@ -245,6 +269,8 @@ Increase severity if replicas serve reads or failover guarantees are strict.
 | checkpoints_req > 10                               | medium   | medium     |
 
 **Cause:** max_wal_size or checkpoint_timeout too low for write volume, causing frequent forced checkpoints and backend write pressure.
+**Impact:** Excessive checkpoint pressure can increase write latency and backend write work.
+**Recommendation:** Review checkpoint cadence, WAL volume, and write-heavy query patterns before changing memory or checkpoint settings.
 **Urgency:** structural
 **Score effects (high):** efficiency -16, performance -6, availability -4, cost -4
 
@@ -262,6 +288,8 @@ Increase severity if replicas serve reads or failover guarantees are strict.
 This is a **meta-finding** — not a system defect, but a diagnostic quality concern.
 
 **Cause:** pg_stat_statements not included in shared_preload_libraries, or extension not created in the database.
+**Impact:** Limited observability reduces diagnostic confidence and can delay root-cause analysis.
+**Recommendation:** Enable and retain key diagnostic views or extensions, especially pg_stat_statements, where supported by platform policy.
 **Urgency:** structural
 **Score effects:** operational_hygiene -10
 
@@ -279,8 +307,30 @@ This is a **meta-finding** — not a system defect, but a diagnostic quality con
 Becomes more relevant when cost or maintenance is a primary objective.
 
 **Cause:** Natural data growth concentrated in a few high-traffic tables, or lack of partitioning/archiving strategy.
+**Impact:** Storage concentrated in a few large relations can amplify maintenance, bloat, and cost issues.
+**Recommendation:** Focus storage and maintenance analysis on the largest relations first, especially those with high churn or large index footprints.
 **Urgency:** structural
 **Score effects:** storage -8, cost -6, efficiency -3
+
+---
+
+### 15b. diagnostic_configuration_weak
+
+**Domain:** operational_hygiene
+**Inputs:** `instance_metadata`
+
+| Condition                                                                                  | Severity | Confidence |
+|--------------------------------------------------------------------------------------------|----------|------------|
+| `track_io_timing = off` AND `log_min_duration_statement = -1` AND `pg_stat_statements` absent | medium   | high       |
+| Any one of these is suboptimal                                                             | low      | high       |
+
+**Cause:** Key diagnostic settings are disabled in the PostgreSQL configuration.
+**Impact:** Weak diagnostic configuration makes root-cause analysis difficult and hides performance bottlenecks.
+**Recommendation:** Enable `track_io_timing`, configure `log_min_duration_statement` to a reasonable threshold (e.g., 100ms), and ensure `pg_stat_statements` is active.
+**Urgency:** structural
+**Score effects (medium):** operational_hygiene -10
+
+---
 
 ### 16. excessive_superuser_roles
 
@@ -292,10 +342,11 @@ Becomes more relevant when cost or maintenance is a primary objective.
 | > 2 roles with `SUPERUSER`                    | medium   | high       |
 | > 1 role with `SUPERUSER` (beyond `postgres`) | low      | high       |
 
-**Score effects (medium):** operational_hygiene -10, availability -4
-
 **Cause:** Roles granted superuser privileges during initial setup or debugging and never revoked.
+**Impact:** Superuser proliferation increases the blast radius of credential compromise and bypasses RLS.
+**Recommendation:** Revoke superuser from non-system roles and follow the principle of least privilege.
 **Urgency:** short_term
+**Score effects (medium):** operational_hygiene -10, availability -4
 
 **Note:** Superuser roles bypass all permission checks including RLS. Proliferation increases blast radius of credential compromise. Roles with `SUPERUSER` + `LOGIN` + no `VALID UNTIL` are the highest risk.
 
@@ -314,9 +365,11 @@ Becomes more relevant when cost or maintenance is a primary objective.
 | > 2 tables with unindexed RLS columns | medium   | high       |
 | Any table with unindexed RLS columns  | low      | high       |
 
+**Cause:** Missing indexes on columns referenced in RLS USING/WITH CHECK clauses.
+**Impact:** Every API call through PostgREST pays the RLS tax; missing indexes on policy columns turn this into a sequential scan on every request.
+**Recommendation:** Add indexes to all columns used in RLS USING and WITH CHECK clauses.
+**Urgency:** short_term
 **Score effects (high):** performance -20, efficiency -10
-
-**Note:** Possibly the single highest-impact Supabase-specific finding. RLS is enabled by default on all Supabase tables exposed through PostgREST. Every API call pays the RLS tax; missing indexes on policy columns turn this into a sequential scan on every request.
 
 ---
 
@@ -331,9 +384,11 @@ Becomes more relevant when cost or maintenance is a primary objective.
 | Lag > 500MB or inactive > 1 hour | high     | high       |
 | Lag > 100MB                      | medium   | high       |
 
+**Cause:** Unconsumed replication slots prevent WAL cleanup, often due to an inactive logical replication consumer (like Supabase Realtime).
+**Impact:** Unconsumed or inactive slots prevent WAL cleanup and can fill disk, leading to database unavailability.
+**Recommendation:** Identify the unconsumed slot and ensure the consumer is active, or drop the slot if it is no longer needed.
+**Urgency:** immediate
 **Score effects (critical):** availability -25, storage -15
-
-**Note:** Supabase Realtime uses logical replication slots. Unconsumed or inactive slots prevent WAL cleanup and can fill disk, leading to database unavailability.
 
 ---
 
@@ -347,9 +402,11 @@ Becomes more relevant when cost or maintenance is a primary objective.
 | dead_tuple_pct > 30% OR row count > 5M with stale vacuum | high     | high       |
 | dead_tuple_pct > 10% OR row count > 1M                   | medium   | high       |
 
+**Cause:** High churn on auth tables (sessions and refresh_tokens) exceeding autovacuum reclaim rate.
+**Impact:** Auth tables experience high churn; stale vacuum on these tables slows login flows and bloats storage.
+**Recommendation:** Tune autovacuum for the auth schema and ensure long-running transactions are not blocking cleanup.
+**Urgency:** short_term
 **Score effects (high):** storage -15, performance -8, availability -5
-
-**Note:** Auth tables (especially auth.sessions and auth.refresh_tokens) experience high churn. Stale vacuum on these tables slows login flows and bloats storage.
 
 ---
 
@@ -363,9 +420,11 @@ Becomes more relevant when cost or maintenance is a primary objective.
 | soft_deleted_ratio > 20% AND table size > 1GB | high     | medium     |
 | soft_deleted_ratio > 10%                      | medium   | medium     |
 
+**Cause:** Large number of soft-deleted objects in storage.objects that have not been purged.
+**Impact:** storage.objects can grow very large in file-heavy applications; soft-deleted rows waste storage and slow queries.
+**Recommendation:** Review storage cleanup policies and ensure soft-deleted objects are purged regularly.
+**Urgency:** short_term
 **Score effects (high):** storage -12, cost -8
-
-**Note:** storage.objects can grow very large in file-heavy applications. Soft-deleted rows that aren't cleaned up waste storage and slow queries.
 
 ---
 
@@ -379,9 +438,11 @@ Becomes more relevant when cost or maintenance is a primary objective.
 | Any system table > 1M rows with no autovacuum in 7 days OR dead_tuple_pct > 30% | high     | high       |
 | dead_tuple_pct > 10%                                                            | medium   | high       |
 
+**Cause:** Platform-managed tables (auth, storage, realtime) not receiving adequate autovacuum coverage.
+**Impact:** System schemas are managed by the platform but still need vacuum; high dead tuple ratios indicate maintenance gaps.
+**Recommendation:** Alert platform engineering or tune autovacuum for system tables where customer-tunable.
+**Urgency:** short_term
 **Score effects (high):** operational_hygiene -15, storage -8, performance -5
-
-**Note:** System schemas (auth, storage, realtime, extensions, supabase_functions) are managed by the platform but still need vacuum. Findings should be tagged as "platform" origin to distinguish from user-schema issues.
 
 ---
 
@@ -395,9 +456,11 @@ Becomes more relevant when cost or maintenance is a primary objective.
 | Transaction mode with high planning time overhead | medium   | medium     |
 | Transaction mode detected (informational)         | low      | medium     |
 
+**Cause:** Connection pooler (PgBouncer/Supavisor) configured in transaction mode when prepared statements are required.
+**Impact:** Transaction mode breaks prepared statement caching, causing repeated planning overhead for every query.
+**Recommendation:** Use session mode for workloads requiring prepared statements, or optimize application to use transaction-mode-safe patterns.
+**Urgency:** structural
 **Score effects (medium):** performance -8, concurrency -5
-
-**Note:** Transaction mode breaks prepared statement caching, causing repeated planning overhead. This is informational unless paired with evidence of planning time impact.
 
 ---
 
@@ -411,9 +474,11 @@ Becomes more relevant when cost or maintenance is a primary objective.
 | Multiple recent failures or critical job failing | high     | high       |
 | Any job failure detected                         | medium   | medium     |
 
+**Cause:** Scheduled pg_cron jobs failing due to logic errors, permission issues, or resource contention.
+**Impact:** Failed background jobs can indicate logic errors, resource contention, or silent failures in maintenance tasks.
+**Recommendation:** Check `cron.job_run_details` for specific error messages and validate job dependencies.
+**Urgency:** short_term
 **Score effects (high):** operational_hygiene -10, availability -5
-
-**Note:** Failed cron jobs may indicate schema issues, permission problems, or resource contention.
 
 ---
 
@@ -427,9 +492,11 @@ Becomes more relevant when cost or maintenance is a primary objective.
 | Critical extensions outdated by multiple versions | medium   | medium     |
 | Any extension outdated                            | low      | low        |
 
+**Cause:** Database extensions have available upgrades that have not been applied.
+**Impact:** Outdated extensions may miss security patches, bug fixes, or performance improvements.
+**Recommendation:** Upgrade extensions during a scheduled maintenance window after testing for compatibility.
+**Urgency:** structural
 **Score effects (medium):** operational_hygiene -8
-
-**Note:** On Supabase, extension upgrades are sometimes tied to platform version upgrades. Outdated extensions may miss security patches or performance improvements.
 
 ---
 
@@ -443,9 +510,11 @@ Becomes more relevant when cost or maintenance is a primary objective.
 | Large tables (> 100K rows) with vector columns but no vector index | high     | high       |
 | Any table with vector columns but no vector index                  | medium   | medium     |
 
+**Cause:** Vector columns exist on large tables but lack specialized HNSW or IVFFlat indexes.
+**Impact:** Missing vector indexes cause expensive sequential distance scans, dramatically increasing latency for AI/search features.
+**Recommendation:** Add HNSW or IVFFlat indexes to all frequently queried vector columns.
+**Urgency:** short_term
 **Score effects (high):** performance -15, efficiency -8
-
-**Note:** Missing vector indexes cause sequential distance scans. HNSW with default parameters may not suit the dataset size. IVFFlat with too few lists reduces recall.
 
 ## Most Actionable Findings (v1 priority)
 
