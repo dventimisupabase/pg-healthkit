@@ -20,6 +20,8 @@ For a new contributor or agent, read in this order:
 12. `12_findings_catalog.md` — findings with severity and score effects
 13. `13_roadmap.md` — phased delivery plan
 14. `14_cross_assessment_model.md` — cross-assessment benchmarking (future)
+15. `15_normalizer.md` — normalization model and transformation pipeline
+16. `16_report_template.md` — report output contract and presentation semantics
 
 ## Supporting Documents
 

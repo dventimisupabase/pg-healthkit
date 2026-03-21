@@ -6,7 +6,102 @@ Convert evidence into findings. The diagnostic layer is where most "health check
 
 The rule engine sits between normalized probe evidence and human-actionable findings. It is intentionally declarative: SQL probes collect evidence, the rule engine interprets it, reporting renders the results.
 
-See `rules.yaml` for the machine-readable rule definitions and `rules.md` for the evaluation semantics.
+See `contracts/rules.yaml` for the machine-readable rule definitions and `contracts/rules.md` for the full evaluation semantics.
+
+## Evaluation Model
+
+The rule engine uses a declarative evaluation model. Understanding these mechanics is necessary for implementing or extending rules.
+
+### Execution Flow
+
+1. Load assessment context (persona, workload type, profile)
+2. Load normalized probe payloads
+3. Iterate through enabled rules for the active profile
+4. Verify required probes are present
+5. Evaluate rule cases in order
+6. When a case matches, create the finding and apply score deltas
+7. Continue to the next rule
+
+Rules are independent from each other unless an implementation explicitly adds cross-rule logic later.
+
+### Fact Resolution
+
+Each condition references a fact using a `from` (probe name or `assessment_context`) and a `fact` (dot-path into the normalized payload):
+
+```yaml
+- fact: summary.oldest_xact_age_seconds
+  from: long_running_transactions
+  op: gt
+  value: 3600
+```
+
+Dot-path resolution:
+
+1. Start at the normalized object for the named source
+2. Split the fact path on `.`
+3. Traverse keys in order
+4. If any key is missing, resolution returns "missing" — the condition evaluates false (not an error)
+
+### Operators
+
+The supported operators are intentionally small:
+
+| Operator       | Meaning                                |
+|----------------|----------------------------------------|
+| `gt`, `gte`    | Greater than, greater than or equal    |
+| `lt`, `lte`    | Less than, less than or equal          |
+| `eq`, `neq`    | Equal, not equal (null-safe)           |
+| `contains`     | String or array contains value         |
+| `not_contains` | String or array does not contain value |
+| `in`, `not_in` | Value in / not in a set                |
+| `exists`       | Fact path resolves to a present value  |
+| `not_exists`   | Fact path does not resolve             |
+| `regex`        | Pattern match                          |
+
+### Combinators
+
+Conditions within a case use combinators:
+
+- `all` — every child condition must evaluate true
+- `any` — at least one child condition must evaluate true
+
+Nested combinators are allowed but v1 should keep usage shallow.
+
+### First-Match Evaluation
+
+Rules use `mode: first_match`. Cases are evaluated in order; the first case whose condition evaluates true wins. Later cases in the same rule are ignored. This is useful when cases represent ordered severity bands (high → medium → low).
+
+### Finding Construction
+
+When a case matches, the engine:
+
+1. Copies static finding metadata (key, domain, title, tags)
+2. Renders templates using `${...}` interpolation from the matched probe payloads
+3. Attaches evidence references to the supporting probes
+4. Records matched case metadata for debugging
+
+### Score Effects
+
+Each matching case specifies additive score deltas:
+
+```yaml
+score_effects:
+  concurrency: -20
+  storage: -10
+  availability: -8
+```
+
+These are applied to domain scores initialized at 100, then clamped to 0–100. Overall score computation happens outside the rule engine.
+
+### Skip vs No-Match vs Error
+
+These states must be distinct:
+
+- **Skip** — rule disabled, profile doesn't apply, or required probe missing
+- **No match** — rule evaluated, evidence existed, no case condition matched
+- **Error** — evaluator logic fails or payload is malformed
+
+This distinction matters for operator trust. "No finding" must not be conflated with "could not check."
 
 ## Design Principles
 

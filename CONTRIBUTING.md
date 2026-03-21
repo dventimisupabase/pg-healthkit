@@ -74,15 +74,20 @@ These files are the key sources of truth:
 **Inception docs (`docs/`):**
 - `docs/01_methodology.md` — conceptual framework (personas, workloads, domains, diagnostics)
 - `docs/02_assessment_model.md` — lifecycle and object model
-- `docs/03_data_model.md` — SQL schema for the assessment system of record
-- `docs/04_context_ingestion.md` — how non-SQL context enters the system
-- `docs/05_assessment_orchestration.md` — workflow system and arena design
-- `docs/06_probe_system.md` — probe model, classification, and mapping matrices
-- `docs/07_cli_contract.md` — CLI integration contract, commands, and API endpoints
-- `docs/08_rule_engine.md` — rule design and threshold logic
-- `docs/09_scoring_model.md` — domain scoring, persona weights, Supabase adjustments
-- `docs/10_probe_catalog.md` — human-readable probe catalog with interpretation guidance
-- `docs/11_findings_catalog.md` — findings with severity gradation and score effects
+- `docs/03_human_checklist.md` — standalone assessment checklist for Phase 1
+- `docs/04_data_model.md` — SQL schema for the assessment system of record
+- `docs/05_context_ingestion.md` — how non-SQL context enters the system
+- `docs/06_assessment_orchestration.md` — workflow system and arena design
+- `docs/07_probe_system.md` — probe model, classification, and mapping matrices
+- `docs/08_cli_contract.md` — CLI integration contract, commands, and API endpoints
+- `docs/09_rule_engine.md` — rule design, evaluation semantics, and threshold logic
+- `docs/10_scoring_model.md` — domain scoring, persona weights, Supabase adjustments
+- `docs/11_probe_catalog.md` — human-readable probe catalog with interpretation guidance
+- `docs/12_findings_catalog.md` — findings with severity gradation and score effects
+- `docs/13_roadmap.md` — phased delivery plan
+- `docs/14_cross_assessment_model.md` — cross-assessment benchmarking (future)
+- `docs/15_normalizer.md` — normalization model and transformation pipeline
+- `docs/16_report_template.md` — report output contract and presentation semantics
 
 **Shared contracts (`contracts/`):**
 - `contracts/cli_contract.md` — operator-facing command model and API endpoints
