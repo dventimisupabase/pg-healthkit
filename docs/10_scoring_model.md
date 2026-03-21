@@ -131,6 +131,26 @@ Reweighted after understanding workload and objectives. The evidence stays the s
 
 Example: high temp spill may be "medium severity" in the baseline but "low severity" after the customer confirms it's a nightly analytics job with no latency requirement.
 
+### Trigger Mechanism
+
+Two-pass scoring is not a separate operation — it is the natural result of running `analyze` at different points in the assessment lifecycle:
+
+1. **Pass 1** occurs when `analyze` runs after probe evidence is uploaded but before customer context has been added. The rule engine evaluates against stored evidence using the `default` profile (or whichever profile was set at `init`). Workload-sensitive rules that reference `assessment_context.workload_type` resolve to the initial value (or missing, which triggers conservative defaults).
+
+2. **Pass 2** occurs when the operator adds or updates customer context (via `input set` or `input import` — e.g., setting `workload_type` to `olap` or `primary_persona` to `cto`) and then re-runs `analyze`. The rule engine re-evaluates the same evidence against updated context. Findings may change severity, and scoring weights may shift if the assessment profile changes.
+
+In practice:
+```
+supabase db health probe run --assessment-id <uuid> --upload
+supabase db health analyze --assessment-id <uuid>          # Pass 1
+supabase db health input import --assessment-id <uuid> --file customer-context.json
+supabase db health analyze --assessment-id <uuid>          # Pass 2
+```
+
+The `analyze` command is idempotent over the same evidence — re-running it without changing inputs or evidence produces identical results. It only produces different results when the underlying inputs (context, evidence, or profile) have changed.
+
+The `assessment_scores` table stores only the latest scoring result. If audit of scoring history is needed, the `assessment_events` table should log each `analyze` invocation with its scoring profile and timestamp.
+
 ## Score Payload
 
 Scores should be transparent, not opaque. The score payload includes weights, rationale, and per-domain breakdown:
