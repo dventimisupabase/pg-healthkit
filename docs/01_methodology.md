@@ -178,7 +178,7 @@ For a CTO-focused review, cost and capacity get heavier weight; performance and 
 
 Do not overfit numeric precision. The score is a communication device, not science.
 
-See `06_scoring_model.md` for full scoring specification.
+See `10_scoring_model.md` for full scoring specification.
 
 ## 8. Output Structure
 

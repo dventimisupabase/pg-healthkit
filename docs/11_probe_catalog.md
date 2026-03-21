@@ -6,9 +6,9 @@ This document provides the human-readable probe catalog with purpose, interpreta
 
 **Purpose:** Establish technical context for the rest of the assessment.
 
-**Collects:** PostgreSQL version, recovery state, max_connections, shared_buffers, work_mem, maintenance_work_mem, effective_cache_size, max_wal_size, checkpoint_timeout, autovacuum enabled.
+**Collects:** PostgreSQL version, recovery state, max_connections, shared_buffers, work_mem, maintenance_work_mem, effective_cache_size, max_wal_size, checkpoint_timeout, autovacuum enabled, random_page_cost, log_min_duration_statement, track_io_timing, shared_preload_libraries.
 
-**Interpretation:** This is mostly contextual evidence. It should rarely generate a severe finding by itself unless a configuration is clearly pathological (e.g., autovacuum disabled, max_connections set to 10000).
+**Interpretation:** This is mostly contextual evidence. It should rarely generate a severe finding by itself unless a configuration is clearly pathological (e.g., autovacuum disabled, max_connections set to 10000). However, `track_io_timing = off` means I/O timing data is unavailable for diagnostics, `log_min_duration_statement = -1` means slow query logging is disabled, and `random_page_cost = 4.0` on SSD storage causes the planner to over-prefer sequential scans. These are diagnostic quality signals that feed the `diagnostic_configuration_weak` finding.
 
 ## 2. extensions_inventory
 
@@ -129,6 +129,14 @@ This document provides the human-readable probe catalog with purpose, interpreta
 
 **Interpretation:** Useful but less directly actionable than transaction/locking/query probes. Keep it in v1 because it improves operational depth. High buffers_backend means backends are doing their own writes — checkpoint tuning may be off.
 
+## 16. role_inventory
+
+**Purpose:** Detect superuser sprawl, unused roles, and risky role configurations.
+
+**Collects:** Role name, superuser flag, create-role flag, create-db flag, replication flag, login flag, password expiry (VALID UNTIL).
+
+**Interpretation:** Superuser roles bypass all permission checks including RLS. More than one superuser role (beyond the default `postgres`) is a security hygiene concern. Roles with `LOGIN` + `SUPERUSER` + no `VALID UNTIL` are highest risk. Unused roles (exist but never connect) should be flagged for cleanup.
+
 ## Probe-to-Finding Mapping Matrix
 
 | Finding                                 | Primary Probes                                     | Corroborating Probes                          |
@@ -148,6 +156,7 @@ This document provides the human-readable probe catalog with purpose, interpreta
 | `checkpoint_pressure_detected`          | `wal_checkpoint_health`                            | `database_activity`, `instance_metadata`      |
 | `diagnostic_visibility_limited`         | `extensions_inventory`                             | —                                             |
 | `storage_concentration_risk`            | `largest_tables`                                   | `unused_indexes`                              |
+| `excessive_superuser_roles`             | `role_inventory`                                   | —                                             |
 
 ## Strongest Probes for Immediate Value
 

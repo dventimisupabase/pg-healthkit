@@ -70,7 +70,7 @@ Fleet-wide patterns require sufficient assessment volume. Early conclusions from
 
 The single-assessment design should not prevent cross-assessment queries. Specifically:
 
-- `assessment_scores` should be queryable across assessments (already true with the schema in `03_data_model.md`)
+- `assessment_scores` should be queryable across assessments (already true with the schema in `04_data_model.md`)
 - `assessment_findings` should be groupable by `finding_key` across assessments
 - Assessment metadata should include enough context (workload_type, instance tier, project_ref) to enable meaningful grouping
 

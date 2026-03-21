@@ -168,6 +168,15 @@ Every rule should answer: what was observed, why it matters, what to do about it
 | **Domains**    | operational hygiene                                                                               |
 | **Confidence** | high                                                                                              |
 
+### diagnostic_configuration_weak
+
+| Property       | Value                                                                                                                                                                                                                  |
+|----------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| **Inputs**     | `instance_metadata`                                                                                                                                                                                                    |
+| **Logic**      | medium if `track_io_timing = off` AND `log_min_duration_statement = -1` AND `pg_stat_statements` absent; low if any one of these is suboptimal. Complements `diagnostic_visibility_limited` with configuration signals |
+| **Domains**    | operational hygiene                                                                                                                                                                                                    |
+| **Confidence** | high                                                                                                                                                                                                                   |
+
 ### storage_concentration_risk
 
 | Property       | Value                                                                                                                 |
@@ -176,6 +185,15 @@ Every rule should answer: what was observed, why it matters, what to do about it
 | **Logic**      | low/medium if a few relations dominate storage. Becomes more relevant when cost or maintenance is a primary objective |
 | **Domains**    | storage, cost, efficiency                                                                                             |
 | **Confidence** | high                                                                                                                  |
+
+### excessive_superuser_roles
+
+| Property       | Value                                                                                                                                           |
+|----------------|-------------------------------------------------------------------------------------------------------------------------------------------------|
+| **Inputs**     | `role_inventory`                                                                                                                                |
+| **Logic**      | medium if > 2 roles have `SUPERUSER`; low if > 1 (beyond the default `postgres` role). Flag roles with `SUPERUSER` + `LOGIN` + no `VALID UNTIL` |
+| **Domains**    | operational hygiene, availability                                                                                                               |
+| **Confidence** | high                                                                                                                                            |
 
 ## Supabase-Specific Rules
 

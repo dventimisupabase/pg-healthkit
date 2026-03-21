@@ -78,7 +78,7 @@ For v1, the following entities are sufficient:
 | `assessment_reports`  | Deliverables           | Generated artifacts (Markdown, JSON, HTML)            |
 | `assessment_events`   | Audit trail            | Cheap workflow history without full workflow modeling |
 
-See `03_data_model.md` for the complete SQL schema.
+See `04_data_model.md` for the complete SQL schema.
 
 ## Assessment Profiles
 
@@ -128,7 +128,7 @@ Each finding should have:
 }
 ```
 
-See `09_findings_catalog.md` for the full v1 findings set.
+See `12_findings_catalog.md` for the full v1 findings set.
 
 ## Report Structure
 

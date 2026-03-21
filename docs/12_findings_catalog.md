@@ -8,16 +8,20 @@ Each finding includes:
 
 | Field            | Purpose                                           |
 |------------------|---------------------------------------------------|
-| `finding_key`    | Stable identifier for the issue class             |
-| `domain`         | Primary health domain                             |
-| `severity`       | Operational/business importance (info → critical) |
-| `confidence`     | How trustworthy the inference is                  |
-| `title`          | Human-readable title                              |
-| `summary`        | What was observed                                 |
-| `impact`         | Why it matters                                    |
-| `recommendation` | What to do                                        |
-| `evidence_refs`  | Links to supporting probe evidence                |
-| `tags`           | Classification labels                             |
+| Field            | Purpose                                                                           |
+|------------------|-----------------------------------------------------------------------------------|
+| `finding_key`    | Stable identifier for the issue class                                             |
+| `domain`         | Primary health domain                                                             |
+| `severity`       | Operational/business importance (info → critical)                                 |
+| `confidence`     | How trustworthy the inference is                                                  |
+| `title`          | Human-readable title                                                              |
+| `summary`        | What was observed                                                                 |
+| `cause`          | Likely root cause (not symptoms)                                                  |
+| `impact`         | Why it matters                                                                    |
+| `recommendation` | What to do                                                                        |
+| `urgency`        | Remediation timeframe: `immediate` (1 week), `short_term` (30 days), `structural` (quarter) |
+| `evidence_refs`  | Links to supporting probe evidence                                                |
+| `tags`           | Classification labels                                                             |
 
 ## Findings
 
@@ -34,6 +38,8 @@ Each finding includes:
 
 Increase severity if state is `idle in transaction`.
 
+**Cause:** Application transaction boundaries are too broad, or sessions are being abandoned without rollback.
+**Urgency:** short_term
 **Score effects (high):** concurrency -20, storage -10, availability -8
 
 ---
@@ -48,6 +54,8 @@ Increase severity if state is `idle in transaction`.
 | idle-in-transaction count ≥ 3 AND oldest > 15 min | high     | high       |
 | idle-in-transaction count ≥ 1 AND oldest > 5 min  | medium   | high       |
 
+**Cause:** Client applications are not closing transactions promptly, or connection pool configuration allows idle-in-transaction sessions to persist.
+**Urgency:** short_term
 **Score effects (high):** concurrency -18, availability -8
 
 ---
@@ -63,6 +71,8 @@ Increase severity if state is `idle in transaction`.
 | Any blocking pair exists              | medium   | high       |
 | Blockers include DDL or very old xact | critical | high       |
 
+**Cause:** Concurrent transactions competing for the same rows, or DDL operations running during active workload without proper coordination.
+**Urgency:** immediate
 **Score effects (high):** concurrency -20, performance -12, availability -8
 
 ---
@@ -79,6 +89,8 @@ Increase severity if state is `idle in transaction`.
 
 Confidence is medium because stats window matters — deadlock count is cumulative since last stats reset.
 
+**Cause:** Application lock ordering is inconsistent, or transactions hold locks across user-facing wait points.
+**Urgency:** short_term
 **Score effects (high):** concurrency -16, availability -8
 
 ---
@@ -95,6 +107,8 @@ Confidence is medium because stats window matters — deadlock count is cumulati
 
 Increase severity if active connections are high and wait events indicate contention.
 
+**Cause:** Missing or misconfigured connection pooling, or max_connections set too low for actual demand.
+**Urgency:** short_term
 **Score effects (high):** concurrency -16, availability -8, efficiency -4
 
 ---
@@ -111,6 +125,8 @@ Increase severity if active connections are high and wait events indicate conten
 
 **Workload-sensitive:** Downgrade in OLAP profile unless interactive latency is an objective.
 
+**Cause:** Sort or hash operations exceed work_mem, forcing spill to disk. May also indicate missing indexes causing large intermediate result sets.
+**Urgency:** short_term
 **Score effects (high):** performance -16, efficiency -10, cost -8
 
 ---
@@ -125,6 +141,8 @@ Increase severity if active connections are high and wait events indicate conten
 | Top total_exec_time > 600,000 ms | high     | medium     |
 | Top total_exec_time > 120,000 ms | medium   | medium     |
 
+**Cause:** Inefficient query plans, missing indexes, or suboptimal query design causing a small number of queries to dominate server time.
+**Urgency:** structural
 **Score effects (high):** performance -14, efficiency -8, cost -6
 
 ---
@@ -141,6 +159,8 @@ Increase severity if active connections are high and wait events indicate conten
 
 **Workload-sensitive:** Increase severity in OLTP; decrease in OLAP unless user-facing path involved.
 
+**Cause:** Missing indexes, suboptimal query plans, or lock contention causing queries to wait.
+**Urgency:** short_term
 **Score effects (high):** performance -18, concurrency -6
 
 ---
@@ -157,6 +177,8 @@ Increase severity if active connections are high and wait events indicate conten
 
 Deprioritize small tables. Increase severity if paired with long transactions or stale vacuum.
 
+**Cause:** Autovacuum cannot reclaim dead tuples because long-running transactions hold back the visibility horizon, or autovacuum settings are insufficient for write volume.
+**Urgency:** short_term
 **Score effects (high):** storage -18, performance -8, availability -4
 
 ---
@@ -171,6 +193,8 @@ Deprioritize small tables. Increase severity if paired with long transactions or
 | tables missing autoanalyze AND > 1M live tuples | high     | medium     |
 | any stale tables detected                       | medium   | medium     |
 
+**Cause:** Autovacuum thresholds are too conservative for table write volume, or autovacuum workers are saturated and cannot keep up.
+**Urgency:** short_term
 **Score effects (high):** operational_hygiene -14, storage -6, performance -4
 
 ---
@@ -187,6 +211,8 @@ Deprioritize small tables. Increase severity if paired with long transactions or
 
 **Never high in v1** without longer stats horizon. "Large" means ≥ 100 MiB.
 
+**Cause:** Indexes created during earlier development or schema iterations that are no longer used by any query path.
+**Urgency:** structural
 **Score effects (medium):** storage -8, efficiency -5, cost -5
 
 ---
@@ -203,6 +229,8 @@ Deprioritize small tables. Increase severity if paired with long transactions or
 
 Increase severity if replicas serve reads or failover guarantees are strict.
 
+**Cause:** Network latency between primary and replica, high write volume exceeding replica apply rate, or replica resource contention.
+**Urgency:** immediate
 **Score effects (high):** availability -18, performance -4
 
 ---
@@ -217,6 +245,8 @@ Increase severity if replicas serve reads or failover guarantees are strict.
 | checkpoints_req > 50 AND buffers_backend > 500,000 | high     | medium     |
 | checkpoints_req > 10                               | medium   | medium     |
 
+**Cause:** max_wal_size or checkpoint_timeout too low for write volume, causing frequent forced checkpoints and backend write pressure.
+**Urgency:** structural
 **Score effects (high):** efficiency -16, performance -6, availability -4, cost -4
 
 ---
@@ -232,6 +262,8 @@ Increase severity if replicas serve reads or failover guarantees are strict.
 
 This is a **meta-finding** — not a system defect, but a diagnostic quality concern.
 
+**Cause:** pg_stat_statements not included in shared_preload_libraries, or extension not created in the database.
+**Urgency:** structural
 **Score effects:** operational_hygiene -10
 
 ---
@@ -247,11 +279,32 @@ This is a **meta-finding** — not a system defect, but a diagnostic quality con
 
 Becomes more relevant when cost or maintenance is a primary objective.
 
+**Cause:** Natural data growth concentrated in a few high-traffic tables, or lack of partitioning/archiving strategy.
+**Urgency:** structural
 **Score effects:** storage -8, cost -6, efficiency -3
+
+### 16. excessive_superuser_roles
+
+**Domain:** operational_hygiene
+**Inputs:** `role_inventory`
+
+| Condition                                     | Severity | Confidence |
+|-----------------------------------------------|----------|------------|
+| > 2 roles with `SUPERUSER`                    | medium   | high       |
+| > 1 role with `SUPERUSER` (beyond `postgres`) | low      | high       |
+
+**Score effects (medium):** operational_hygiene -10, availability -4
+
+**Cause:** Roles granted superuser privileges during initial setup or debugging and never revoked.
+**Urgency:** short_term
+
+**Note:** Superuser roles bypass all permission checks including RLS. Proliferation increases blast radius of credential compromise. Roles with `SUPERUSER` + `LOGIN` + no `VALID UNTIL` are the highest risk.
+
+---
 
 ## Supabase-Specific Findings
 
-### 16. rls_policy_columns_unindexed
+### 17. rls_policy_columns_unindexed
 
 **Domain:** performance
 **Inputs:** `rls_policy_column_indexing`
@@ -268,7 +321,7 @@ Becomes more relevant when cost or maintenance is a primary objective.
 
 ---
 
-### 17. replication_slot_inactive_or_lagging
+### 18. replication_slot_inactive_or_lagging
 
 **Domain:** availability
 **Inputs:** `realtime_replication_slot_health`
@@ -285,7 +338,7 @@ Becomes more relevant when cost or maintenance is a primary objective.
 
 ---
 
-### 18. auth_table_bloat_detected
+### 19. auth_table_bloat_detected
 
 **Domain:** storage
 **Inputs:** `auth_schema_health`
@@ -301,7 +354,7 @@ Becomes more relevant when cost or maintenance is a primary objective.
 
 ---
 
-### 19. storage_soft_delete_pressure
+### 20. storage_soft_delete_pressure
 
 **Domain:** storage
 **Inputs:** `storage_objects_health`
@@ -317,7 +370,7 @@ Becomes more relevant when cost or maintenance is a primary objective.
 
 ---
 
-### 20. system_schema_vacuum_stale
+### 21. system_schema_vacuum_stale
 
 **Domain:** operational_hygiene
 **Inputs:** `system_schema_bloat`
@@ -333,7 +386,7 @@ Becomes more relevant when cost or maintenance is a primary objective.
 
 ---
 
-### 21. pool_mode_misconfiguration
+### 22. pool_mode_misconfiguration
 
 **Domain:** performance
 **Inputs:** `pgbouncer_pool_health`
@@ -349,7 +402,7 @@ Becomes more relevant when cost or maintenance is a primary objective.
 
 ---
 
-### 22. pg_cron_job_failures
+### 23. pg_cron_job_failures
 
 **Domain:** operational_hygiene
 **Inputs:** `pg_cron_job_health`
@@ -365,7 +418,7 @@ Becomes more relevant when cost or maintenance is a primary objective.
 
 ---
 
-### 23. extension_version_outdated
+### 24. extension_version_outdated
 
 **Domain:** operational_hygiene
 **Inputs:** `extension_version_health`
@@ -381,7 +434,7 @@ Becomes more relevant when cost or maintenance is a primary objective.
 
 ---
 
-### 24. pgvector_missing_index
+### 25. pgvector_missing_index
 
 **Domain:** performance
 **Inputs:** `pgvector_index_health`
