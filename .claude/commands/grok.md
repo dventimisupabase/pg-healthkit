@@ -189,7 +189,13 @@ Include the log file in the git commit from Phase 6.
 
 ## Phase 8: Report
 
-Return the same summary content that was written to the log. This is what the caller sees.
+Return the same summary content that was written to the log. IMPORTANT: The very first line of your response MUST be exactly this format so the caller can parse it:
+
+```
+NEW_ITEMS=[N]
+```
+
+Where [N] is the "New issues found" count from the summary. Follow it with the rest of the summary content.
 
 ## Guidelines
 
