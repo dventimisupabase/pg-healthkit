@@ -71,7 +71,7 @@ See `docs/README.md` for the full document inventory and recommended reading ord
 
 **Probes:** 25 SQL-based evidence collectors (16 generic PostgreSQL + 9 Supabase-specific).
 
-**Findings:** 25 interpretive results with severity, confidence, and score effects.
+**Findings:** 30 interpretive results with severity, confidence, and score effects (17 generic + 13 Supabase-specific).
 
 ## Supabase-Specific Features
 

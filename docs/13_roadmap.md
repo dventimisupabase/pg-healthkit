@@ -5,8 +5,8 @@
 ## Phase 1: Manual but Standardized
 
 **Deliverables:**
-- Standardized human checklist (sections A–J)
-- SQL probe pack (15 probes organized by domain)
+- Standardized human checklist (sections A–K)
+- SQL probe pack (25 probes: 16 generic + 9 Supabase-specific, organized by domain)
 - Scoring rubric (7 domains, persona-weighted)
 - Report template (executive summary + domain scores + findings + appendix)
 

@@ -15,7 +15,7 @@ The repository currently contains:
 - SQL probe definitions (25 probes: 16 generic + 9 Supabase-specific)
 - machine-readable probe registry (`probe_registry.yaml`)
 - machine-readable rule catalog (`rules.yaml`)
-- findings catalog (25 findings with severity gradation and score effects)
+- findings catalog (30 findings with severity gradation and score effects: 17 generic + 13 Supabase-specific)
 - scoring model (7 domains, persona-weighted, tier-aware)
 - prose descriptions of evaluation and normalization semantics
 - normalizer contracts for converting SQL output into canonical payloads

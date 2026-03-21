@@ -55,6 +55,8 @@ rules:
       summary_template: >
         Found ${summary.row_count} transaction(s) exceeding expected age, with the oldest at
         ${summary.oldest_xact_age_seconds}s.
+      cause_template: >
+        Application transaction boundaries are too broad, or sessions are being abandoned without rollback.
       impact_template: >
         Long-running transactions can block vacuum progress, increase table bloat, and amplify
         lock contention.
@@ -121,6 +123,8 @@ rules:
       summary_template: >
         Found ${summary.idle_in_transaction} idle-in-transaction session(s); oldest transaction age
         observed was ${summary.oldest_idle_xact_age_seconds}s.
+      cause_template: >
+        Client applications are not closing transactions promptly, or connection pool configuration allows idle-in-transaction sessions to persist.
       impact_template: >
         Idle-in-transaction sessions hold transactional resources open and can interfere with
         vacuum, locking behavior, and connection hygiene.
@@ -176,6 +180,8 @@ rules:
       urgency: immediate
       summary_template: >
         Found ${summary.blocking_pairs} active blocking pair(s) during sampling.
+      cause_template: >
+        Concurrent transactions competing for the same rows, or DDL operations running during active workload without proper coordination.
       impact_template: >
         Blocking chains can directly increase request latency and, in severe cases, trigger incidents.
       recommendation_template: >
@@ -224,6 +230,8 @@ rules:
       urgency: short_term
       summary_template: >
         The database statistics reported ${stats.deadlocks} deadlock(s) in the current stats window.
+      cause_template: >
+        Application lock ordering is inconsistent, or transactions hold locks across user-facing wait points.
       impact_template: >
         Deadlocks indicate transactional access patterns that can fail user requests and complicate
         reliability.
@@ -270,6 +278,8 @@ rules:
       urgency: short_term
       summary_template: >
         Connection utilization was ${summary.utilization_pct}% of max_connections.
+      cause_template: >
+        Missing or misconfigured connection pooling, or max_connections set too low for actual demand.
       impact_template: >
         High connection utilization reduces headroom and raises saturation risk during spikes or
         incidents.
@@ -320,6 +330,8 @@ rules:
       summary_template: >
         Query statistics show repeated temp spill activity; top observed spill was
         ${summary.max_temp_blks_written} temp blocks written.
+      cause_template: >
+        Sort or hash operations exceed work_mem, forcing spill to disk. May also indicate missing indexes causing large intermediate result sets.
       impact_template: >
         Temp spills often indicate expensive sorts or hashes, increasing latency and I/O cost.
       recommendation_template: >
@@ -369,6 +381,8 @@ rules:
       summary_template: >
         A small number of queries dominate cumulative execution time; top query consumed
         ${summary.top_total_exec_time_ms}ms across ${summary.top_calls} calls.
+      cause_template: >
+        Inefficient query plans, missing indexes, or suboptimal query design causing a small number of queries to dominate server time.
       impact_template: >
         Queries dominating total server time are the best optimization leverage points for performance
         and cost.
@@ -418,6 +432,8 @@ rules:
       urgency: short_term
       summary_template: >
         Top mean-latency query showed ${summary.top_mean_exec_time_ms}ms average execution time.
+      cause_template: >
+        Missing indexes, suboptimal query plans, or lock contention causing queries to wait.
       impact_template: >
         Slow queries directly affect response time, and in OLTP workloads can degrade user-visible
         service quality.
@@ -470,6 +486,8 @@ rules:
       summary_template: >
         Large or active tables show dead tuple accumulation; top observed dead tuple percentage was
         ${summary.max_dead_tuple_pct}%.
+      cause_template: >
+        Autovacuum cannot reclaim dead tuples because long-running transactions hold back the visibility horizon, or autovacuum settings are insufficient for write volume.
       impact_template: >
         Dead tuples can degrade scan performance, increase storage usage, and indicate that vacuum is
         not keeping up.
@@ -518,6 +536,8 @@ rules:
       urgency: short_term
       summary_template: >
         One or more significant tables show stale or missing autovacuum/autoanalyze activity.
+      cause_template: >
+        Autovacuum thresholds are too conservative for table write volume, or autovacuum workers are saturated and cannot keep up.
       impact_template: >
         Stale maintenance can reduce planner quality and allow dead tuple accumulation to persist.
       recommendation_template: >
@@ -571,6 +591,8 @@ rules:
       summary_template: >
         Found ${summary.zero_scan_large_index_count} large index(es) with zero scans in the observed
         stats window.
+      cause_template: >
+        Indexes created during earlier development or schema iterations that are no longer used by any query path.
       impact_template: >
         Unused indexes increase storage footprint and write amplification.
       recommendation_template: >
@@ -619,6 +641,8 @@ rules:
       urgency: immediate
       summary_template: >
         Observed replay lag of ${summary.max_replay_lag_ms}ms across replica connections.
+      cause_template: >
+        Network latency between primary and replica, high write volume exceeding replica apply rate, or replica resource contention.
       impact_template: >
         Elevated lag can affect failover posture and read freshness when replicas serve reads.
       recommendation_template: >
@@ -664,6 +688,8 @@ rules:
       urgency: structural
       summary_template: >
         Requested checkpoints and backend writes indicate elevated checkpoint or write pressure.
+      cause_template: >
+        max_wal_size or checkpoint_timeout too low for write volume, causing frequent forced checkpoints and backend write pressure.
       impact_template: >
         Excessive checkpoint pressure can increase write latency and backend write work.
       recommendation_template: >
@@ -718,6 +744,8 @@ rules:
       summary_template: >
         Required observability features are missing or incomplete; ${summary.missing_features} feature(s)
         were not available.
+      cause_template: >
+        pg_stat_statements not included in shared_preload_libraries, or extension not created in the database.
       impact_template: >
         Limited observability reduces diagnostic confidence and can delay root-cause analysis.
       recommendation_template: >
@@ -751,16 +779,17 @@ rules:
       urgency: structural
       summary_template: >
         One or more recommended PostgreSQL diagnostic settings are disabled or suboptimal.
+      cause_template: >
+        Key diagnostic settings are disabled in the PostgreSQL configuration.
       impact_template: >
         Weak diagnostic configuration makes root-cause analysis difficult and hides performance bottlenecks.
       recommendation_template: >
-        Enable track_io_timing, configure log_min_duration_statement (e.g., to 100ms), and ensure
-        pg_stat_statements is active.
+        Enable track_io_timing and configure log_min_duration_statement to a reasonable threshold
+        (e.g., 100ms).
       tags: [observability, diagnostics, configuration]
     evidence:
       required_probes:
         - instance_metadata
-        - extensions_inventory
     evaluate:
       mode: first_match
       cases:
@@ -774,10 +803,6 @@ rules:
                 from: instance_metadata
                 op: eq
                 value: -1
-              - fact: summary.has_pg_stat_statements
-                from: extensions_inventory
-                op: eq
-                value: false
           severity: medium
           confidence: high
           score_effects:
@@ -809,6 +834,8 @@ rules:
       summary_template: >
         A small number of relations dominate storage; the top relation consumes
         ${summary.top_relation_total_bytes} bytes.
+      cause_template: >
+        Natural data growth concentrated in a few high-traffic tables, or lack of partitioning/archiving strategy.
       impact_template: >
         Storage concentrated in a few large relations can amplify maintenance, bloat, and cost issues.
       recommendation_template: >
@@ -844,6 +871,8 @@ rules:
       urgency: short_term
       summary_template: >
         Found ${summary.superuser_count} roles with SUPERUSER privileges.
+      cause_template: >
+        Roles granted superuser privileges during initial setup or debugging and never revoked.
       impact_template: >
         Superuser proliferation increases the blast radius of credential compromise and bypasses RLS.
       recommendation_template: >
@@ -888,6 +917,8 @@ rules:
       urgency: short_term
       summary_template: >
         Found ${summary.unindexed_policy_column_count} unindexed column(s) referenced in RLS policies.
+      cause_template: >
+        Missing indexes on columns referenced in RLS USING/WITH CHECK clauses.
       impact_template: >
         Every API call through PostgREST pays the RLS tax; missing indexes on policy columns
         cause sequential scans on every request.
@@ -934,6 +965,8 @@ rules:
       urgency: immediate
       summary_template: >
         Replication slot lag detected; max lag is ${summary.max_lag_bytes} bytes.
+      cause_template: >
+        Unconsumed replication slots prevent WAL cleanup, often due to an inactive logical replication consumer (like Supabase Realtime).
       impact_template: >
         Unconsumed replication slots prevent WAL cleanup and can fill disk, leading to unavailability.
       recommendation_template: >
@@ -975,7 +1008,7 @@ rules:
 
   - id: auth_table_bloat_detected
     enabled: true
-    profiles: [default, storage]
+    profiles: [default, reliability, cost_capacity]
     finding:
       key: auth_table_bloat_detected
       domain: storage
@@ -983,6 +1016,8 @@ rules:
       urgency: short_term
       summary_template: >
         High dead tuple ratio in auth schema; max dead tuple percentage is ${summary.max_dead_tuple_pct}%.
+      cause_template: >
+        High churn on auth tables (sessions and refresh_tokens) exceeding autovacuum reclaim rate.
       impact_template: >
         Auth tables churn heavily; stale vacuum slows login flows and wastes storage.
       recommendation_template: >
@@ -1021,7 +1056,7 @@ rules:
 
   - id: storage_soft_delete_pressure
     enabled: true
-    profiles: [default, storage]
+    profiles: [default, cost_capacity]
     finding:
       key: storage_soft_delete_pressure
       domain: storage
@@ -1029,6 +1064,8 @@ rules:
       urgency: short_term
       summary_template: >
         Soft-deleted rows account for ${summary.soft_deleted_ratio}% of storage.objects.
+      cause_template: >
+        Large number of soft-deleted objects in storage.objects that have not been purged.
       impact_template: >
         Un-cleaned soft deletes waste space and slow metadata queries.
       recommendation_template: >
@@ -1054,7 +1091,7 @@ rules:
 
   - id: system_schema_vacuum_stale
     enabled: true
-    profiles: [default, operational_hygiene]
+    profiles: [default, reliability]
     finding:
       key: system_schema_vacuum_stale
       domain: operational_hygiene
@@ -1062,6 +1099,8 @@ rules:
       urgency: short_term
       summary_template: >
         High dead tuple ratio in system schemas; max observed is ${summary.max_dead_tuple_pct}%.
+      cause_template: >
+        Platform-managed tables (auth, storage, realtime) not receiving adequate autovacuum coverage.
       impact_template: >
         System schemas are managed by the platform but still require vacuum to prevent bloat.
       recommendation_template: >
@@ -1096,6 +1135,8 @@ rules:
       urgency: structural
       summary_template: >
         Connection pool is in ${summary.pool_mode} mode.
+      cause_template: >
+        Connection pooler (PgBouncer/Supavisor) configured in transaction mode when prepared statements are required.
       impact_template: >
         Transaction mode breaks prepared statement caching, increasing planning overhead.
       recommendation_template: >
@@ -1121,7 +1162,7 @@ rules:
 
   - id: pg_cron_job_failures
     enabled: true
-    profiles: [default, operational_hygiene]
+    profiles: [default, reliability]
     finding:
       key: pg_cron_job_failures
       domain: operational_hygiene
@@ -1129,6 +1170,8 @@ rules:
       urgency: short_term
       summary_template: >
         Found ${summary.failed_job_count} failed scheduled job(s).
+      cause_template: >
+        Scheduled pg_cron jobs failing due to logic errors, permission issues, or resource contention.
       impact_template: >
         Failed background jobs can indicate logic errors or resource contention.
       recommendation_template: >
@@ -1154,7 +1197,7 @@ rules:
 
   - id: extension_version_outdated
     enabled: true
-    profiles: [default, operational_hygiene]
+    profiles: [default, reliability]
     finding:
       key: extension_version_outdated
       domain: operational_hygiene
@@ -1162,6 +1205,8 @@ rules:
       urgency: structural
       summary_template: >
         Found ${summary.outdated_count} extension(s) with available upgrades.
+      cause_template: >
+        Database extensions have available upgrades that have not been applied.
       impact_template: >
         Outdated extensions may miss security patches or performance improvements.
       recommendation_template: >
@@ -1194,6 +1239,8 @@ rules:
       urgency: short_term
       summary_template: >
         Found ${summary.unindexed_vector_column_count} unindexed vector column(s).
+      cause_template: >
+        Vector columns exist on large tables but lack specialized HNSW or IVFFlat indexes.
       impact_template: >
         Missing vector indexes cause expensive sequential distance scans.
       recommendation_template: >
@@ -1216,6 +1263,195 @@ rules:
           score_effects:
             performance: -15
             efficiency: -8
+
+  - id: pgvector_index_misconfigured
+    enabled: true
+    profiles: [default, performance]
+    finding:
+      key: pgvector_index_misconfigured
+      domain: performance
+      title: pgvector index misconfigured
+      urgency: structural
+      summary_template: >
+        Vector index parameters may be suboptimal for the dataset size.
+      cause_template: >
+        Vector index parameters were left at defaults or set without accounting for dataset size,
+        leading to suboptimal recall or excessive memory usage.
+      impact_template: >
+        Misconfigured vector indexes degrade search quality (low recall) or consume unnecessary
+        memory, affecting both accuracy and performance of AI/search features.
+      recommendation_template: >
+        Review HNSW m and ef_construction parameters relative to dataset size. For IVFFlat, ensure
+        lists is approximately sqrt(row_count). Benchmark recall vs latency after changes.
+      tags: [supabase, pgvector, ai, performance]
+    evidence:
+      required_probes:
+        - pgvector_index_health
+    evaluate:
+      mode: first_match
+      cases:
+        - when:
+            all:
+              - fact: summary.misconfigured_index_count
+                from: pgvector_index_health
+                op: gt
+                value: 0
+          severity: medium
+          confidence: medium
+          score_effects:
+            performance: -8
+            efficiency: -5
+
+  - id: pool_contention_detected
+    enabled: true
+    profiles: [default, performance]
+    finding:
+      key: pool_contention_detected
+      domain: concurrency
+      title: Connection pool contention detected
+      urgency: short_term
+      summary_template: >
+        Clients are waiting for available connections from the pool; ${summary.waiting_clients}
+        client(s) waiting.
+      cause_template: >
+        Connection pool is undersized relative to demand, causing clients to queue for available
+        connections.
+      impact_template: >
+        Pool contention adds latency to every queued request and can cascade into timeouts under load.
+      recommendation_template: >
+        Increase pool size, reduce per-connection hold time, or add a secondary pooler. Investigate
+        whether idle-in-transaction sessions are consuming pool slots unnecessarily.
+      tags: [supabase, pgbouncer, pooling, contention]
+    evidence:
+      required_probes:
+        - pgbouncer_pool_health
+    evaluate:
+      mode: first_match
+      cases:
+        - when:
+            all:
+              - fact: summary.waiting_clients
+                from: pgbouncer_pool_health
+                op: gt
+                value: 10
+          severity: high
+          confidence: high
+          score_effects:
+            concurrency: -15
+            performance: -8
+
+        - when:
+            all:
+              - fact: summary.waiting_clients
+                from: pgbouncer_pool_health
+                op: gt
+                value: 0
+          severity: medium
+          confidence: medium
+          score_effects:
+            concurrency: -8
+            performance: -4
+
+  - id: auth_session_explosion
+    enabled: true
+    profiles: [default, reliability, cost_capacity]
+    finding:
+      key: auth_session_explosion
+      domain: storage
+      title: Auth session table explosion detected
+      urgency: short_term
+      summary_template: >
+        Auth sessions table has ${summary.sessions_row_count} rows.
+      cause_template: >
+        Auth sessions accumulating without adequate cleanup, often due to short-lived anonymous
+        sessions or missing session expiration policies.
+      impact_template: >
+        Excessive session table size degrades login performance, increases vacuum pressure, and
+        inflates storage costs.
+      recommendation_template: >
+        Review session retention policies, enable or tune session cleanup jobs, and investigate
+        whether anonymous session creation rate is expected.
+      tags: [supabase, auth, sessions, storage]
+    evidence:
+      required_probes:
+        - auth_schema_health
+    evaluate:
+      mode: first_match
+      cases:
+        - when:
+            all:
+              - fact: summary.sessions_row_count
+                from: auth_schema_health
+                op: gt
+                value: 10000000
+          severity: high
+          confidence: high
+          score_effects:
+            storage: -12
+            performance: -8
+            availability: -5
+
+        - when:
+            all:
+              - fact: summary.sessions_row_count
+                from: auth_schema_health
+                op: gt
+                value: 5000000
+          severity: medium
+          confidence: medium
+          score_effects:
+            storage: -6
+            performance: -4
+
+  - id: storage_objects_bloat
+    enabled: true
+    profiles: [default, cost_capacity]
+    finding:
+      key: storage_objects_bloat
+      domain: storage
+      title: Storage objects table bloat detected
+      urgency: short_term
+      summary_template: >
+        storage.objects dead tuple ratio is ${summary.dead_tuple_pct}%.
+      cause_template: >
+        High churn on storage.objects (frequent uploads, deletions, or metadata updates) outpacing
+        autovacuum reclaim rate.
+      impact_template: >
+        Bloated storage.objects table slows file listing queries and wastes disk space beyond the
+        actual file metadata footprint.
+      recommendation_template: >
+        Tune autovacuum for storage.objects (lower threshold, higher scale factor for this table).
+        Investigate whether soft-delete cleanup is running.
+      tags: [supabase, storage, vacuum, bloat]
+    evidence:
+      required_probes:
+        - storage_objects_health
+    evaluate:
+      mode: first_match
+      cases:
+        - when:
+            all:
+              - fact: summary.dead_tuple_pct
+                from: storage_objects_health
+                op: gt
+                value: 30
+          severity: high
+          confidence: high
+          score_effects:
+            storage: -12
+            cost: -6
+
+        - when:
+            all:
+              - fact: summary.dead_tuple_pct
+                from: storage_objects_health
+                op: gt
+                value: 15
+          severity: medium
+          confidence: medium
+          score_effects:
+            storage: -6
+            cost: -3
 
 metadata:
   guidance:

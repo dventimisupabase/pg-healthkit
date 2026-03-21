@@ -11,6 +11,7 @@ profiles:
   - performance
   - reliability
   - cost_capacity
+  - supabase_default
 
 probes:
 
@@ -59,7 +60,26 @@ probes:
             max_wal_size: { type: string }
             checkpoint_timeout: { type: string }
             autovacuum: { type: string }
-    summary_fields: []
+            random_page_cost: { type: string }
+            log_min_duration_statement: { type: string }
+            track_io_timing: { type: string }
+            shared_preload_libraries: { type: string }
+        summary:
+          type: object
+          required:
+            - track_io_timing
+            - log_min_duration_statement
+            - random_page_cost
+          properties:
+            track_io_timing: { type: string }
+            log_min_duration_statement: { type: string }
+            random_page_cost: { type: string }
+            shared_preload_libraries: { type: string }
+    summary_fields:
+      - summary.track_io_timing
+      - summary.log_min_duration_statement
+      - summary.random_page_cost
+      - summary.shared_preload_libraries
     supports_findings:
       - high_connection_utilization
       - checkpoint_pressure_detected
@@ -811,7 +831,7 @@ probes:
   - name: rls_policy_column_indexing
     version: "2026-03-20"
     enabled: true
-    profiles: [default, performance]
+    profiles: [default, performance, supabase_default]
     category: baseline
     sql_file: probes/60_rls_policy_column_indexing.sql
     prerequisites:
@@ -847,7 +867,7 @@ probes:
   - name: realtime_replication_slot_health
     version: "2026-03-20"
     enabled: true
-    profiles: [default, reliability]
+    profiles: [default, reliability, supabase_default]
     category: baseline
     sql_file: probes/61_realtime_replication_slot_health.sql
     prerequisites:
@@ -884,7 +904,7 @@ probes:
   - name: auth_schema_health
     version: "2026-03-20"
     enabled: true
-    profiles: [default, storage]
+    profiles: [default, reliability, cost_capacity, supabase_default]
     category: baseline
     sql_file: probes/62_auth_schema_health.sql
     prerequisites:
@@ -907,13 +927,16 @@ probes:
               last_autovacuum: { type: string, nullable: true }
         summary:
           type: object
-          required: [max_dead_tuple_pct]
+          required: [max_dead_tuple_pct, sessions_row_count]
           properties:
             max_dead_tuple_pct: { type: number }
+            sessions_row_count: { type: integer, description: "Row count for auth.sessions table" }
     summary_fields:
       - summary.max_dead_tuple_pct
+      - summary.sessions_row_count
     supports_findings:
       - auth_table_bloat_detected
+      - auth_session_explosion
     affects_domains:
       - storage
       - performance
@@ -922,7 +945,7 @@ probes:
   - name: storage_objects_health
     version: "2026-03-20"
     enabled: true
-    profiles: [default, storage]
+    profiles: [default, cost_capacity, supabase_default]
     category: baseline
     sql_file: probes/63_storage_objects_health.sql
     prerequisites:
@@ -950,7 +973,7 @@ probes:
   - name: system_schema_bloat
     version: "2026-03-20"
     enabled: true
-    profiles: [default, operational_hygiene]
+    profiles: [default, reliability, supabase_default]
     category: baseline
     sql_file: probes/64_system_schema_bloat.sql
     prerequisites:
@@ -987,21 +1010,27 @@ probes:
   - name: pgbouncer_pool_health
     version: "2026-03-20"
     enabled: true
-    profiles: [default, performance]
+    profiles: [default, performance, supabase_default]
     category: baseline
     sql_file: probes/65_pgbouncer_pool_health.sql
     prerequisites:
       extensions: []
       capabilities: []
+    notes: >
+      pool_mode cannot be determined from pg_stat_activity alone. It must be
+      supplied via platform metadata (e.g., Supabase Management API or context
+      ingestion). The SQL probe collects connection statistics; pool_mode comes
+      from a separate input channel. If pool_mode is unavailable, pool_mode_misconfiguration
+      should be skipped rather than producing a false result.
     payload_contract:
       type: object
       required: [summary]
       properties:
         summary:
           type: object
-          required: [pool_mode, active_connections, waiting_clients]
+          required: [active_connections, waiting_clients]
           properties:
-            pool_mode: { type: string }
+            pool_mode: { type: string, description: "Requires platform metadata — not derivable from SQL" }
             active_connections: { type: integer }
             waiting_clients: { type: integer }
     summary_fields:
@@ -1017,7 +1046,7 @@ probes:
   - name: pg_cron_job_health
     version: "2026-03-20"
     enabled: true
-    profiles: [default, operational_hygiene]
+    profiles: [default, reliability, supabase_default]
     category: baseline
     sql_file: probes/66_pg_cron_job_health.sql
     prerequisites:
@@ -1052,7 +1081,7 @@ probes:
   - name: extension_version_health
     version: "2026-03-20"
     enabled: true
-    profiles: [default, operational_hygiene]
+    profiles: [default, reliability, supabase_default]
     category: baseline
     sql_file: probes/67_extension_version_health.sql
     prerequisites:
@@ -1086,7 +1115,7 @@ probes:
   - name: pgvector_index_health
     version: "2026-03-20"
     enabled: true
-    profiles: [default, performance]
+    profiles: [default, performance, supabase_default]
     category: baseline
     sql_file: probes/68_pgvector_index_health.sql
     prerequisites:

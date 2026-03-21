@@ -562,7 +562,9 @@ Becomes more relevant when cost or maintenance is a primary objective.
 | Condition                                          | Severity | Confidence |
 |----------------------------------------------------|----------|------------|
 | auth.sessions row count > 10M                      | high     | high       |
-| auth.sessions row count > 5M with growth > 1M/week | medium   | medium     |
+| auth.sessions row count > 5M                        | medium   | medium     |
+
+> **v1 note:** Growth rate detection (e.g., "> 1M/week") requires historical data from multiple assessment runs and is deferred to Phase 3. The v1 rule uses threshold-only conditions.
 
 **Cause:** Auth sessions accumulating without adequate cleanup, often due to short-lived anonymous sessions or missing session expiration policies.
 **Impact:** Excessive session table size degrades login performance, increases vacuum pressure, and inflates storage costs.

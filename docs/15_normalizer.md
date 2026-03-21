@@ -134,7 +134,11 @@ The normalizer may add fields beyond the registry contract, but must not remove 
 ## Probe-Specific Summary Derivation
 
 ### instance_metadata
-No derived `summary` required unless later added. Use direct object fields and `settings`.
+Derive:
+- `summary.track_io_timing` — value of the `track_io_timing` setting (string: `"on"` or `"off"`)
+- `summary.log_min_duration_statement` — value of the `log_min_duration_statement` setting (coerce to integer: `-1` means disabled)
+- `summary.random_page_cost` — value of the `random_page_cost` setting (string)
+- `summary.shared_preload_libraries` — value of the `shared_preload_libraries` setting (string)
 
 ### extensions_inventory
 Derive:
@@ -153,6 +157,18 @@ Derive:
 - `summary.idle_in_transaction`
 - `summary.max_connections`
 - `summary.utilization_pct` = `total_connections / max_connections * 100`
+
+The registry contract also requires a `states` array. The SQL probe's Part 2 (grouped by state/wait event) is commented out. The normalizer should synthesize the `states` array from Part 1 by grouping the summary counts into objects:
+
+```json
+"states": [
+  { "state": "active", "count": 5 },
+  { "state": "idle", "count": 12 },
+  { "state": "idle in transaction", "count": 2 }
+]
+```
+
+If Part 2 is uncommented in a future version, the normalizer should use its richer output directly instead.
 
 ### long_running_transactions
 Derive:
