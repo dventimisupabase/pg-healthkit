@@ -41,8 +41,8 @@ pg-healthkit/
 
 | Island | Purpose | Language/Stack | Key Docs |
 |--------|---------|---------------|----------|
-| **`cli/`** | Execute SQL probes, normalize payloads, upload evidence | Go | `docs/04_probe_system.md`, `contracts/normalizer_spec.md` |
-| **`arena/`** | Store assessments, evaluate rules, compute scores, generate reports, manage workflow | Supabase + Next.js | `docs/03_data_model.md`, `docs/05_rule_engine.md` |
+| **`cli/`** | Execute SQL probes, normalize payloads, upload evidence | Go | `docs/06_probe_system.md`, `docs/07_cli_contract.md`, `contracts/normalizer_spec.md` |
+| **`arena/`** | Store assessments, evaluate rules, compute scores, generate reports, manage workflow | Supabase + Next.js | `docs/03_data_model.md`, `docs/08_rule_engine.md` |
 
 The two islands depend on **`contracts/`**, never on each other directly.
 
