@@ -372,7 +372,7 @@ This is possibly the single highest-impact Supabase-specific finding. RLS is ena
 | Property       | Value                                                                                                                      |
 |----------------|----------------------------------------------------------------------------------------------------------------------------|
 | **Inputs**     | `auth_schema_health`                                                                                                       |
-| **Logic**      | high if auth.sessions row count > 10M; medium if > 5M with growth > 1M/week                                               |
+| **Logic**      | high if auth.sessions row count > 10M; medium if > 5M                                                                     |
 | **Domains**    | storage, performance, availability                                                                                         |
 | **Confidence** | high                                                                                                                       |
 

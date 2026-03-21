@@ -163,7 +163,7 @@ Increase severity if active connections are high and wait events indicate conten
 ### 8. high_latency_queries_detected
 
 **Domain:** performance
-**Inputs:** `top_queries_mean_latency`
+**Inputs:** `top_queries_mean_latency`, `temp_spill_queries`, `lock_blocking_chains`
 
 | Condition                             | Severity | Confidence |
 |---------------------------------------|----------|------------|
@@ -183,7 +183,7 @@ Increase severity if active connections are high and wait events indicate conten
 ### 9. dead_tuple_accumulation_detected
 
 **Domain:** storage
-**Inputs:** `dead_tuple_ratio`
+**Inputs:** `dead_tuple_ratio`, `long_running_transactions`, `largest_tables`
 
 | Condition              | Severity | Confidence |
 |------------------------|----------|------------|
@@ -203,7 +203,7 @@ Deprioritize small tables. Increase severity if paired with long transactions or
 ### 10. stale_vacuum_or_analyze_detected
 
 **Domain:** operational_hygiene
-**Inputs:** `stale_maintenance`
+**Inputs:** `stale_maintenance`, `dead_tuple_ratio`
 
 | Condition                                       | Severity | Confidence |
 |-------------------------------------------------|----------|------------|
@@ -221,7 +221,7 @@ Deprioritize small tables. Increase severity if paired with long transactions or
 ### 11. potentially_unused_large_indexes
 
 **Domain:** storage
-**Inputs:** `unused_indexes`
+**Inputs:** `unused_indexes`, `largest_tables`
 
 | Condition                         | Severity | Confidence |
 |-----------------------------------|----------|------------|
@@ -261,7 +261,7 @@ Increase severity if replicas serve reads or failover guarantees are strict.
 ### 13. checkpoint_pressure_detected
 
 **Domain:** efficiency
-**Inputs:** `wal_checkpoint_health`
+**Inputs:** `wal_checkpoint_health`, `database_activity`, `instance_metadata`
 
 | Condition                                          | Severity | Confidence |
 |----------------------------------------------------|----------|------------|
@@ -298,7 +298,7 @@ This is a **meta-finding** — not a system defect, but a diagnostic quality con
 ### 15. storage_concentration_risk
 
 **Domain:** storage
-**Inputs:** `largest_tables`
+**Inputs:** `largest_tables`, `unused_indexes`
 
 | Condition            | Severity | Confidence |
 |----------------------|----------|------------|
