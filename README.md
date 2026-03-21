@@ -22,52 +22,44 @@ Scores + Findings
 Report (persona-aware)
 ```
 
-## What's In This Repo
+## Repository Structure
 
-### Methodology & Model
-| Document | Purpose |
-|----------|---------|
-| `01_methodology.md` | 10-step assessment framework: personas, workload types, health domains, KPIs, diagnostics, scoring |
-| `02_assessment_model.md` | Assessment as a first-class entity: lifecycle, capabilities, entity model, profiles |
-| `03_context_ingestion.md` | How non-SQL context enters the system: provenance matrix, intake tracks, canonical input keys |
-| `03_data_model.md` | Full SQL schema: 7 tables, enums, indexes, design rationale |
-| `04_assessment_orchestration.md` | The "arena": workflow system, three-layer architecture, interface options |
+This is a monorepo with two implementation islands and shared foundations:
 
-### Probes & Evidence
-| Document | Purpose |
-|----------|---------|
-| `04_probe_system.md` | Probe model, classification, 24 probes (15 generic + 9 Supabase), mapping matrices |
-| `08_probe_catalog.md` | Human-readable probe catalog with interpretation guidance |
-| `probe_registry.yaml` | Machine-readable payload contracts per probe |
-| `normalizer_spec.md` | How raw SQL output is transformed into canonical payloads |
-| `normalizer_interface_contract.md` | Boundary between SQL runner and normalizer |
+```
+pg-healthkit/
+├── docs/              # Inception docs — methodology, models, catalogs, roadmap
+├── contracts/         # Shared contracts — the seam between CLI and Arena
+├── cli/               # Go CLI plugin — probe collection, normalization, upload
+├── arena/             # Assessment application — Supabase backend, Next.js frontend
+├── CLAUDE.md          # Top-level agent guidance
+├── CONTRIBUTING.md    # Contribution workflow and contract stability rules
+└── README.md          # This file
+```
 
-### Rules & Findings
-| Document | Purpose |
-|----------|---------|
-| `05_rule_engine.md` | Rule design: 24 rules (15 generic + 9 Supabase), threshold logic, workload sensitivity |
-| `09_findings_catalog.md` | 24 findings with severity gradation, score effects, interpretation |
-| `rules.yaml` | Machine-readable rule definitions (v1: 15 generic rules) |
-| `rules.md` | Evaluation semantics: profiles, fact resolution, operators, scoring |
+### Two Islands
 
-### Scoring & Reporting
-| Document | Purpose |
-|----------|---------|
-| `06_scoring_model.md` | 7 domains, persona-specific weights, tier-aware thresholds, Supabase adjustments |
-| `sample_report_template.md` | Canonical report format with Mustache-style placeholders |
+| Island | Purpose | Language/Stack | Key Docs |
+|--------|---------|---------------|----------|
+| **`cli/`** | Execute SQL probes, normalize payloads, upload evidence | Go | `docs/04_probe_system.md`, `contracts/normalizer_spec.md` |
+| **`arena/`** | Store assessments, evaluate rules, compute scores, generate reports, manage workflow | Supabase + Next.js | `docs/03_data_model.md`, `docs/05_rule_engine.md` |
 
-### CLI & Integration
-| Document | Purpose |
-|----------|---------|
-| `07_cli_contract.md` | 8 CLI commands with JSON payloads, API endpoints, state transitions |
+The two islands depend on **`contracts/`**, never on each other directly.
 
-### Planning & Process
-| Document | Purpose |
+### Shared Contracts
+
+| Contract | Purpose |
 |----------|---------|
-| `10_roadmap.md` | 4-phase roadmap (manual → CLI → time-series → productization) + Supabase track |
-| `11_cross_assessment_model.md` | Cross-assessment benchmarking, pattern detection, product feedback loops |
-| `IMPLEMENTATION_PLAN.md` | Practical build order, CLI milestones, test strategy, repo layout |
-| `CONTRIBUTING.md` | Contribution workflow, contract stability rules, review checklist |
+| `contracts/cli_contract.md` | CLI commands, API endpoints, JSON payloads — the interface between CLI and Arena |
+| `contracts/probe_registry.yaml` | Canonical payload contracts per probe — what the CLI produces and the Arena validates |
+| `contracts/rules.yaml` | Machine-readable rule definitions — what the Arena evaluates |
+| `contracts/rules.md` | Rule evaluation semantics |
+| `contracts/normalizer_spec.md` | How raw SQL output is transformed into canonical payloads |
+| `contracts/normalizer_interface_contract.md` | Boundary between SQL runner and normalizer |
+
+### Inception Docs
+
+See `docs/README.md` for the full document inventory and recommended reading order.
 
 ## Key Concepts
 
@@ -79,30 +71,31 @@ Report (persona-aware)
 
 **Assessment Profiles:** `default`, `performance`, `reliability`, `cost_capacity`, `supabase_default`.
 
-**Probes:** 24 SQL-based evidence collectors (15 generic PostgreSQL + 9 Supabase-specific including RLS indexing, Realtime slot health, Auth schema bloat, Storage objects, system schema maintenance).
+**Probes:** 24 SQL-based evidence collectors (15 generic PostgreSQL + 9 Supabase-specific).
 
 **Findings:** 24 interpretive results with severity, confidence, and score effects.
 
 ## Supabase-Specific Features
 
-The framework includes dedicated support for Supabase platform concerns:
-
-- **RLS policy column indexing** — detects missing indexes on Row Level Security filter columns (the #1 Supabase-specific performance issue)
+- **RLS policy column indexing** — detects missing indexes on Row Level Security filter columns
 - **Realtime replication slot health** — detects WAL bloat from unconsumed logical replication slots
-- **Auth schema health** — monitors vacuum and bloat on auth.users, auth.sessions, auth.refresh_tokens
-- **Storage objects health** — detects soft-delete pressure and growth on storage.objects
-- **System schema bloat** — monitors platform-managed schemas (auth, storage, realtime, extensions)
-- **PgBouncer/Supavisor pool health** — detects pool mode misconfiguration and contention
+- **Auth schema health** — monitors vacuum and bloat on auth tables
+- **Storage objects health** — detects soft-delete pressure on storage.objects
+- **System schema bloat** — monitors platform-managed schemas
+- **PgBouncer/Supavisor pool health** — detects pool mode misconfiguration
 - **Tier-aware scoring** — adjusts thresholds based on Supabase instance tier
 - **Feature interaction awareness** — PostgREST + RLS, Realtime + writes, Auth + traffic
 
 ## How to Use This Repo
 
-### For manual assessments (Phase 1)
-Run the SQL probes directly via `psql` against a target database. Use the checklist in `01_methodology.md` and report template in `sample_report_template.md` to structure findings.
+### For manual assessments
+Run SQL probes directly via `psql`. Use `docs/01_methodology.md` for the checklist and `docs/sample_report_template.md` for report structure.
 
-### For CLI development (Phase 2)
-Use `probe_registry.yaml`, `rules.yaml`, and the normalizer contracts as the implementation specification. Follow the build order in `IMPLEMENTATION_PLAN.md`.
+### For CLI development
+Work in `cli/`. Read `cli/CLAUDE.md` first. Use contracts as the implementation spec. Follow `docs/IMPLEMENTATION_PLAN.md`.
+
+### For Arena development
+Work in `arena/`. Read `arena/CLAUDE.md` first. Start with the schema migration from `docs/03_data_model.md`.
 
 ### For agentic development
-Point the agent to `01_methodology.md` first, then `probe_registry.yaml` and `rules.yaml`. Ask for small, testable increments. See `CONTRIBUTING.md` for guidance.
+Read `CLAUDE.md` at the top level. It will route you to the right island.

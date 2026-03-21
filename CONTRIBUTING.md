@@ -71,22 +71,25 @@ Use this workflow for substantive changes:
 
 These files are the key sources of truth:
 
-- `01_methodology.md` — conceptual framework (personas, workloads, domains, diagnostics)
-- `02_assessment_model.md` — lifecycle and object model
-- `03_context_ingestion.md` — how non-SQL context enters the system
-- `03_data_model.md` — SQL schema for the assessment system of record
-- `04_assessment_orchestration.md` — workflow system and arena design
-- `04_probe_system.md` — probe model, classification, and mapping matrices
-- `05_rule_engine.md` — rule design and threshold logic
-- `06_scoring_model.md` — domain scoring, persona weights, Supabase adjustments
-- `07_cli_contract.md` — operator-facing command model
-- `08_probe_catalog.md` — human-readable probe catalog with interpretation guidance
-- `09_findings_catalog.md` — findings with severity gradation and score effects
-- `rules.yaml` — machine-readable evaluation logic
-- `rules.md` — human explanation of rule semantics
-- `probe_registry.yaml` — canonical payload contracts per probe
-- `normalizer_spec.md` — normalization rules
-- `normalizer_interface_contract.md` — boundary between SQL runner and normalizer
+**Inception docs (`docs/`):**
+- `docs/01_methodology.md` — conceptual framework (personas, workloads, domains, diagnostics)
+- `docs/02_assessment_model.md` — lifecycle and object model
+- `docs/03_context_ingestion.md` — how non-SQL context enters the system
+- `docs/03_data_model.md` — SQL schema for the assessment system of record
+- `docs/04_assessment_orchestration.md` — workflow system and arena design
+- `docs/04_probe_system.md` — probe model, classification, and mapping matrices
+- `docs/05_rule_engine.md` — rule design and threshold logic
+- `docs/06_scoring_model.md` — domain scoring, persona weights, Supabase adjustments
+- `docs/08_probe_catalog.md` — human-readable probe catalog with interpretation guidance
+- `docs/09_findings_catalog.md` — findings with severity gradation and score effects
+
+**Shared contracts (`contracts/`):**
+- `contracts/cli_contract.md` — operator-facing command model and API endpoints
+- `contracts/rules.yaml` — machine-readable evaluation logic
+- `contracts/rules.md` — human explanation of rule semantics
+- `contracts/probe_registry.yaml` — canonical payload contracts per probe
+- `contracts/normalizer_spec.md` — normalization rules
+- `contracts/normalizer_interface_contract.md` — boundary between SQL runner and normalizer
 
 Avoid editing one of these in isolation if the change crosses boundaries.
 
@@ -95,7 +98,7 @@ Avoid editing one of these in isolation if the change crosses boundaries.
 When adding a probe:
 
 1. Add the SQL file under `probes/`
-2. Add a probe entry to `probe_registry.yaml`
+2. Add a probe entry to `contracts/probe_registry.yaml`
 3. Define the normalized payload contract
 4. Define summary fields if the rule engine will depend on them
 5. Update methodology docs only if the probe materially changes the model
@@ -116,9 +119,9 @@ Questions to answer before merging:
 
 When adding a rule:
 
-1. Add the rule to `rules.yaml`
-2. Add human-readable explanation to `rules.md` if semantics are new
-3. Confirm the referenced probe fields exist in `probe_registry.yaml`
+1. Add the rule to `contracts/rules.yaml`
+2. Add human-readable explanation to `contracts/rules.md` if semantics are new
+3. Confirm the referenced probe fields exist in `contracts/probe_registry.yaml`
 4. Add tests for:
    - matching case
    - no-match case
@@ -139,7 +142,7 @@ Before making such a change:
 
 - decide whether the change is truly necessary
 - prefer additive changes over breaking changes
-- update `probe_registry.yaml`
+- update `contracts/probe_registry.yaml`
 - update any affected rules
 - update prose docs and examples
 - consider versioning the contract if the change is breaking
@@ -221,7 +224,7 @@ Keep contributions aligned with the current scope unless the repository directio
 If using Codex or another agentic tool:
 
 - point the agent to the methodology docs first
-- then provide `probe_registry.yaml`, `rules.yaml`, and the normalizer docs
+- then provide `contracts/probe_registry.yaml`, `contracts/rules.yaml`, and the normalizer docs
 - ask for small, testable increments
 - require the agent to preserve contract stability
 - prefer generated code that is boring and explicit
