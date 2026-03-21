@@ -171,7 +171,7 @@ Emphasize: `replication_health`, `long_running_transactions`, `lock_blocking_cha
 Emphasize: `largest_tables`, `unused_indexes`, `top_queries_total_time`, `temp_spill_queries`, `wal_checkpoint_health`
 
 ### `supabase_default`
-All probes from `default`, plus all Supabase-specific probes (60–69): `rls_policy_column_indexing`, `realtime_replication_slot_health`, `auth_schema_health`, `storage_objects_health`, `system_schema_bloat`, `pgbouncer_pool_health`. Prerequisite-gated Supabase probes (`pg_cron_job_health`, `extension_version_health`, `pgvector_index_health`) run if their required extensions are present.
+All probes from `default`, plus all Supabase-specific probes (60–69): `rls_policy_column_indexing`, `realtime_replication_slot_health`, `auth_schema_health`, `storage_objects_health`, `system_schema_bloat`. Prerequisite-gated Supabase probes (`pg_cron_job_health`, `extension_version_health`, `pgvector_index_health`) run if their required extensions are present.
 
 This profile uses Supabase-specific scoring weights (see `10_scoring_model.md`) and enables tier-aware threshold adjustments.
 
@@ -271,21 +271,9 @@ Good but not required for a credible first release:
 **Affected domains:** storage, performance, operational_hygiene.
 **Interpretation:** System schemas are managed by the platform but still need vacuum like any other tables. Customers often don't monitor these because they "belong to Supabase." High dead tuple ratios on system tables indicate platform-level maintenance gaps.
 
-#### 22. pgbouncer_pool_health
-
-**Purpose:** Detect connection pool mode and contention.
-**Prerequisites:** PgBouncer/Supavisor metrics accessible.
-**Execution scope:** platform.
-**Collects:** pool_mode (transaction/session), active connections, idle connections, waiting clients, max pool size.
-**Candidate findings:** `pool_mode_misconfiguration`, `pool_contention_detected`.
-**Affected domains:** concurrency, performance.
-**Interpretation:** Transaction mode breaks prepared statement caching (causing repeated planning overhead). Session mode limits connection reuse. High waiting client count indicates pool undersizing.
-
-> **Note on Platform Scope:** Probes with `platform` execution scope may require access to platform-specific APIs (e.g., Supabase Management API) or metrics endpoints in addition to a standard database connection.
-
 ### Baseline (v1.1, prerequisite-gated)
 
-#### 23. pg_cron_job_health
+#### 22. pg_cron_job_health
 
 **Purpose:** Detect failed or long-running scheduled jobs.
 **Prerequisites:** pg_cron extension.
@@ -295,7 +283,7 @@ Good but not required for a credible first release:
 **Affected domains:** availability, operational_hygiene.
 **Interpretation:** Failed cron jobs may indicate schema issues, permission problems, or resource contention. Long-running jobs can spike CPU/lock pressure during execution windows.
 
-#### 24. extension_version_health
+#### 23. extension_version_health
 
 **Purpose:** Detect outdated or potentially incompatible extensions.
 **Prerequisites:** None.
@@ -305,7 +293,7 @@ Good but not required for a credible first release:
 **Affected domains:** operational_hygiene, availability.
 **Interpretation:** Outdated extensions may miss security patches or performance improvements. On Supabase, extension upgrades are sometimes tied to platform version upgrades.
 
-#### 25. pgvector_index_health
+#### 24. pgvector_index_health
 
 **Purpose:** Assess vector index configuration and health.
 **Prerequisites:** pgvector extension.
@@ -324,7 +312,6 @@ Good but not required for a credible first release:
 | `auth_schema_health`               | `auth_table_bloat_detected`, `auth_session_explosion`    | `dead_tuple_ratio`, `stale_maintenance` |
 | `storage_objects_health`           | `storage_soft_delete_pressure`, `storage_objects_bloat`  | `largest_tables`                        |
 | `system_schema_bloat`              | `system_schema_vacuum_stale`                             | `stale_maintenance`                     |
-| `pgbouncer_pool_health`            | `pool_mode_misconfiguration`, `pool_contention_detected` | `top_queries_total_time`                |
 | `pg_cron_job_health`               | `pg_cron_job_failures`                                   | —                                       |
 | `extension_version_health`         | `extension_version_outdated`                             | `extensions_inventory`                  |
 | `pgvector_index_health`            | `pgvector_missing_index`, `pgvector_index_misconfigured` | `largest_tables`                        |
@@ -336,11 +323,8 @@ Good but not required for a credible first release:
 - **Secondary:** `pg_cron_job_health`, `extension_version_health`
 
 #### Performance
-- **Primary:** `rls_policy_column_indexing`, `pgbouncer_pool_health`, `pgvector_index_health`
+- **Primary:** `rls_policy_column_indexing`, `pgvector_index_health`
 - **Secondary:** `auth_schema_health`, `system_schema_bloat`
-
-#### Concurrency
-- **Primary:** `pgbouncer_pool_health`
 
 #### Storage
 - **Primary:** `realtime_replication_slot_health`, `auth_schema_health`, `storage_objects_health`, `system_schema_bloat`

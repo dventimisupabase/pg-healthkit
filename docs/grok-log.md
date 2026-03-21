@@ -416,3 +416,20 @@
 
 **New residuals added:**
 - None
+
+---
+
+### 2026-03-21 (pass 17)
+
+**Counts:**
+- Total issues found: 1
+- Already known from residuals: 0
+- New issues found: 1
+- New issues auto-fixed: 1
+- New residuals added: 0
+
+**Fixes made:**
+- Fixed `docs/07_probe_system.md`: renumbered Supabase prerequisite-gated probes from 23-25 to 22-24 to close the gap left by the deleted pgbouncer_pool_health (#22) and match the contiguous numbering in `docs/11_probe_catalog.md` (17-24)
+
+**New residuals added:**
+- None
