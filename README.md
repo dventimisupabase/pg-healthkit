@@ -93,7 +93,7 @@ Run SQL probes directly via `psql`. Use `docs/01_methodology.md` for the checkli
 Work in `cli/`. Read `cli/CLAUDE.md` first. Use contracts as the implementation spec. Follow `docs/IMPLEMENTATION_PLAN.md`.
 
 ### For Arena development
-Work in `arena/`. Read `arena/CLAUDE.md` first. Start with the schema migration from `docs/03_data_model.md`.
+Work in `arena/`. Read `arena/CLAUDE.md` first. Start with the schema migration from `docs/04_data_model.md`.
 
 ### For agentic development
 Read `CLAUDE.md` at the top level. It will route you to the right island.

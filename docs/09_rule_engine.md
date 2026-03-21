@@ -305,7 +305,7 @@ Remediation advice without tradeoffs is incomplete. For example, "drop this unus
 | Property       | Value                                                                    |
 |----------------|--------------------------------------------------------------------------|
 | **Inputs**     | `rls_policy_column_indexing`                                             |
-| **Logic**      | high if > 5 tables with unindexed RLS columns; medium if > 2; low if any |
+| **Logic**      | high if > 5 unindexed RLS policy columns; medium if > 2; low if any |
 | **Domains**    | performance, efficiency                                                  |
 | **Confidence** | high                                                                     |
 

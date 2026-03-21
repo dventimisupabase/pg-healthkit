@@ -909,7 +909,7 @@ rules:
 
   - id: rls_policy_columns_unindexed
     enabled: true
-    profiles: [default, performance]
+    profiles: [default, performance, supabase_default]
     finding:
       key: rls_policy_columns_unindexed
       domain: performance
@@ -957,7 +957,7 @@ rules:
 
   - id: replication_slot_inactive_or_lagging
     enabled: true
-    profiles: [default, reliability]
+    profiles: [default, reliability, supabase_default]
     finding:
       key: replication_slot_inactive_or_lagging
       domain: availability
@@ -1008,7 +1008,7 @@ rules:
 
   - id: auth_table_bloat_detected
     enabled: true
-    profiles: [default, reliability, cost_capacity]
+    profiles: [default, reliability, cost_capacity, supabase_default]
     finding:
       key: auth_table_bloat_detected
       domain: storage
@@ -1056,7 +1056,7 @@ rules:
 
   - id: storage_soft_delete_pressure
     enabled: true
-    profiles: [default, cost_capacity]
+    profiles: [default, cost_capacity, supabase_default]
     finding:
       key: storage_soft_delete_pressure
       domain: storage
@@ -1091,7 +1091,7 @@ rules:
 
   - id: system_schema_vacuum_stale
     enabled: true
-    profiles: [default, reliability]
+    profiles: [default, reliability, supabase_default]
     finding:
       key: system_schema_vacuum_stale
       domain: operational_hygiene
@@ -1127,7 +1127,7 @@ rules:
 
   - id: pool_mode_misconfiguration
     enabled: true
-    profiles: [default, performance]
+    profiles: [default, performance, supabase_default]
     finding:
       key: pool_mode_misconfiguration
       domain: performance
@@ -1162,7 +1162,7 @@ rules:
 
   - id: pg_cron_job_failures
     enabled: true
-    profiles: [default, reliability]
+    profiles: [default, reliability, supabase_default]
     finding:
       key: pg_cron_job_failures
       domain: operational_hygiene
@@ -1197,7 +1197,7 @@ rules:
 
   - id: extension_version_outdated
     enabled: true
-    profiles: [default, reliability]
+    profiles: [default, reliability, supabase_default]
     finding:
       key: extension_version_outdated
       domain: operational_hygiene
@@ -1231,7 +1231,7 @@ rules:
 
   - id: pgvector_missing_index
     enabled: true
-    profiles: [default, performance]
+    profiles: [default, performance, supabase_default]
     finding:
       key: pgvector_missing_index
       domain: performance
@@ -1266,7 +1266,7 @@ rules:
 
   - id: pgvector_index_misconfigured
     enabled: true
-    profiles: [default, performance]
+    profiles: [default, performance, supabase_default]
     finding:
       key: pgvector_index_misconfigured
       domain: performance
@@ -1304,7 +1304,7 @@ rules:
 
   - id: pool_contention_detected
     enabled: true
-    profiles: [default, performance]
+    profiles: [default, performance, supabase_default]
     finding:
       key: pool_contention_detected
       domain: concurrency
@@ -1354,7 +1354,7 @@ rules:
 
   - id: auth_session_explosion
     enabled: true
-    profiles: [default, reliability, cost_capacity]
+    profiles: [default, reliability, cost_capacity, supabase_default]
     finding:
       key: auth_session_explosion
       domain: storage
@@ -1405,7 +1405,7 @@ rules:
 
   - id: storage_objects_bloat
     enabled: true
-    profiles: [default, cost_capacity]
+    profiles: [default, cost_capacity, supabase_default]
     finding:
       key: storage_objects_bloat
       domain: storage

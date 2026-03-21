@@ -4,7 +4,7 @@
 
 This is a standalone, human-usable assessment checklist for Phase 1 — before any CLI tooling exists. Any SA, DBA, or support engineer can use this checklist to run a structured health review using only `psql`, platform tools, and customer conversation.
 
-The checklist is organized into 10 sections. Sections A–B establish context. Sections C–G assess health domains. Section H audits configuration. Section I covers security and operational hygiene. Section J defines the expected output.
+The checklist is organized into 11 sections. Sections A–B establish context. Sections C–G assess health domains. Section H covers capacity and cost. Section I audits configuration. Section J covers security and operational hygiene. Section K defines the expected output.
 
 ---
 

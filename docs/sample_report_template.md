@@ -124,9 +124,9 @@ This report is generated using:
 - Domain-based scoring model
 
 For details, refer to:
-- `rules.md`
-- `probe_registry.yaml`
-- `normalizer_spec.md`
+- `docs/09_rule_engine.md`
+- `contracts/probe_registry.yaml`
+- `docs/15_normalizer.md`
 
 ---
 

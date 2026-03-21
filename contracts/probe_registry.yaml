@@ -83,14 +83,13 @@ probes:
     supports_findings:
       - high_connection_utilization
       - checkpoint_pressure_detected
-      - diagnostic_visibility_limited
-      - replication_lag_elevated
-      - storage_concentration_risk
+      - diagnostic_configuration_weak
     affects_domains:
       - availability
       - performance
       - efficiency
       - cost
+      - operational_hygiene
 
   - name: extensions_inventory
     version: "2026-03-20"
@@ -957,15 +956,18 @@ probes:
       properties:
         summary:
           type: object
-          required: [total_rows, soft_deleted_rows, soft_deleted_ratio]
+          required: [total_rows, soft_deleted_rows, soft_deleted_ratio, dead_tuple_pct]
           properties:
             total_rows: { type: integer }
             soft_deleted_rows: { type: integer }
             soft_deleted_ratio: { type: number }
+            dead_tuple_pct: { type: number, description: "Dead tuple percentage for storage.objects table" }
     summary_fields:
       - summary.soft_deleted_ratio
+      - summary.dead_tuple_pct
     supports_findings:
       - storage_soft_delete_pressure
+      - storage_objects_bloat
     affects_domains:
       - storage
       - cost
@@ -1136,13 +1138,16 @@ probes:
               has_index: { type: boolean }
         summary:
           type: object
-          required: [unindexed_vector_column_count]
+          required: [unindexed_vector_column_count, misconfigured_index_count]
           properties:
             unindexed_vector_column_count: { type: integer }
+            misconfigured_index_count: { type: integer, description: "Count of vector indexes with suboptimal parameters for dataset size" }
     summary_fields:
       - summary.unindexed_vector_column_count
+      - summary.misconfigured_index_count
     supports_findings:
       - pgvector_missing_index
+      - pgvector_index_misconfigured
     affects_domains:
       - performance
       - efficiency

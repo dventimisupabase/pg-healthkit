@@ -68,7 +68,7 @@ Not all probes need to run for every assessment. Select probes based on the asse
 
 | Profile         | Always Run                                       | If Available                                        |
 |-----------------|--------------------------------------------------|-----------------------------------------------------|
-| `default`       | 00–01, 10–13, 30–34, 40–41                      | 20–22 (require pg_stat_statements)                  |
+| `default`       | 00–01, 10–13, 30–33, 40–41, 50                   | 20–22 (require pg_stat_statements)                  |
 | `performance`   | 11–13, 20–22, 31–32                             | 10, 30                                              |
 | `reliability`   | 00, 11–13, 31–32, 40–41                         | 10                                                  |
 | `cost_capacity` | 00, 20, 22, 30, 33, 40–41                       | 21                                                  |

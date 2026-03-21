@@ -359,11 +359,11 @@ Becomes more relevant when cost or maintenance is a primary objective.
 **Domain:** performance
 **Inputs:** `rls_policy_column_indexing`
 
-| Condition                             | Severity | Confidence |
-|---------------------------------------|----------|------------|
-| > 5 tables with unindexed RLS columns | high     | high       |
-| > 2 tables with unindexed RLS columns | medium   | high       |
-| Any table with unindexed RLS columns  | low      | high       |
+| Condition                              | Severity | Confidence |
+|----------------------------------------|----------|------------|
+| > 5 unindexed RLS policy columns       | high     | high       |
+| > 2 unindexed RLS policy columns       | medium   | high       |
+| Any unindexed RLS policy column        | low      | high       |
 
 **Cause:** Missing indexes on columns referenced in RLS USING/WITH CHECK clauses.
 **Impact:** Every API call through PostgREST pays the RLS tax; missing indexes on policy columns turn this into a sequential scan on every request.
