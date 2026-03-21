@@ -10,3 +10,4 @@
 - DO NOT blur the layers: probes collect, normalizers shape, rules interpret, scores summarize, reports render
 - DO prefer boring, explicit code over clever abstractions
 - DO test against fixtures derived from contracts
+- DO write the CLI in Go — this is a Supabase CLI plugin and Supabase CLI is Go
