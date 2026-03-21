@@ -164,3 +164,26 @@
 - `wal_checkpoint_health` SQL column names lack `_ms` suffix required by registry (requires decision on SQL alias naming vs normalizer mapping)
 - `pgbouncer_pool_health` SQL probe cannot produce required registry fields `waiting_clients` and `active_connections` (requires implementation strategy decision)
 - `docs/15_normalizer.md` missing probe-specific summary derivation for all 9 Supabase probes (requires domain-specific normalization logic decisions)
+
+---
+
+### 2026-03-20 (pass 8)
+
+**Counts:**
+- Total issues found: 11
+- Already known from residuals: 4
+- New issues found: 7
+- New issues auto-fixed: 7
+- New residuals added: 0
+
+**Fixes made:**
+- Fixed `docs/12_findings_catalog.md`: changed "Blocked count > 3" to "Blocking pairs > 3" for `active_lock_blocking_detected` to match `rules.yaml` field name `summary.blocking_pairs`
+- Added clarifying note to `docs/09_rule_engine.md` V1 Rule Catalog explaining that "Inputs" lists both required and corroborating probes, with `rules.yaml` `required_probes` as the authoritative required list
+- Added matching clarifying note to `docs/12_findings_catalog.md` Findings section
+- Fixed `docs/09_rule_engine.md`: changed `active_lock_blocking_detected` logic from "blocked count > 3" to "blocking pairs > 3" to match contract terminology
+- Fixed `docs/07_probe_system.md`: removed `replication_health` from `cost_capacity` profile emphasis list (registry only includes it in `[default, reliability]`)
+- Fixed `docs/07_probe_system.md`: removed `replication_health` from Cost domain Secondary probes list (registry `affects_domains` for this probe is `[availability, performance]`, not cost)
+- Added 3 missing Supabase rules to `docs/09_rule_engine.md`: `pg_cron_job_failures`, `extension_version_outdated`, `pgvector_missing_index` (all present in `rules.yaml` and `12_findings_catalog.md` but were absent from the rule engine doc)
+
+**New residuals added:**
+- None

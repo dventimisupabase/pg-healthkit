@@ -23,6 +23,8 @@ Each finding includes:
 
 ## Findings
 
+> **Note on "Inputs":** For each finding below, **Inputs** lists all probes whose evidence is relevant — both required and corroborating. The authoritative list of probes that must be present for the rule to evaluate is the `required_probes` field in `contracts/rules.yaml`. Corroborating probes improve confidence or context but are not mandatory.
+
 ### 1. long_running_transactions_detected
 
 **Domain:** concurrency
@@ -69,7 +71,7 @@ Increase severity if state is `idle in transaction`.
 
 | Condition                             | Severity | Confidence |
 |---------------------------------------|----------|------------|
-| Blocked count > 3                     | high     | high       |
+| Blocking pairs > 3                    | high     | high       |
 | Any blocking pair exists              | medium   | high       |
 
 **Cause:** Concurrent transactions competing for the same rows, or DDL operations running during active workload without proper coordination.

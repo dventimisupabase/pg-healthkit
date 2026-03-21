@@ -125,7 +125,7 @@ See `probe_registry.yaml` for the machine-readable contracts.
 
 ### Cost
 - **Primary:** `largest_tables`, `unused_indexes`, `top_queries_total_time`, `temp_spill_queries`, `wal_checkpoint_health`
-- **Secondary:** `instance_metadata`, `replication_health`
+- **Secondary:** `instance_metadata`
 
 ### Operational Hygiene
 - **Primary:** `extensions_inventory`, `stale_maintenance`, `instance_metadata`, `role_inventory`
@@ -168,7 +168,7 @@ Emphasize: `top_queries_total_time`, `top_queries_mean_latency`, `temp_spill_que
 Emphasize: `replication_health`, `long_running_transactions`, `lock_blocking_chains`, `connection_pressure`, `wal_checkpoint_health`, `dead_tuple_ratio`
 
 ### `cost_capacity`
-Emphasize: `largest_tables`, `unused_indexes`, `top_queries_total_time`, `temp_spill_queries`, `wal_checkpoint_health`, `replication_health`
+Emphasize: `largest_tables`, `unused_indexes`, `top_queries_total_time`, `temp_spill_queries`, `wal_checkpoint_health`
 
 ### `supabase_default`
 All probes from `default`, plus all Supabase-specific probes (60–69): `rls_policy_column_indexing`, `realtime_replication_slot_health`, `auth_schema_health`, `storage_objects_health`, `system_schema_bloat`, `pgbouncer_pool_health`. Contextual Supabase probes (`pg_cron_job_health`, `extension_version_health`, `pgvector_index_health`) run if prerequisites are met.

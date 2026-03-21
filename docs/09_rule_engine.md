@@ -145,6 +145,8 @@ Remediation advice without tradeoffs is incomplete. For example, "drop this unus
 
 ## V1 Rule Catalog
 
+> **Note on "Inputs":** For each rule below, **Inputs** lists all probes whose evidence is relevant to the rule — both required and corroborating. The authoritative list of probes that must be present for the rule to evaluate is the `required_probes` field in `rules.yaml`. Corroborating probes improve confidence or context but are not mandatory.
+
 ### long_running_transactions_detected
 
 | Property       | Value                                                                                                                                             |
@@ -168,7 +170,7 @@ Remediation advice without tradeoffs is incomplete. For example, "drop this unus
 | Property       | Value                                                                                                                                                      |
 |----------------|------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | **Inputs**     | `lock_blocking_chains`                                                                                                                                     |
-| **Logic**      | high if blocking chains present and blocked count > 3; medium if any blocking pair exists |
+| **Logic**      | high if blocking pairs > 3; medium if any blocking pair exists |
 | **Domains**    | concurrency, performance, availability                                                                                                                     |
 | **Confidence** | high                                                                                                                                                       |
 
@@ -391,6 +393,33 @@ This is possibly the single highest-impact Supabase-specific finding. RLS is ena
 | **Logic**      | high if storage.objects dead_tuple_pct > 30%; medium if dead_tuple_pct > 15%              |
 | **Domains**    | storage, cost                                                                                             |
 | **Confidence** | high                                                                                                      |
+
+### pg_cron_job_failures
+
+| Property       | Value                                                                                                      |
+|----------------|------------------------------------------------------------------------------------------------------------|
+| **Inputs**     | `pg_cron_job_health`                                                                                       |
+| **Logic**      | medium if any job failure detected                                                                         |
+| **Domains**    | operational_hygiene, availability                                                                          |
+| **Confidence** | high                                                                                                       |
+
+### extension_version_outdated
+
+| Property       | Value                                                                                                      |
+|----------------|------------------------------------------------------------------------------------------------------------|
+| **Inputs**     | `extension_version_health`                                                                                 |
+| **Logic**      | low if any extension has available upgrades                                                                |
+| **Domains**    | operational_hygiene                                                                                        |
+| **Confidence** | low                                                                                                        |
+
+### pgvector_missing_index
+
+| Property       | Value                                                                                                      |
+|----------------|------------------------------------------------------------------------------------------------------------|
+| **Inputs**     | `pgvector_index_health`                                                                                    |
+| **Logic**      | high if any unindexed vector column detected                                                               |
+| **Domains**    | performance, efficiency                                                                                    |
+| **Confidence** | high                                                                                                       |
 
 ## Rule Attributes
 
