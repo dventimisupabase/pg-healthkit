@@ -51,6 +51,7 @@ For each finding:
 - **Finding Key** — stable identifier (`finding.key`)
 - **Tags** — classification labels
 - **Summary** — what was observed (rendered from `summary_template`)
+- **Cause** — likely root cause (rendered from `cause_template`)
 - **Impact** — why it matters (rendered from `impact_template`)
 - **Recommendation** — what to do (rendered from `recommendation_template`)
 - **Evidence** — probe references and key signals

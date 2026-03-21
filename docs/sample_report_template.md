@@ -54,10 +54,13 @@
 - **Finding Key:** `{{key}}`
 - **Tags:** {{tags}}
 
-**Summary**  
+**Summary**
 {{summary}}
 
-**Impact**  
+**Cause**
+{{cause}}
+
+**Impact**
 {{impact}}
 
 **Recommendation**  
