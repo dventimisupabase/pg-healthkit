@@ -153,9 +153,9 @@ Every assessment should produce:
 
 Categorize recommendations by urgency:
 
-| Urgency       | Timeframe    | Examples                                                         |
-|---------------|--------------|------------------------------------------------------------------|
-| **Immediate** | Within 1 week | Kill blocking sessions, terminate abandoned transactions         |
+| Urgency        | Timeframe      | Examples                                                        |
+|----------------|----------------|-----------------------------------------------------------------|
+| **Immediate**  | Within 1 week  | Kill blocking sessions, terminate abandoned transactions        |
 | **Short-term** | Within 30 days | Add missing indexes, tune autovacuum, adjust pool configuration |
 | **Structural** | Within quarter | Schema redesign, tier upgrade, application transaction rework   |
 

@@ -93,19 +93,19 @@ This separation is operationally important: it minimizes customer questioning an
 
 ### Customer-derived
 
-| Key                       | Type                                               | Source             |
-|---------------------------|----------------------------------------------------|--------------------|
-| `primary_persona`         | string                                             | Customer interview |
-| `primary_objective`       | string                                             | Customer interview |
-| `secondary_objectives`    | array                                              | Customer interview |
+| Key                       | Type                                                       | Source             |
+|---------------------------|------------------------------------------------------------|--------------------|
+| `primary_persona`         | string                                                     | Customer interview |
+| `primary_objective`       | string                                                     | Customer interview |
+| `secondary_objectives`    | array                                                      | Customer interview |
 | `workload_type`           | enum (oltp, olap, hybrid, queue, vector, multitenant_saas) | Customer interview |
-| `application_description` | string                                             | Customer interview |
-| `critical_services`       | array                                              | Customer interview |
-| `latency_slo`             | string                                             | Customer interview |
-| `availability_target`     | string                                             | Customer interview |
-| `growth_expectation`      | string                                             | Customer interview |
-| `cost_sensitivity`        | string                                             | Customer interview |
-| `recent_incidents`        | string                                             | Customer interview |
+| `application_description` | string                                                     | Customer interview |
+| `critical_services`       | array                                                      | Customer interview |
+| `latency_slo`             | string                                                     | Customer interview |
+| `availability_target`     | string                                                     | Customer interview |
+| `growth_expectation`      | string                                                     | Customer interview |
+| `cost_sensitivity`        | string                                                     | Customer interview |
+| `recent_incidents`        | string                                                     | Customer interview |
 
 ### Operator-derived
 
@@ -222,16 +222,16 @@ Many variables that would require customer input in a generic context are platfo
 
 These additional platform-derived inputs should be collected for Supabase assessments:
 
-| Key | Type | Source |
-|-----|------|--------|
-| `supabase_tier` | string (small/medium/large/xl) | Platform metadata |
-| `supabase_region` | string | Platform metadata |
-| `auth_provider` | string (supabase/external) | Platform metadata |
-| `realtime_enabled` | boolean | Platform metadata |
-| `storage_enabled` | boolean | Platform metadata |
-| `pgbouncer_pool_mode` | string (transaction/session) | Platform metadata |
-| `postgrest_max_rows` | integer | Platform config |
-| `supabase_project_age_days` | integer | Platform metadata |
+| Key                         | Type                           | Source            |
+|-----------------------------|--------------------------------|-------------------|
+| `supabase_tier`             | string (small/medium/large/xl) | Platform metadata |
+| `supabase_region`           | string                         | Platform metadata |
+| `auth_provider`             | string (supabase/external)     | Platform metadata |
+| `realtime_enabled`          | boolean                        | Platform metadata |
+| `storage_enabled`           | boolean                        | Platform metadata |
+| `pgbouncer_pool_mode`       | string (transaction/session)   | Platform metadata |
+| `postgrest_max_rows`        | integer                        | Platform config   |
+| `supabase_project_age_days` | integer                        | Platform metadata |
 
 ### Supabase-Specific Customer Questions
 

@@ -267,14 +267,14 @@ This document provides the human-readable probe catalog with purpose, interpreta
 
 ## Supabase Probe-to-Finding Mapping
 
-| Finding | Primary Probes | Corroborating Probes |
-|---------|---------------|---------------------|
-| `rls_policy_columns_unindexed` | `rls_policy_column_indexing` | `top_queries_mean_latency` |
-| `replication_slot_inactive_or_lagging` | `realtime_replication_slot_health` | `wal_checkpoint_health` |
-| `auth_table_bloat_detected` | `auth_schema_health` | `dead_tuple_ratio`, `stale_maintenance` |
-| `storage_soft_delete_pressure` | `storage_objects_health` | `largest_tables` |
-| `system_schema_vacuum_stale` | `system_schema_bloat` | `stale_maintenance` |
-| `pool_mode_misconfiguration` | `pgbouncer_pool_health` | `top_queries_total_time` |
-| `pg_cron_job_failures` | `pg_cron_job_health` | — |
-| `extension_version_outdated` | `extension_version_health` | `extensions_inventory` |
-| `pgvector_missing_index` | `pgvector_index_health` | `largest_tables` |
+| Finding                                | Primary Probes                     | Corroborating Probes                    |
+|----------------------------------------|------------------------------------|-----------------------------------------|
+| `rls_policy_columns_unindexed`         | `rls_policy_column_indexing`       | `top_queries_mean_latency`              |
+| `replication_slot_inactive_or_lagging` | `realtime_replication_slot_health` | `wal_checkpoint_health`                 |
+| `auth_table_bloat_detected`            | `auth_schema_health`               | `dead_tuple_ratio`, `stale_maintenance` |
+| `storage_soft_delete_pressure`         | `storage_objects_health`           | `largest_tables`                        |
+| `system_schema_vacuum_stale`           | `system_schema_bloat`              | `stale_maintenance`                     |
+| `pool_mode_misconfiguration`           | `pgbouncer_pool_health`            | `top_queries_total_time`                |
+| `pg_cron_job_failures`                 | `pg_cron_job_health`               | —                                       |
+| `extension_version_outdated`           | `extension_version_health`         | `extensions_inventory`                  |
+| `pgvector_missing_index`               | `pgvector_index_health`            | `largest_tables`                        |

@@ -6,22 +6,21 @@ This document defines the 15 v1 findings with their logic, inputs, severity grad
 
 Each finding includes:
 
-| Field            | Purpose                                           |
-|------------------|---------------------------------------------------|
-| Field            | Purpose                                                                           |
-|------------------|-----------------------------------------------------------------------------------|
-| `finding_key`    | Stable identifier for the issue class                                             |
-| `domain`         | Primary health domain                                                             |
-| `severity`       | Operational/business importance (info → critical)                                 |
-| `confidence`     | How trustworthy the inference is                                                  |
-| `title`          | Human-readable title                                                              |
-| `summary`        | What was observed                                                                 |
-| `cause`          | Likely root cause (not symptoms)                                                  |
-| `impact`         | Why it matters                                                                    |
-| `recommendation` | What to do                                                                        |
+|------------------|---------------------------------------------------------------------------------------------|
+| Field            | Purpose                                                                                     |
+|------------------|---------------------------------------------------------------------------------------------|
+| `finding_key`    | Stable identifier for the issue class                                                       |
+| `domain`         | Primary health domain                                                                       |
+| `severity`       | Operational/business importance (info → critical)                                           |
+| `confidence`     | How trustworthy the inference is                                                            |
+| `title`          | Human-readable title                                                                        |
+| `summary`        | What was observed                                                                           |
+| `cause`          | Likely root cause (not symptoms)                                                            |
+| `impact`         | Why it matters                                                                              |
+| `recommendation` | What to do                                                                                  |
 | `urgency`        | Remediation timeframe: `immediate` (1 week), `short_term` (30 days), `structural` (quarter) |
-| `evidence_refs`  | Links to supporting probe evidence                                                |
-| `tags`           | Classification labels                                                             |
+| `evidence_refs`  | Links to supporting probe evidence                                                          |
+| `tags`           | Classification labels                                                                       |
 
 ## Findings
 
@@ -309,11 +308,11 @@ Becomes more relevant when cost or maintenance is a primary objective.
 **Domain:** performance
 **Inputs:** `rls_policy_column_indexing`
 
-| Condition | Severity | Confidence |
-|-----------|----------|------------|
-| > 5 tables with unindexed RLS columns | high | high |
-| > 2 tables with unindexed RLS columns | medium | high |
-| Any table with unindexed RLS columns | low | high |
+| Condition                             | Severity | Confidence |
+|---------------------------------------|----------|------------|
+| > 5 tables with unindexed RLS columns | high     | high       |
+| > 2 tables with unindexed RLS columns | medium   | high       |
+| Any table with unindexed RLS columns  | low      | high       |
 
 **Score effects (high):** performance -20, efficiency -10
 
@@ -326,11 +325,11 @@ Becomes more relevant when cost or maintenance is a primary objective.
 **Domain:** availability
 **Inputs:** `realtime_replication_slot_health`
 
-| Condition | Severity | Confidence |
-|-----------|----------|------------|
-| Inactive slot with lag > 1GB | critical | high |
-| Lag > 500MB or inactive > 1 hour | high | high |
-| Lag > 100MB | medium | high |
+| Condition                        | Severity | Confidence |
+|----------------------------------|----------|------------|
+| Inactive slot with lag > 1GB     | critical | high       |
+| Lag > 500MB or inactive > 1 hour | high     | high       |
+| Lag > 100MB                      | medium   | high       |
 
 **Score effects (critical):** availability -25, storage -15
 
@@ -343,10 +342,10 @@ Becomes more relevant when cost or maintenance is a primary objective.
 **Domain:** storage
 **Inputs:** `auth_schema_health`
 
-| Condition | Severity | Confidence |
-|-----------|----------|------------|
-| dead_tuple_pct > 30% OR row count > 5M with stale vacuum | high | high |
-| dead_tuple_pct > 10% OR row count > 1M | medium | high |
+| Condition                                                | Severity | Confidence |
+|----------------------------------------------------------|----------|------------|
+| dead_tuple_pct > 30% OR row count > 5M with stale vacuum | high     | high       |
+| dead_tuple_pct > 10% OR row count > 1M                   | medium   | high       |
 
 **Score effects (high):** storage -15, performance -8, availability -5
 
@@ -359,10 +358,10 @@ Becomes more relevant when cost or maintenance is a primary objective.
 **Domain:** storage
 **Inputs:** `storage_objects_health`
 
-| Condition | Severity | Confidence |
-|-----------|----------|------------|
-| soft_deleted_ratio > 20% AND table size > 1GB | high | medium |
-| soft_deleted_ratio > 10% | medium | medium |
+| Condition                                     | Severity | Confidence |
+|-----------------------------------------------|----------|------------|
+| soft_deleted_ratio > 20% AND table size > 1GB | high     | medium     |
+| soft_deleted_ratio > 10%                      | medium   | medium     |
 
 **Score effects (high):** storage -12, cost -8
 
@@ -375,10 +374,10 @@ Becomes more relevant when cost or maintenance is a primary objective.
 **Domain:** operational_hygiene
 **Inputs:** `system_schema_bloat`
 
-| Condition | Severity | Confidence |
-|-----------|----------|------------|
-| Any system table > 1M rows with no autovacuum in 7 days OR dead_tuple_pct > 30% | high | high |
-| dead_tuple_pct > 10% | medium | high |
+| Condition                                                                       | Severity | Confidence |
+|---------------------------------------------------------------------------------|----------|------------|
+| Any system table > 1M rows with no autovacuum in 7 days OR dead_tuple_pct > 30% | high     | high       |
+| dead_tuple_pct > 10%                                                            | medium   | high       |
 
 **Score effects (high):** operational_hygiene -15, storage -8, performance -5
 
@@ -391,10 +390,10 @@ Becomes more relevant when cost or maintenance is a primary objective.
 **Domain:** performance
 **Inputs:** `pgbouncer_pool_health`
 
-| Condition | Severity | Confidence |
-|-----------|----------|------------|
-| Transaction mode with high planning time overhead | medium | medium |
-| Transaction mode detected (informational) | low | medium |
+| Condition                                         | Severity | Confidence |
+|---------------------------------------------------|----------|------------|
+| Transaction mode with high planning time overhead | medium   | medium     |
+| Transaction mode detected (informational)         | low      | medium     |
 
 **Score effects (medium):** performance -8, concurrency -5
 
@@ -407,10 +406,10 @@ Becomes more relevant when cost or maintenance is a primary objective.
 **Domain:** operational_hygiene
 **Inputs:** `pg_cron_job_health`
 
-| Condition | Severity | Confidence |
-|-----------|----------|------------|
-| Multiple recent failures or critical job failing | high | high |
-| Any job failure detected | medium | medium |
+| Condition                                        | Severity | Confidence |
+|--------------------------------------------------|----------|------------|
+| Multiple recent failures or critical job failing | high     | high       |
+| Any job failure detected                         | medium   | medium     |
 
 **Score effects (high):** operational_hygiene -10, availability -5
 
@@ -423,10 +422,10 @@ Becomes more relevant when cost or maintenance is a primary objective.
 **Domain:** operational_hygiene
 **Inputs:** `extension_version_health`
 
-| Condition | Severity | Confidence |
-|-----------|----------|------------|
-| Critical extensions outdated by multiple versions | medium | medium |
-| Any extension outdated | low | low |
+| Condition                                         | Severity | Confidence |
+|---------------------------------------------------|----------|------------|
+| Critical extensions outdated by multiple versions | medium   | medium     |
+| Any extension outdated                            | low      | low        |
 
 **Score effects (medium):** operational_hygiene -8
 
@@ -439,10 +438,10 @@ Becomes more relevant when cost or maintenance is a primary objective.
 **Domain:** performance
 **Inputs:** `pgvector_index_health`
 
-| Condition | Severity | Confidence |
-|-----------|----------|------------|
-| Large tables (> 100K rows) with vector columns but no vector index | high | high |
-| Any table with vector columns but no vector index | medium | medium |
+| Condition                                                          | Severity | Confidence |
+|--------------------------------------------------------------------|----------|------------|
+| Large tables (> 100K rows) with vector columns but no vector index | high     | high       |
+| Any table with vector columns but no vector index                  | medium   | medium     |
 
 **Score effects (high):** performance -15, efficiency -8
 

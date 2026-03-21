@@ -199,59 +199,59 @@ Every rule should answer: what was observed, why it matters, what to do about it
 
 ### rls_policy_columns_unindexed
 
-| Property       | Value |
-|----------------|-------|
-| **Inputs**     | `rls_policy_column_indexing` |
+| Property       | Value                                                                    |
+|----------------|--------------------------------------------------------------------------|
+| **Inputs**     | `rls_policy_column_indexing`                                             |
 | **Logic**      | high if > 5 tables with unindexed RLS columns; medium if > 2; low if any |
-| **Domains**    | performance, efficiency |
-| **Confidence** | high |
+| **Domains**    | performance, efficiency                                                  |
+| **Confidence** | high                                                                     |
 
 This is possibly the single highest-impact Supabase-specific finding. RLS is enabled by default on all Supabase tables exposed through PostgREST. Missing indexes on columns referenced in USING clauses cause sequential scans on every API request through that table.
 
 ### replication_slot_inactive_or_lagging
 
-| Property       | Value |
-|----------------|-------|
-| **Inputs**     | `realtime_replication_slot_health` |
+| Property       | Value                                                                                                     |
+|----------------|-----------------------------------------------------------------------------------------------------------|
+| **Inputs**     | `realtime_replication_slot_health`                                                                        |
 | **Logic**      | critical if inactive slot with lag > 1GB; high if lag > 500MB or inactive > 1 hour; medium if lag > 100MB |
-| **Domains**    | availability, storage |
-| **Confidence** | high |
+| **Domains**    | availability, storage                                                                                     |
+| **Confidence** | high                                                                                                      |
 
 ### auth_table_bloat_detected
 
-| Property       | Value |
-|----------------|-------|
-| **Inputs**     | `auth_schema_health` |
+| Property       | Value                                                                                                                                                   |
+|----------------|---------------------------------------------------------------------------------------------------------------------------------------------------------|
+| **Inputs**     | `auth_schema_health`                                                                                                                                    |
 | **Logic**      | high if auth.sessions or auth.refresh_tokens dead_tuple_pct > 30% or row count > 5M with stale vacuum; medium if dead_tuple_pct > 10% or row count > 1M |
-| **Domains**    | storage, performance, availability |
-| **Confidence** | high |
+| **Domains**    | storage, performance, availability                                                                                                                      |
+| **Confidence** | high                                                                                                                                                    |
 
 ### storage_soft_delete_pressure
 
-| Property       | Value |
-|----------------|-------|
-| **Inputs**     | `storage_objects_health` |
+| Property       | Value                                                                                     |
+|----------------|-------------------------------------------------------------------------------------------|
+| **Inputs**     | `storage_objects_health`                                                                  |
 | **Logic**      | high if soft_deleted_ratio > 20% and table size > 1GB; medium if soft_deleted_ratio > 10% |
-| **Domains**    | storage, cost |
-| **Confidence** | medium |
+| **Domains**    | storage, cost                                                                             |
+| **Confidence** | medium                                                                                    |
 
 ### system_schema_vacuum_stale
 
-| Property       | Value |
-|----------------|-------|
-| **Inputs**     | `system_schema_bloat` |
+| Property       | Value                                                                                                                   |
+|----------------|-------------------------------------------------------------------------------------------------------------------------|
+| **Inputs**     | `system_schema_bloat`                                                                                                   |
 | **Logic**      | high if any system table > 1M rows with no autovacuum in 7 days or dead_tuple_pct > 30%; medium if dead_tuple_pct > 10% |
-| **Domains**    | storage, performance, operational_hygiene |
-| **Confidence** | high |
+| **Domains**    | storage, performance, operational_hygiene                                                                               |
+| **Confidence** | high                                                                                                                    |
 
 ### pool_mode_misconfiguration
 
-| Property       | Value |
-|----------------|-------|
-| **Inputs**     | `pgbouncer_pool_health` |
+| Property       | Value                                                                                                                                                                                           |
+|----------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| **Inputs**     | `pgbouncer_pool_health`                                                                                                                                                                         |
 | **Logic**      | medium if pool_mode = transaction AND application shows signs of prepared statement overhead (high planning time relative to execution time); low as informational if transaction mode detected |
-| **Domains**    | performance, concurrency |
-| **Confidence** | medium |
+| **Domains**    | performance, concurrency                                                                                                                                                                        |
+| **Confidence** | medium                                                                                                                                                                                          |
 
 ## Rule Attributes
 

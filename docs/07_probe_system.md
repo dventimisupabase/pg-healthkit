@@ -292,17 +292,17 @@ Good but not required for a credible first release:
 
 ### Supabase Probe-to-Finding Mapping
 
-| Probe | Supports (primary) | Supports (corroboration) |
-|-------|-------------------|-------------------------|
-| `rls_policy_column_indexing` | `rls_policy_columns_unindexed` | — |
-| `realtime_replication_slot_health` | `replication_slot_inactive_or_lagging` | `wal_checkpoint_health` |
-| `auth_schema_health` | `auth_table_bloat_detected`, `auth_session_explosion` | `dead_tuple_ratio`, `stale_maintenance` |
-| `storage_objects_health` | `storage_soft_delete_pressure`, `storage_objects_bloat` | `largest_tables` |
-| `system_schema_bloat` | `system_schema_vacuum_stale` | `stale_maintenance` |
-| `pgbouncer_pool_health` | `pool_mode_misconfiguration`, `pool_contention_detected` | `top_queries_total_time` |
-| `pg_cron_job_health` | `pg_cron_job_failures` | — |
-| `extension_version_health` | `extension_version_outdated` | `extensions_inventory` |
-| `pgvector_index_health` | `pgvector_missing_index`, `pgvector_index_misconfigured` | `largest_tables` |
+| Probe                              | Supports (primary)                                       | Supports (corroboration)                |
+|------------------------------------|----------------------------------------------------------|-----------------------------------------|
+| `rls_policy_column_indexing`       | `rls_policy_columns_unindexed`                           | —                                       |
+| `realtime_replication_slot_health` | `replication_slot_inactive_or_lagging`                   | `wal_checkpoint_health`                 |
+| `auth_schema_health`               | `auth_table_bloat_detected`, `auth_session_explosion`    | `dead_tuple_ratio`, `stale_maintenance` |
+| `storage_objects_health`           | `storage_soft_delete_pressure`, `storage_objects_bloat`  | `largest_tables`                        |
+| `system_schema_bloat`              | `system_schema_vacuum_stale`                             | `stale_maintenance`                     |
+| `pgbouncer_pool_health`            | `pool_mode_misconfiguration`, `pool_contention_detected` | `top_queries_total_time`                |
+| `pg_cron_job_health`               | `pg_cron_job_failures`                                   | —                                       |
+| `extension_version_health`         | `extension_version_outdated`                             | `extensions_inventory`                  |
+| `pgvector_index_health`            | `pgvector_missing_index`, `pgvector_index_misconfigured` | `largest_tables`                        |
 
 ### Supabase Probe-to-Score-Domain Mapping (additions)
 
