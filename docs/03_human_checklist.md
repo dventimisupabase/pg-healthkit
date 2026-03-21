@@ -87,9 +87,20 @@ These questions must be answered before interpreting any evidence. Context defin
 
 **Key probes:** `connection_pressure`, `long_running_transactions`, `lock_blocking_chains`
 
+## G. Resource Efficiency
+
+- [ ] Cache hit ratio (shared_buffers efficiency)
+- [ ] Index hit ratio (index vs sequential scan balance)
+- [ ] Temporary file generation (work_mem sufficiency)
+- [ ] Checkpoint frequency and write pressure (bgwriter/WAL health)
+- [ ] CPU saturation versus utilization (is latency CPU-bound?)
+- [ ] I/O patterns (random vs sequential, IOPS saturation)
+
+**Key probes:** `database_activity`, `temp_spill_queries`, `wal_checkpoint_health`, `instance_metadata`
+
 ---
 
-## G. Capacity and Cost
+## H. Capacity and Cost
 
 - [ ] Data growth rate (if historical data available; otherwise note current size for future comparison)
 - [ ] WAL growth rate
@@ -105,7 +116,7 @@ These questions must be answered before interpreting any evidence. Context defin
 
 ---
 
-## H. Configuration Hygiene
+## I. Configuration Hygiene
 
 Review these settings against workload type and instance sizing:
 
@@ -127,7 +138,7 @@ Review these settings against workload type and instance sizing:
 
 ---
 
-## I. Security and Operational Hygiene
+## J. Security and Operational Hygiene
 
 - [ ] Superuser sprawl — how many roles have `SUPERUSER`? (should be minimal)
 - [ ] Unused roles — roles that exist but have never connected or have expired `VALID UNTIL`
@@ -141,7 +152,7 @@ Review these settings against workload type and instance sizing:
 
 ---
 
-## J. Output
+## K. Output
 
 Every assessment should produce:
 

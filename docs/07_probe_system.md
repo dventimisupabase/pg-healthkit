@@ -174,15 +174,15 @@ Emphasize: `largest_tables`, `unused_indexes`, `top_queries_total_time`, `temp_s
 9. `role_inventory`
 
 ### Second Wave (requires pg_stat_statements)
-9. `database_activity`
-10. `top_queries_total_time`
-11. `top_queries_mean_latency`
-12. `temp_spill_queries`
+10. `database_activity`
+11. `top_queries_total_time`
+12. `top_queries_mean_latency`
+13. `temp_spill_queries`
 
 ### Third Wave (more operational depth)
-13. `replication_health`
-14. `wal_checkpoint_health`
-15. `unused_indexes`
+14. `replication_health`
+15. `wal_checkpoint_health`
+16. `unused_indexes`
 
 ## Optional v1.1 Probes
 

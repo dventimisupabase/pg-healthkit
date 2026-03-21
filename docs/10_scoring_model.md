@@ -73,47 +73,51 @@ Scoring weights vary by assessment profile (which derives from persona):
 
 ### DBA / SRE Profile (`reliability`)
 
-| Domain                        | Weight |
-|-------------------------------|--------|
-| Availability & Recoverability | 25%    |
-| Concurrency & Contention      | 20%    |
-| Storage & Maintenance         | 20%    |
-| Performance & Latency         | 15%    |
-| Efficiency & Sizing           | 10%    |
-| Operational Hygiene           | 10%    |
+| Domain                | Weight | Rationale                                            |
+|-----------------------|--------|------------------------------------------------------|
+| Availability          | 25%    | Uptime and failover readiness are primary            |
+| Concurrency           | 20%    | Contention and lock management                       |
+| Storage               | 15%    | Maintenance and bloat control                        |
+| Performance           | 15%    | Latency and plan quality                             |
+| Operational Hygiene   | 10%    | Visibility and configuration posture                 |
+| Efficiency            | 10%    | Resource utilization and waste                       |
+| Cost                  | 5%     | Lower priority than stability                        |
 
 ### CTO / Eng Leadership Profile (`cost_capacity`)
 
-| Domain                | Weight |
-|-----------------------|--------|
-| Cost & Capacity       | 30%    |
-| Efficiency & Sizing   | 25%    |
-| Performance & Latency | 15%    |
-| Storage & Maintenance | 15%    |
-| Availability          | 10%    |
-| Concurrency           | 5%     |
+| Domain                | Weight | Rationale                                            |
+|-----------------------|--------|------------------------------------------------------|
+| Cost                  | 30%    | Spend optimization and forecastability               |
+| Efficiency            | 20%    | Resource utilization and waste                       |
+| Storage               | 15%    | Storage footprint and data growth                    |
+| Performance           | 10%    | Baseline acceptable performance                       |
+| Availability          | 10%    | Business continuity                                  |
+| Operational Hygiene   | 10%    | Long-term sustainability and visibility              |
+| Concurrency           | 5%     | Tactical contention (less strategic)                 |
 
 ### App Developer Profile (`performance`)
 
-| Domain                   | Weight |
-|--------------------------|--------|
-| Performance & Latency    | 30%    |
-| Concurrency & Contention | 25%    |
-| Efficiency               | 15%    |
-| Availability             | 15%    |
-| Storage                  | 10%    |
-| Cost                     | 5%     |
+| Domain                | Weight | Rationale                                            |
+|-----------------------|--------|------------------------------------------------------|
+| Performance           | 30%    | Query latency and plan quality                       |
+| Concurrency           | 20%    | Lock contention affecting app responsiveness         |
+| Efficiency            | 15%    | Resource utilization and temp spill                  |
+| Availability          | 15%    | App uptime                                           |
+| Storage               | 10%    | Data shape and bloat                                 |
+| Operational Hygiene   | 5%     | Basic diagnostic visibility                          |
+| Cost                  | 5%     | Infrastructure spend awareness                       |
 
 ### Default Profile
 
-| Domain       | Weight |
-|--------------|--------|
-| Availability | 20%    |
-| Performance  | 25%    |
-| Concurrency  | 20%    |
-| Storage      | 15%    |
-| Efficiency   | 10%    |
-| Cost         | 10%    |
+| Domain                | Weight | Rationale                                            |
+|-----------------------|--------|------------------------------------------------------|
+| Availability          | 20%    | Uptime and reliability baseline                      |
+| Performance           | 20%    | Latency and plan quality baseline                    |
+| Concurrency           | 15%    | Contention and connection management                 |
+| Storage               | 15%    | Maintenance and bloat control                        |
+| Operational Hygiene   | 10%    | Configuration and diagnostic posture                 |
+| Efficiency            | 10%    | Resource utilization and waste                       |
+| Cost                  | 10%    | Cost efficiency awareness                            |
 
 ## Two-Pass Scoring
 

@@ -762,6 +762,379 @@ rules:
             cost: -6
             efficiency: -3
 
+  - id: excessive_superuser_roles
+    enabled: true
+    profiles: [default, reliability]
+    finding:
+      key: excessive_superuser_roles
+      domain: operational_hygiene
+      title: Excessive superuser roles detected
+      summary_template: >
+        Found ${summary.superuser_count} roles with SUPERUSER privileges.
+      impact_template: >
+        Superuser proliferation increases the blast radius of credential compromise and bypasses RLS.
+      recommendation_template: >
+        Revoke superuser from non-system roles and follow the principle of least privilege.
+      tags: [security, roles, superuser]
+    evidence:
+      required_probes:
+        - role_inventory
+    evaluate:
+      mode: first_match
+      cases:
+        - when:
+            all:
+              - fact: summary.superuser_count
+                from: role_inventory
+                op: gt
+                value: 2
+          severity: medium
+          confidence: high
+          score_effects:
+            operational_hygiene: -10
+            availability: -4
+
+        - when:
+            all:
+              - fact: summary.superuser_count
+                from: role_inventory
+                op: gt
+                value: 1
+          severity: low
+          confidence: high
+          score_effects:
+            operational_hygiene: -4
+
+  - id: rls_policy_columns_unindexed
+    enabled: true
+    profiles: [default, performance]
+    finding:
+      key: rls_policy_columns_unindexed
+      domain: performance
+      title: Unindexed RLS policy columns detected
+      summary_template: >
+        Found ${summary.unindexed_policy_column_count} unindexed column(s) referenced in RLS policies.
+      impact_template: >
+        Every API call through PostgREST pays the RLS tax; missing indexes on policy columns
+        cause sequential scans on every request.
+      recommendation_template: >
+        Add indexes to all columns used in RLS USING and WITH CHECK clauses.
+      tags: [supabase, rls, performance, indexes]
+    evidence:
+      required_probes:
+        - rls_policy_column_indexing
+    evaluate:
+      mode: first_match
+      cases:
+        - when:
+            all:
+              - fact: summary.unindexed_policy_column_count
+                from: rls_policy_column_indexing
+                op: gt
+                value: 5
+          severity: high
+          confidence: high
+          score_effects:
+            performance: -20
+            efficiency: -10
+
+        - when:
+            all:
+              - fact: summary.unindexed_policy_column_count
+                from: rls_policy_column_indexing
+                op: gt
+                value: 2
+          severity: medium
+          confidence: high
+          score_effects:
+            performance: -12
+            efficiency: -6
+
+  - id: replication_slot_inactive_or_lagging
+    enabled: true
+    profiles: [default, reliability]
+    finding:
+      key: replication_slot_inactive_or_lagging
+      domain: availability
+      title: Inactive or lagging replication slot detected
+      summary_template: >
+        Replication slot lag detected; max lag is ${summary.max_lag_bytes} bytes.
+      impact_template: >
+        Unconsumed replication slots prevent WAL cleanup and can fill disk, leading to unavailability.
+      recommendation_template: >
+        Identify the unconsumed slot (often Supabase Realtime) and ensure the consumer is active.
+      tags: [supabase, realtime, replication, wal]
+    evidence:
+      required_probes:
+        - realtime_replication_slot_health
+    evaluate:
+      mode: first_match
+      cases:
+        - when:
+            all:
+              - fact: summary.inactive_slot_count
+                from: realtime_replication_slot_health
+                op: gt
+                value: 0
+              - fact: summary.max_lag_bytes
+                from: realtime_replication_slot_health
+                op: gt
+                value: 1073741824
+          severity: critical
+          confidence: high
+          score_effects:
+            availability: -25
+            storage: -15
+
+        - when:
+            all:
+              - fact: summary.max_lag_bytes
+                from: realtime_replication_slot_health
+                op: gt
+                value: 536870912
+          severity: high
+          confidence: high
+          score_effects:
+            availability: -15
+            storage: -8
+
+  - id: auth_table_bloat_detected
+    enabled: true
+    profiles: [default, storage]
+    finding:
+      key: auth_table_bloat_detected
+      domain: storage
+      title: Supabase Auth table bloat detected
+      summary_template: >
+        High dead tuple ratio in auth schema; max dead tuple percentage is ${summary.max_dead_tuple_pct}%.
+      impact_template: >
+        Auth tables churn heavily; stale vacuum slows login flows and wastes storage.
+      recommendation_template: >
+        Tune autovacuum for auth.sessions and auth.refresh_tokens tables.
+      tags: [supabase, auth, vacuum, bloat]
+    evidence:
+      required_probes:
+        - auth_schema_health
+    evaluate:
+      mode: first_match
+      cases:
+        - when:
+            all:
+              - fact: summary.max_dead_tuple_pct
+                from: auth_schema_health
+                op: gt
+                value: 30
+          severity: high
+          confidence: high
+          score_effects:
+            storage: -15
+            performance: -8
+            availability: -5
+
+        - when:
+            all:
+              - fact: summary.max_dead_tuple_pct
+                from: auth_schema_health
+                op: gt
+                value: 10
+          severity: medium
+          confidence: high
+          score_effects:
+            storage: -8
+            performance: -4
+
+  - id: storage_soft_delete_pressure
+    enabled: true
+    profiles: [default, storage]
+    finding:
+      key: storage_soft_delete_pressure
+      domain: storage
+      title: Storage soft-delete pressure detected
+      summary_template: >
+        Soft-deleted rows account for ${summary.soft_deleted_ratio}% of storage.objects.
+      impact_template: >
+        Un-cleaned soft deletes waste space and slow metadata queries.
+      recommendation_template: >
+        Review storage cleanup policies and ensure soft-deleted objects are purged.
+      tags: [supabase, storage, vacuum]
+    evidence:
+      required_probes:
+        - storage_objects_health
+    evaluate:
+      mode: first_match
+      cases:
+        - when:
+            all:
+              - fact: summary.soft_deleted_ratio
+                from: storage_objects_health
+                op: gt
+                value: 20
+          severity: high
+          confidence: medium
+          score_effects:
+            storage: -12
+            cost: -8
+
+  - id: system_schema_vacuum_stale
+    enabled: true
+    profiles: [default, operational_hygiene]
+    finding:
+      key: system_schema_vacuum_stale
+      domain: operational_hygiene
+      title: System schema vacuum is stale
+      summary_template: >
+        High dead tuple ratio in system schemas; max observed is ${summary.max_dead_tuple_pct}%.
+      impact_template: >
+        System schemas are managed by the platform but still require vacuum to prevent bloat.
+      recommendation_template: >
+        Alert platform engineering or tune autovacuum for system tables.
+      tags: [supabase, maintenance, vacuum]
+    evidence:
+      required_probes:
+        - system_schema_bloat
+    evaluate:
+      mode: first_match
+      cases:
+        - when:
+            all:
+              - fact: summary.max_dead_tuple_pct
+                from: system_schema_bloat
+                op: gt
+                value: 30
+          severity: high
+          confidence: high
+          score_effects:
+            operational_hygiene: -15
+            storage: -8
+            performance: -5
+
+  - id: pool_mode_misconfiguration
+    enabled: true
+    profiles: [default, performance]
+    finding:
+      key: pool_mode_misconfiguration
+      domain: performance
+      title: Connection pool mode misconfiguration
+      summary_template: >
+        Connection pool is in ${summary.pool_mode} mode.
+      impact_template: >
+        Transaction mode breaks prepared statement caching, increasing planning overhead.
+      recommendation_template: >
+        Use session mode for workloads requiring prepared statements, or transaction mode for high
+        concurrency.
+      tags: [supabase, pgbouncer, pooling]
+    evidence:
+      required_probes:
+        - pgbouncer_pool_health
+    evaluate:
+      mode: first_match
+      cases:
+        - when:
+            all:
+              - fact: summary.pool_mode
+                from: pgbouncer_pool_health
+                op: eq
+                value: transaction
+          severity: low
+          confidence: medium
+          score_effects:
+            performance: -4
+
+  - id: pg_cron_job_failures
+    enabled: true
+    profiles: [default, operational_hygiene]
+    finding:
+      key: pg_cron_job_failures
+      domain: operational_hygiene
+      title: pg_cron job failures detected
+      summary_template: >
+        Found ${summary.failed_job_count} failed scheduled job(s).
+      impact_template: >
+        Failed background jobs can indicate logic errors or resource contention.
+      recommendation_template: >
+        Check cron.job_run_details for specific error messages.
+      tags: [supabase, cron, maintenance]
+    evidence:
+      required_probes:
+        - pg_cron_job_health
+    evaluate:
+      mode: first_match
+      cases:
+        - when:
+            all:
+              - fact: summary.failed_job_count
+                from: pg_cron_job_health
+                op: gt
+                value: 0
+          severity: medium
+          confidence: high
+          score_effects:
+            operational_hygiene: -10
+            availability: -5
+
+  - id: extension_version_outdated
+    enabled: true
+    profiles: [default, operational_hygiene]
+    finding:
+      key: extension_version_outdated
+      domain: operational_hygiene
+      title: Outdated extensions detected
+      summary_template: >
+        Found ${summary.outdated_count} extension(s) with available upgrades.
+      impact_template: >
+        Outdated extensions may miss security patches or performance improvements.
+      recommendation_template: >
+        Upgrade extensions during a scheduled maintenance window.
+      tags: [extensions, maintenance]
+    evidence:
+      required_probes:
+        - extension_version_health
+    evaluate:
+      mode: first_match
+      cases:
+        - when:
+            all:
+              - fact: summary.outdated_count
+                from: extension_version_health
+                op: gt
+                value: 0
+          severity: low
+          confidence: low
+          score_effects:
+            operational_hygiene: -4
+
+  - id: pgvector_missing_index
+    enabled: true
+    profiles: [default, performance]
+    finding:
+      key: pgvector_missing_index
+      domain: performance
+      title: Missing pgvector index detected
+      summary_template: >
+        Found ${summary.unindexed_vector_column_count} unindexed vector column(s).
+      impact_template: >
+        Missing vector indexes cause expensive sequential distance scans.
+      recommendation_template: >
+        Add HNSW or IVFFlat indexes to all frequently queried vector columns.
+      tags: [supabase, pgvector, ai, performance]
+    evidence:
+      required_probes:
+        - pgvector_index_health
+    evaluate:
+      mode: first_match
+      cases:
+        - when:
+            all:
+              - fact: summary.unindexed_vector_column_count
+                from: pgvector_index_health
+                op: gt
+                value: 0
+          severity: high
+          confidence: high
+          score_effects:
+            performance: -15
+            efficiency: -8
+
 metadata:
   guidance:
     path_resolution: >

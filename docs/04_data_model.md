@@ -217,6 +217,7 @@ create table assessment_scores (
   storage_score numeric(5,2),
   efficiency_score numeric(5,2),
   cost_score numeric(5,2),
+  operational_hygiene_score numeric(5,2),
 
   overall_score numeric(5,2),
   score_payload jsonb not null default '{}'::jsonb

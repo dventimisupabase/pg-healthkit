@@ -768,6 +768,356 @@ probes:
       - availability
       - cost
 
+  - name: role_inventory
+    version: "2026-03-20"
+    enabled: true
+    profiles: [default, reliability]
+    category: baseline
+    sql_file: probes/50_role_inventory.sql
+    prerequisites:
+      extensions: []
+      capabilities: []
+    payload_contract:
+      type: object
+      required:
+        - roles
+        - summary
+      properties:
+        roles:
+          type: array
+          items:
+            type: object
+            required: [rolname, rolsuper]
+            properties:
+              rolname: { type: string }
+              rolsuper: { type: boolean }
+              rolcreaterole: { type: boolean }
+              rolcreatedb: { type: boolean }
+              rolcanlogin: { type: boolean }
+              rolvaliduntil: { type: string, nullable: true }
+        summary:
+          type: object
+          required: [superuser_count]
+          properties:
+            superuser_count: { type: integer }
+    summary_fields:
+      - summary.superuser_count
+    supports_findings:
+      - excessive_superuser_roles
+    affects_domains:
+      - operational_hygiene
+      - availability
+
+  - name: rls_policy_column_indexing
+    version: "2026-03-20"
+    enabled: true
+    profiles: [default, performance]
+    category: baseline
+    sql_file: probes/60_rls_policy_column_indexing.sql
+    prerequisites:
+      extensions: []
+      capabilities: []
+    payload_contract:
+      type: object
+      required: [rows, summary]
+      properties:
+        rows:
+          type: array
+          items:
+            type: object
+            required: [schemaname, tablename, column_name, has_index]
+            properties:
+              schemaname: { type: string }
+              tablename: { type: string }
+              column_name: { type: string }
+              has_index: { type: boolean }
+        summary:
+          type: object
+          required: [unindexed_policy_column_count]
+          properties:
+            unindexed_policy_column_count: { type: integer }
+    summary_fields:
+      - summary.unindexed_policy_column_count
+    supports_findings:
+      - rls_policy_columns_unindexed
+    affects_domains:
+      - performance
+      - efficiency
+
+  - name: realtime_replication_slot_health
+    version: "2026-03-20"
+    enabled: true
+    profiles: [default, reliability]
+    category: baseline
+    sql_file: probes/61_realtime_replication_slot_health.sql
+    prerequisites:
+      extensions: []
+      capabilities: []
+    payload_contract:
+      type: object
+      required: [rows, summary]
+      properties:
+        rows:
+          type: array
+          items:
+            type: object
+            required: [slot_name, active, lag_bytes]
+            properties:
+              slot_name: { type: string }
+              active: { type: boolean }
+              lag_bytes: { type: integer }
+        summary:
+          type: object
+          required: [max_lag_bytes, inactive_slot_count]
+          properties:
+            max_lag_bytes: { type: integer }
+            inactive_slot_count: { type: integer }
+    summary_fields:
+      - summary.max_lag_bytes
+      - summary.inactive_slot_count
+    supports_findings:
+      - replication_slot_inactive_or_lagging
+    affects_domains:
+      - availability
+      - storage
+
+  - name: auth_schema_health
+    version: "2026-03-20"
+    enabled: true
+    profiles: [default, storage]
+    category: baseline
+    sql_file: probes/62_auth_schema_health.sql
+    prerequisites:
+      extensions: []
+      capabilities: []
+    payload_contract:
+      type: object
+      required: [rows, summary]
+      properties:
+        rows:
+          type: array
+          items:
+            type: object
+            required: [relname, n_dead_tup, dead_tuple_pct]
+            properties:
+              relname: { type: string }
+              n_live_tup: { type: integer }
+              n_dead_tup: { type: integer }
+              dead_tuple_pct: { type: number }
+              last_autovacuum: { type: string, nullable: true }
+        summary:
+          type: object
+          required: [max_dead_tuple_pct]
+          properties:
+            max_dead_tuple_pct: { type: number }
+    summary_fields:
+      - summary.max_dead_tuple_pct
+    supports_findings:
+      - auth_table_bloat_detected
+    affects_domains:
+      - storage
+      - performance
+      - availability
+
+  - name: storage_objects_health
+    version: "2026-03-20"
+    enabled: true
+    profiles: [default, storage]
+    category: baseline
+    sql_file: probes/63_storage_objects_health.sql
+    prerequisites:
+      extensions: []
+      capabilities: []
+    payload_contract:
+      type: object
+      required: [summary]
+      properties:
+        summary:
+          type: object
+          required: [total_rows, soft_deleted_rows, soft_deleted_ratio]
+          properties:
+            total_rows: { type: integer }
+            soft_deleted_rows: { type: integer }
+            soft_deleted_ratio: { type: number }
+    summary_fields:
+      - summary.soft_deleted_ratio
+    supports_findings:
+      - storage_soft_delete_pressure
+    affects_domains:
+      - storage
+      - cost
+
+  - name: system_schema_bloat
+    version: "2026-03-20"
+    enabled: true
+    profiles: [default, operational_hygiene]
+    category: baseline
+    sql_file: probes/64_system_schema_bloat.sql
+    prerequisites:
+      extensions: []
+      capabilities: []
+    payload_contract:
+      type: object
+      required: [rows, summary]
+      properties:
+        rows:
+          type: array
+          items:
+            type: object
+            required: [schemaname, relname, dead_tuple_pct]
+            properties:
+              schemaname: { type: string }
+              relname: { type: string }
+              dead_tuple_pct: { type: number }
+              last_autovacuum: { type: string, nullable: true }
+        summary:
+          type: object
+          required: [max_dead_tuple_pct]
+          properties:
+            max_dead_tuple_pct: { type: number }
+    summary_fields:
+      - summary.max_dead_tuple_pct
+    supports_findings:
+      - system_schema_vacuum_stale
+    affects_domains:
+      - storage
+      - performance
+      - operational_hygiene
+
+  - name: pgbouncer_pool_health
+    version: "2026-03-20"
+    enabled: true
+    profiles: [default, performance]
+    category: baseline
+    sql_file: probes/65_pgbouncer_pool_health.sql
+    prerequisites:
+      extensions: []
+      capabilities: []
+    payload_contract:
+      type: object
+      required: [summary]
+      properties:
+        summary:
+          type: object
+          required: [pool_mode, active_connections, waiting_clients]
+          properties:
+            pool_mode: { type: string }
+            active_connections: { type: integer }
+            waiting_clients: { type: integer }
+    summary_fields:
+      - summary.pool_mode
+      - summary.waiting_clients
+    supports_findings:
+      - pool_mode_misconfiguration
+      - pool_contention_detected
+    affects_domains:
+      - concurrency
+      - performance
+
+  - name: pg_cron_job_health
+    version: "2026-03-20"
+    enabled: true
+    profiles: [default, operational_hygiene]
+    category: baseline
+    sql_file: probes/66_pg_cron_job_health.sql
+    prerequisites:
+      extensions: [pg_cron]
+      capabilities: []
+    payload_contract:
+      type: object
+      required: [rows, summary]
+      properties:
+        rows:
+          type: array
+          items:
+            type: object
+            required: [jobname, last_status]
+            properties:
+              jobname: { type: string }
+              last_status: { type: string }
+              last_run_time: { type: string, nullable: true }
+        summary:
+          type: object
+          required: [failed_job_count]
+          properties:
+            failed_job_count: { type: integer }
+    summary_fields:
+      - summary.failed_job_count
+    supports_findings:
+      - pg_cron_job_failures
+    affects_domains:
+      - availability
+      - operational_hygiene
+
+  - name: extension_version_health
+    version: "2026-03-20"
+    enabled: true
+    profiles: [default, operational_hygiene]
+    category: baseline
+    sql_file: probes/67_extension_version_health.sql
+    prerequisites:
+      extensions: []
+      capabilities: []
+    payload_contract:
+      type: object
+      required: [rows, summary]
+      properties:
+        rows:
+          type: array
+          items:
+            type: object
+            required: [name, installed_version, available_version]
+            properties:
+              name: { type: string }
+              installed_version: { type: string }
+              available_version: { type: string }
+        summary:
+          type: object
+          required: [outdated_count]
+          properties:
+            outdated_count: { type: integer }
+    summary_fields:
+      - summary.outdated_count
+    supports_findings:
+      - extension_version_outdated
+    affects_domains:
+      - operational_hygiene
+
+  - name: pgvector_index_health
+    version: "2026-03-20"
+    enabled: true
+    profiles: [default, performance]
+    category: baseline
+    sql_file: probes/68_pgvector_index_health.sql
+    prerequisites:
+      extensions: [pgvector]
+      capabilities: []
+    payload_contract:
+      type: object
+      required: [rows, summary]
+      properties:
+        rows:
+          type: array
+          items:
+            type: object
+            required: [tablename, column_name, has_index]
+            properties:
+              tablename: { type: string }
+              column_name: { type: string }
+              has_index: { type: boolean }
+        summary:
+          type: object
+          required: [unindexed_vector_column_count]
+          properties:
+            unindexed_vector_column_count: { type: integer }
+    summary_fields:
+      - summary.unindexed_vector_column_count
+    supports_findings:
+      - pgvector_missing_index
+    affects_domains:
+      - performance
+      - efficiency
+
 metadata:
   normalization_guidance:
     - Normalize intervals and durations to numeric milliseconds or seconds, not textual intervals.
