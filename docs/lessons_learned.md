@@ -113,6 +113,12 @@ Strict TDD (write test → fail → implement → pass) was followed for Phase 1
 - Supabase MCP only for project provisioning
 - Go code generators for any contract → SQL/code translation (deterministic, no transcription)
 
+### PG version compatibility
+
+- Test probes against PG 15, 16, and 17 at minimum. PG 17 restructured `pg_stat_bgwriter` into separate `pg_stat_checkpointer` and `pg_stat_bgwriter` views.
+- Probes that query system catalog views should use version-aware SQL (e.g., `DO $$ IF current_setting('server_version_num')::int >= 170000 THEN ... END IF; $$`) for cross-version compatibility.
+- The pgx driver returns PostgreSQL `numeric` as `pgtype.Numeric`, not Go `float64`. Handle this explicitly in type coercion.
+
 ### What to track in conversation tasks
 
 Use conversation tasks as an ephemeral checklist. Mark each step as done. Don't write durable plan documents — the design docs serve that purpose.
@@ -137,3 +143,20 @@ Use conversation tasks as an ephemeral checklist. Mark each step as done. Don't 
 - Separate doc-fix commits from implementation commits throughout the trial, not retroactively.
 
 **Status:** Complete. All v1 Definition of Done criteria met. Retrospective produced the trial protocol (`docs/trial_protocol.md`).
+
+### Trial 02 — 2026-03-21
+
+**Scope:** Full v1 implementation (Phases 1-5). All 24 probes, all 28 rules, CLI with arena integration, markdown reporting. Second trial to stress-test doc quality after trial 01 fixes.
+
+**Doc fixes:**
+- `docs: fix wal_checkpoint_health probe for PG 17+ schema changes` — PG 17 moved checkpoint stats from `pg_stat_bgwriter` to `pg_stat_checkpointer`. The probe now uses a version-aware DO block with dynamic SQL to handle both layouts. This was the only ambiguity encountered.
+
+**New lessons:**
+- PostgreSQL version compatibility must be tested across major versions. PG 17 broke the `wal_checkpoint_health` probe due to catalog view restructuring. Probes that query system views should be tested against both the oldest and newest supported PG versions.
+- Multi-statement SQL probes (CREATE TEMP TABLE + DO + SELECT) require the runner to split and execute setup statements separately from the final query. pgx's `Query()` only handles single statements.
+- pgx v5 returns PostgreSQL `numeric` as `pgtype.Numeric`, not as Go `float64`. The normalizer must handle this type explicitly in coercion functions or summary values will silently be zero.
+- The Go seed generator approach worked well — reading `rules.yaml` and emitting SQL INSERTs is deterministic and eliminates transcription errors. All 28 rules seeded correctly on first attempt.
+- The rule engine's `resolve_fact` function must navigate the full evidence payload JSONB. Uploading the canonical payload (which includes `summary` at top level) directly works because the dot-path resolution starts from the payload root.
+- Design docs were significantly better than trial 01. Only one probe SQL fix was needed (vs. 3 doc fixes in trial 01). The normalizer, data model, and rule engine specs required zero fixes.
+
+**Status:** Complete. All v1 Definition of Done criteria met. All 28 rules fire correctly against synthetic evidence. End-to-end test passes against local PostgreSQL.
