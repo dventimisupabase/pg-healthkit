@@ -32,6 +32,14 @@ probes:
         - is_replica
         - settings
       properties:
+        db:
+          type: string
+          optional: true
+          description: Database name connected to
+        version:
+          type: string
+          optional: true
+          description: Human-readable PG version (normalizer maps to postgres_version)
         postgres_version:
           type: string
           description: PostgreSQL version string
@@ -114,6 +122,9 @@ probes:
             properties:
               name: { type: string }
               version: { type: string }
+              # Raw SQL column names; normalizer maps extname -> name, extversion -> version
+              extname: { type: string, optional: true }
+              extversion: { type: string, optional: true }
         summary:
           type: object
           required:
@@ -168,8 +179,15 @@ probes:
             temp_files: { type: integer }
             temp_bytes: { type: integer }
             deadlocks: { type: integer }
+            numbackends: { type: integer, optional: true }
+            tup_returned: { type: integer, optional: true }
+            tup_fetched: { type: integer, optional: true }
+            tup_inserted: { type: integer, optional: true }
+            tup_updated: { type: integer, optional: true }
+            tup_deleted: { type: integer, optional: true }
             blk_read_time: { type: number, nullable: true }
             blk_write_time: { type: number, nullable: true }
+            stats_reset: { type: string, nullable: true, optional: true, description: "ISO timestamp" }
     summary_fields:
       - stats.deadlocks
       - stats.temp_bytes
@@ -195,7 +213,6 @@ probes:
       type: object
       required:
         - summary
-        - states
       properties:
         summary:
           type: object
