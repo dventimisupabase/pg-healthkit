@@ -17,7 +17,7 @@ Each finding includes:
 | `summary`        | What was observed                                                                           |
 | `cause`          | Likely root cause (not symptoms)                                                            |
 | `impact`         | Why it matters                                                                              |
-| `recommendation` | What to do                                                                                  |
+| `recommendation` | What to do, including tradeoffs (what could go wrong, what the recommendation costs)        |
 | `urgency`        | Remediation timeframe: `immediate` (1 week), `short_term` (30 days), `structural` (quarter) |
 | `evidence_refs`  | Links to supporting probe evidence                                                          |
 | `tags`           | Classification labels                                                                       |

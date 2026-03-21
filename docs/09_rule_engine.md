@@ -135,6 +135,14 @@ Rules should include explicit confidence levels.
 
 Every rule should answer: what was observed, why it matters, what to do about it, and how confident we are.
 
+### 5. Rules must diagnose root causes, not report symptoms
+
+Findings should explain *why* something is happening, not just *that* it is happening. "Dead tuple accumulation detected" is a symptom. "Autovacuum cannot reclaim dead tuples because long-running transactions hold back the visibility horizon" is a root cause. Every finding template should include a `cause` that traces the observation back to a likely mechanism.
+
+### 6. Recommendations must include tradeoffs
+
+Remediation advice without tradeoffs is incomplete. For example, "drop this unused index" should note that the index may serve infrequent reporting queries. "Raise work_mem" should note the risk at high concurrency. If a recommendation has no meaningful downside, say so explicitly — that itself is useful information.
+
 ## V1 Rule Catalog
 
 ### long_running_transactions_detected
@@ -350,12 +358,12 @@ This is possibly the single highest-impact Supabase-specific finding. RLS is ena
 
 ## Rule Attributes
 
-Every rule should carry:
+Every rule must carry:
 
 - **Workload context** — which profiles it applies to, whether severity varies by workload type
 - **Confidence** — how trustworthy the inference is from available evidence
 - **Prerequisites** — which probes must have succeeded
-- **Whether history is required** — flag for future trend-based evolution
+- **Whether history is required** — flag for future trend-based evolution. Rules that depend on growth rate, regression detection, trend in autovacuum lag, periodic saturation, or capacity forecasting should be marked `history_required: true` so the evaluator can skip them when only a single snapshot is available, rather than producing misleading findings
 
 ## What Rules Are Not
 

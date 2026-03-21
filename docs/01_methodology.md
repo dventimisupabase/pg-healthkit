@@ -6,6 +6,16 @@ Health = f(persona, objective, workload, evidence, interpretation)
 
 Health is not an absolute property of a database. It is relative to the intended use, the people responsible for it, and the business context in which it operates.
 
+## Product Mindset
+
+Treat this as a product, not a one-off health check. The right outcome is a small assessment framework with three artifacts:
+
+1. **A standardized checklist** for humans (see `03_human_checklist.md`)
+2. **A SQL probe pack** for evidence collection (see `07_probe_system.md` and `probes/`)
+3. **A lightweight audit tool** that runs probes, scores findings, and produces reports (see `08_cli_contract.md`)
+
+That gives you consistency, explainability, and room to mature over time. Every design decision should serve repeatability and credibility across engagements, not just one-time diagnostic convenience.
+
 ## Data Flow
 
 ```
@@ -256,6 +266,7 @@ See `sample_report_template.md` for the canonical report format.
 - Pretending a single snapshot gives trend insight
 - Using only database-internal evidence when app symptoms matter
 - Generating remediation advice without confidence or tradeoffs
+- Reporting symptoms without diagnosing root causes — every finding should answer *why*, not just *what*
 
 A credible health methodology says: "Here is what we know, how we know it, how confident we are, and what to do next."
 

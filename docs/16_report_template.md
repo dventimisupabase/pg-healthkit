@@ -57,7 +57,19 @@ For each finding:
 
 This maps directly to the `finding` block in `rules.yaml`. No translation layer is needed.
 
-### 4. Supporting Observations
+### 4. Action Plan
+
+A prioritized remediation plan derived from findings, split by urgency:
+
+| Urgency        | Timeframe      | Scope                                                                   |
+|----------------|----------------|-------------------------------------------------------------------------|
+| **Immediate**  | Within 1 week  | Kill blocking sessions, terminate abandoned transactions                |
+| **Short-term** | Within 30 days | Add missing indexes, tune autovacuum, adjust pool configuration         |
+| **Structural** | Within quarter | Schema redesign, tier upgrade, application transaction rework           |
+
+Each action item should reference the finding(s) that motivate it and include tradeoffs where applicable. The action plan is a distinct output from the findings detail — findings explain what is wrong and why, while the action plan tells the reader what to do and in what order.
+
+### 6. Supporting Observations
 
 Raw high-signal data that provides context but is not a finding:
 
@@ -67,7 +79,7 @@ Raw high-signal data that provides context but is not a finding:
 
 This section separates interpreted findings from raw data, preventing reports from drowning in metrics or hiding important context.
 
-### 5. Interpretation Notes
+### 7. Interpretation Notes
 
 Caveats that frame how to read the report:
 
@@ -76,11 +88,11 @@ Caveats that frame how to read the report:
 - Absence of findings does not imply absence of risk (some probes may be skipped)
 - Workload type influences interpretation
 
-### 6. Methodology Reference
+### 8. Methodology Reference
 
 Pointers to the underlying system: probe-based evidence, normalization contracts, rule-based evaluation, domain scoring.
 
-### 7. Appendix: Probe Execution Summary
+### 9. Appendix: Probe Execution Summary
 
 Table of all probes with their execution status (`success`, `skipped`, `failed`) and notes. This makes it clear what evidence was and was not available.
 

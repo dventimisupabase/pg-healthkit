@@ -334,6 +334,17 @@ Good but not required for a credible first release:
 #### Operational Hygiene
 - **Primary:** `system_schema_bloat`, `pg_cron_job_health`, `extension_version_health`
 
+## Stats Reset Horizon
+
+Many probes collect cumulative statistics from views like `pg_stat_database`, `pg_stat_user_tables`, and `pg_stat_statements`. These counters accumulate since the last statistics reset (via `pg_stat_reset()` or server restart). Without knowing the stats age, cumulative values are uninterpretable — 50 deadlocks over 1 hour is very different from 50 deadlocks over 6 months.
+
+This is a system-wide principle, not specific to any single probe:
+
+- **Probes that collect cumulative stats should record the stats reset timestamp** (from `pg_stat_database.stats_reset`) in their metadata when available
+- **The normalizer should propagate stats age** into the canonical payload metadata so rules can assess whether cumulative values are meaningful
+- **Rules should not assign high severity to cumulative thresholds** without evidence of the observation window — a cumulative deadlock count of 5 with an unknown stats window should be flagged at lower confidence than the same count over a known 24-hour window
+- **Reports should disclose the stats observation window** when presenting cumulative evidence
+
 ## Standardized Evidence Payload
 
 All probe evidence uses a common wrapper. See `normalizer_interface_contract.md` for the full specification.
