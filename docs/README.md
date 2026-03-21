@@ -44,6 +44,3 @@ These define the boundary between CLI and Arena:
 
 Prose contract documentation now lives in `docs/` (see `08_cli_contract.md`, `09_rule_engine.md`, `15_normalizer.md`).
 
-## Archive
-
-- `chatgpt-conversation.md` — the original brainstorming session that produced these docs

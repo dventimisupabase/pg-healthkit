@@ -2,7 +2,7 @@
 
 ## Context
 
-A gap analysis comparing `docs/chatgpt-conversation.md` (the authoritative source) against the 13 numbered inception documents (`01_` through `13_`) identified 6 omissions. This plan addresses all of them through new documents and targeted edits to existing documents.
+A gap analysis comparing the original brainstorming notes against the 13 numbered inception documents (`01_` through `13_`) identified 6 omissions. This plan addresses all of them through new documents and targeted edits to existing documents.
 
 ## Gaps to Close
 
@@ -138,8 +138,9 @@ Grep all docs and `docs/README.md` for references to renamed files (e.g., `03_da
 
 ### Step 10: Verify completeness
 
-- Re-read the conversation sections on the checklist (lines ~369–525), security (lines ~499–513), configuration (lines ~473–497), action plan timeframes (lines ~354–362), finding structure (lines ~339–353), and Supabase CLI (lines ~1617–1627)
-- Confirm no remaining content from the conversation is missing from the docs
+- Review all inception documents for internal consistency
+- Confirm cross-references between docs are valid
+- Verify probe, rule, and finding catalogs agree on names and counts
 
 ## Out of Scope
 
