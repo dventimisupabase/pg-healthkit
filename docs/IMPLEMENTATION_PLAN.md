@@ -63,22 +63,23 @@ Success criteria:
 - zero-row, skipped, and failed paths are handled correctly
 - canonical payloads validate cleanly
 
-### Phase 3 — Rule evaluation
-Implement:
-- rule loading from `rules.yaml`
+### Phase 3 — Rule evaluation (Arena-side, SQL functions)
+Implement as SQL functions in the Arena database:
+- rule loading from `rules.yaml` (seed as reference data)
 - profile filtering
 - required-probe checks
-- fact path resolution
+- fact path resolution against stored evidence JSONB
 - operator evaluation
 - first-match case handling
 - finding rendering
 - score delta accumulation
 
+> **Design decision:** Rule evaluation lives in the Arena (Supabase SQL functions), not in the CLI. This centralizes rule evolution, avoids CLI releases to update rules, and ensures findings can always be reproduced server-side. The CLI's `analyze` command triggers server-side evaluation.
+
 Deliverables:
-- rule engine package
-- finding objects
-- score accumulator
-- rule fixtures and tests
+- SQL functions for rule evaluation and scoring
+- finding and score views
+- rule fixtures and tests (run against the database)
 
 Success criteria:
 - rules produce expected findings from canonical payloads
@@ -185,15 +186,17 @@ Should not know:
 - business meaning of severity
 - whether a finding is important
 
-### Rule engine
+### Rule engine (Arena, SQL functions)
 Should know:
 - rule semantics
-- field lookup
+- JSONB field lookup against stored evidence
 - score deltas
 
 Should not know:
-- how SQL was executed
+- how SQL was executed on the target database
 - how fields were originally typed in raw output
+
+Lives in the Arena, not the CLI. Triggered by the `analyze` endpoint.
 
 ### Reporter
 Should know:
@@ -244,16 +247,16 @@ A likely implementation layout could be:
 /docs
   methodology and spec files
 
-/internal/probes
-/internal/normalize
-/internal/rules
-/internal/report
-/internal/contracts
+/cli/internal/probes      # Go: probe runner
+/cli/internal/normalize   # Go: normalizer
+/cli/internal/contracts   # Go: contract loader/validator
+/cli/testdata/raw         # fixtures: raw probe output
+/cli/testdata/canonical   # fixtures: normalized payloads
 
-/testdata/raw
-/testdata/canonical
-/testdata/rules
-/testdata/reports
+/arena/supabase/migrations  # SQL: schema, functions, views
+/arena/supabase/functions   # SQL: rule evaluation, scoring
+/arena/testdata/rules       # fixtures: rule evaluation tests
+/arena/testdata/reports     # fixtures: report output
 ```
 
 The exact layout can vary, but keeping contracts and fixtures explicit is important.
