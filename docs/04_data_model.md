@@ -230,9 +230,10 @@ Example `score_payload`:
 {
   "weights": {
     "availability": 0.2,
-    "performance": 0.25,
-    "concurrency": 0.2,
+    "performance": 0.2,
+    "concurrency": 0.15,
     "storage": 0.15,
+    "operational_hygiene": 0.1,
     "efficiency": 0.1,
     "cost": 0.1
   },

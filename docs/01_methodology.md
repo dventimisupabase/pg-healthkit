@@ -206,14 +206,15 @@ To make assessments customer-facing and repeatable, introduce scoring:
 
 Example weights for a DBA/SRE review:
 
-| Domain                        | Weight |
-|-------------------------------|--------|
-| Availability & Recoverability | 25%    |
-| Concurrency & Contention      | 20%    |
-| Storage & Maintenance         | 20%    |
-| Performance & Latency         | 15%    |
-| Efficiency & Sizing           | 10%    |
-| Security & Hygiene            | 10%    |
+| Domain              | Weight |
+|---------------------|--------|
+| Availability        | 25%    |
+| Concurrency         | 20%    |
+| Storage             | 15%    |
+| Performance         | 15%    |
+| Operational Hygiene | 10%    |
+| Efficiency          | 10%    |
+| Cost                | 5%     |
 
 For a CTO-focused review, cost and capacity get heavier weight; performance and maintenance lower unless tied to customer impact.
 

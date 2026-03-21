@@ -144,13 +144,15 @@ Scores should be transparent, not opaque. The score payload includes weights, ra
   "storage_score": 71,
   "efficiency_score": 64,
   "cost_score": 59,
+  "operational_hygiene_score": 80,
   "overall_score": 62.5,
   "score_payload": {
     "weights": {
       "availability": 0.2,
-      "performance": 0.25,
-      "concurrency": 0.2,
+      "performance": 0.2,
+      "concurrency": 0.15,
       "storage": 0.15,
+      "operational_hygiene": 0.1,
       "efficiency": 0.1,
       "cost": 0.1
     },
