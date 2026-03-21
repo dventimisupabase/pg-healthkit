@@ -141,6 +141,8 @@ Attach specific metrics to each domain.
 
 This is where most "health checks" fail. Metrics alone are not enough — you need interpretation rules.
 
+### Cross-Signal Heuristics
+
 | Signal Combination              | Likely Cause                                                  |
 |---------------------------------|---------------------------------------------------------------|
 | High CPU + low I/O              | Inefficient queries or missing indexes                        |
@@ -149,6 +151,39 @@ This is where most "health checks" fail. Metrics alone are not enough — you ne
 | Bloat + high write rate         | Autovacuum misconfiguration                                   |
 | High temp writes + high latency | Sort/hash spill, likely work_mem or query design              |
 | buffers_backend high            | Backends doing their own writes, checkpoint tuning may be off |
+
+### Domain-Specific Diagnostic Heuristics
+
+**Reliability:**
+- Replication lag nontrivial or unstable → recovery risk, stale reads, failover concerns
+- No evidence of restore testing → backup posture weak even if backups exist
+- Long transactions → vacuum interference, bloat growth, xid age risk
+
+**Performance:**
+- Top total time query → best optimization leverage
+- High mean latency with low calls → tail latency or inefficient reporting path
+- High temp writes → sort/hash spill, likely work_mem or query design issue
+- High shared block reads vs hits → memory pressure or poor locality
+
+**Concurrency:**
+- Blocking chains present → application transaction design or missing index patterns
+- Many idle-in-transaction sessions → client behavior defect
+- Active connections near max without pooling → saturation risk
+
+**Storage and Maintenance:**
+- High dead tuple ratio → autovacuum not keeping up or blocked
+- Large indexes with zero scans → write amplification and storage waste
+- High seq_scan on large OLTP tables → possible missing index or poor filter selectivity
+
+**Efficiency and Sizing:**
+- CPU low but latency high → likely contention or I/O
+- I/O high with temp spill → sort/hash overflow
+- buffers_backend high → backends doing their own writes, checkpoint tuning may be off
+
+**Capacity:**
+- High WAL volume plus write-heavy workload → storage and replica pressure
+- Largest relations dominate total size → focus cost review there first
+- max_connections set far above realistic need → memory fragmentation and operational risk
 
 This becomes the heuristic engine. Rules should be explicit about what they infer and at what confidence.
 

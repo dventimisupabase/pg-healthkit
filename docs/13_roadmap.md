@@ -1,5 +1,7 @@
 # Roadmap
 
+> **Note:** This roadmap describes **product maturity phases** — how the pg-healthkit system itself evolves. These are distinct from the **per-assessment workflow phases** (Phase 0: Pre-population → Phase 1: Customer Discovery → Phase 2: Probe Execution → Phase 3: Interpretation → Phase 4: Output) defined in `06_assessment_orchestration.md`, which describe the lifecycle of a single health evaluation.
+
 ## Phase 1: Manual but Standardized
 
 **Deliverables:**
@@ -78,6 +80,23 @@ Within Phase 2, implement in this order:
 6. **Scoring refinements and workflow polish** — persona-weighted scoring, profile support
 
 This sequence gets an end-to-end loop working quickly.
+
+## Original First 10 Rules
+
+The original methodology recommended starting with exactly 10 high-value rules before expanding:
+
+1. Long-running transactions
+2. Idle-in-transaction sessions
+3. Blocking chains
+4. Top total-time queries
+5. Top mean-latency queries
+6. Temp spill queries
+7. Dead tuple accumulation
+8. Stale autovacuum/analyze
+9. Potentially unused large indexes
+10. Replication lag
+
+These 10 produce a serious first product quickly. The full findings catalog (`12_findings_catalog.md`) expands beyond this list, but these remain the priority implementation targets for v1.
 
 ## Recommended First Vertical Slice
 

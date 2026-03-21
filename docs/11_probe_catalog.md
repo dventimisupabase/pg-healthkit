@@ -179,6 +179,56 @@ This document provides the human-readable probe catalog with purpose, interpreta
 | Storage           | dead tuples, maintenance, large tables, unused indexes             |
 | Cost / Efficiency | top queries, temp spill, large tables, unused indexes, checkpoints |
 
+## Optional v1.1 Probes
+
+### duplicate_indexes
+
+**Purpose:** Heuristic detection of duplicate or overlapping indexes on the same table.
+
+**Collects:** Table name, index name, index definition for indexes that share the same table and leading key columns.
+
+**Interpretation:** This is heuristic only. Overlapping indexes are not always redundant — a covering index may serve different queries than its prefix subset. However, true duplicates represent pure write amplification and storage waste. Mark findings as low-confidence and recommend manual review before dropping. The SQL groups by `indrelid` and `indkey` and flags tables with multiple indexes sharing the same key definition.
+
+**Candidate findings:** `duplicate_or_overlapping_indexes`
+
+**Affected domains:** storage, efficiency, cost
+
+### table_growth_proxy
+
+**Purpose:** Snapshot current table sizes for growth rate estimation via repeat sampling.
+
+**Collects:** Schema, table, total relation size in bytes.
+
+**Interpretation:** If you do not have historical telemetry, true growth rate is unavailable from one snapshot. That is important. Do not pretend otherwise. At best, report current size and recommend repeat sampling. This probe becomes valuable in Phase 3 (time-series aware) when diffing between assessment runs. In v1, it provides a size baseline for the `largest_tables` probe and informs cost/capacity discussions.
+
+**Candidate findings:** None directly in v1 (context-only probe; becomes useful for trend findings in v1.1+)
+
+**Affected domains:** cost, storage
+
+### bloat_estimate
+
+**Purpose:** Approximate table bloat from catalog statistics.
+
+**Collects:** Schema, table, table size, estimated tuple size, approximate bloat bytes and percentage.
+
+**Interpretation:** The underlying query is ugly and inherently low-confidence. It relies on `pg_stats` averages and may misestimate for tables with highly variable row widths. Prefer `pgstattuple` extension when available for accurate measurements. Always mark bloat findings as low-confidence when derived from this probe.
+
+**Candidate findings:** `table_bloat_estimated`
+
+**Affected domains:** storage, cost, performance
+
+### sequential_scan_heavy_tables
+
+**Purpose:** Detect tables with disproportionately high sequential scan counts.
+
+**Collects:** Schema, table, seq_scan count, idx_scan count, seq-to-idx ratio, live tuple count.
+
+**Interpretation:** For OLTP, high sequential scans on large tables are often a useful smell indicating missing indexes or poor filter selectivity. Not automatically a bug — small tables are expected to be seq-scanned, and OLAP workloads are inherently scan-heavy. Weight by table size and workload type.
+
+**Candidate findings:** `sequential_scan_dominant`
+
+**Affected domains:** performance, efficiency
+
 ## Supabase-Specific Probes
 
 ### 16. rls_policy_column_indexing

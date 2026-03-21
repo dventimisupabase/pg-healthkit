@@ -46,9 +46,11 @@ Every normalized probe payload uses this envelope structure:
   "metadata": {
     "duration_ms": 14,
     "database_name": "postgres",
+    "server_version_num": 170004,
     "collector_version": "0.1.0",
     "normalizer_version": "0.1.0",
     "contract_version": "v1",
+    "probe_hash": "sha256:...",
     "warnings": []
   }
 }
@@ -58,15 +60,15 @@ Skipped probes use `"status": "skipped"` with a `skip_reason` field. Failed prob
 
 ## Type Coercion Rules
 
-| Source Type        | Target                                             | Rule                                              |
-|--------------------|----------------------------------------------------|----------------------------------------------------|
-| NULLs              | JSON `null`                                        | Never substitute empty strings or `"N/A"`         |
-| Numeric strings    | Integer or number                                  | `"500"` → `500`                                   |
-| PostgreSQL intervals | Seconds or milliseconds                          | Use `_seconds` or `_ms` suffix per registry       |
-| Size values        | Bytes (integer)                                    | Never use human-readable strings like `"12 GB"`   |
-| Booleans           | `true` / `false`                                   | Normalize from PostgreSQL `t`/`f` if needed       |
-| Timestamps         | ISO-8601 strings                                   | `"2026-03-20T20:15:00Z"`                          |
-| Query text         | Truncated string                                   | 1000 character maximum                            |
+| Source Type          | Target                  | Rule                                            |
+|----------------------|-------------------------|-------------------------------------------------|
+| NULLs                | JSON `null`             | Never substitute empty strings or `"N/A"`       |
+| Numeric strings      | Integer or number       | `"500"` → `500`                                 |
+| PostgreSQL intervals | Seconds or milliseconds | Use `_seconds` or `_ms` suffix per registry     |
+| Size values          | Bytes (integer)         | Never use human-readable strings like `"12 GB"` |
+| Booleans             | `true` / `false`        | Normalize from PostgreSQL `t`/`f` if needed     |
+| Timestamps           | ISO-8601 strings        | `"2026-03-20T20:15:00Z"`                        |
+| Query text           | Truncated string        | 1000 character maximum                          |
 
 ## Summary Object
 

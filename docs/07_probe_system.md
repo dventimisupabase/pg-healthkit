@@ -149,6 +149,8 @@ For Supabase, many privilege questions are controlled by platform posture, but t
 ### `default`
 All baseline probes, plus pg_stat_statements probes if available, plus replication probe if relevant.
 
+> **Design note:** The original methodology proposed separate `oltp_default` and `olap_default` profiles. These were consolidated into a single `default` profile for v1 simplicity. The workload-type distinction is instead handled at the rule evaluation layer, where conditions reference `assessment_context.workload_type` to adjust severity thresholds. If profile-level probe selection needs to differ between OLTP and OLAP (e.g., skipping certain probes for analytics workloads), consider splitting `default` into `oltp_default` and `olap_default` in a future version.
+
 ### `performance`
 Emphasize: `top_queries_total_time`, `top_queries_mean_latency`, `temp_spill_queries`, `lock_blocking_chains`, `connection_pressure`, `dead_tuple_ratio`, `stale_maintenance`
 
@@ -185,11 +187,13 @@ Emphasize: `largest_tables`, `unused_indexes`, `top_queries_total_time`, `temp_s
 ## Optional v1.1 Probes
 
 Good but not required for a credible first release:
+- `duplicate_indexes` — Heuristic detection of duplicate or overlapping indexes (indexes on the same table sharing the same leading key columns). These represent write amplification and storage waste. Mark as low-confidence since overlap does not always mean redundancy.
+- `table_growth_proxy` — Snapshot of current table sizes for growth rate estimation. Important caveat: true growth rate is unavailable from a single snapshot. Do not pretend otherwise. At best, report current size and recommend repeat sampling for trend detection.
+- `bloat_estimate` — Approximate table bloat from catalog statistics. The underlying query is inherently low-confidence; prefer `pgstattuple` extension when available. Mark findings as low-confidence.
+- `sequential_scan_heavy_tables` — Tables with high sequential scan counts relative to index scans. For OLTP this is often a useful smell, not automatically a bug. Context-dependent.
 - `vacuum_progress`
 - `analyze_progress`
 - `cache_hit_ratio`
-- `sequential_scan_heavy_tables`
-- `bloat_estimate`
 - `table_xid_age`
 - `prepared_transactions`
 - `replica_conflicts`

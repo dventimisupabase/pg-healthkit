@@ -101,20 +101,58 @@ supabase db health report
 ```
 But crucially: **CLI writes to the database**, not to local files only.
 
-## Workflow Model
+## Per-Assessment Workflow Phases
 
-Once backed by a database, the workflow is:
+Each individual assessment follows a five-phase workflow. This is distinct from the product maturity roadmap (see `13_roadmap.md`), which describes how the system itself evolves over time.
 
-1. **Create assessment** — auto-populate platform data
-2. **Run probes** — CLI → DB
-3. **Review evidence** — human
-4. **Add customer context** — manual input
-5. **Generate findings** — rules engine
-6. **Adjust severity** — human override if needed
-7. **Generate report** — templated output
-8. **Mark complete** — status transition
+### Phase 0: Pre-population
+
+Supabase auto-fills everything available from internal metadata, observability, and database probes **before any customer contact**. This enables a draft health profile that can:
+
+- Identify likely risk areas in advance
+- Focus the customer conversation on validation rather than data gathering
+- Produce a technical baseline score (Pass 1) without customer input
+
+This is a major advantage for a managed service provider.
+
+### Phase 1: Customer Discovery
+
+Ask only the missing high-value questions:
+
+- What is the system for?
+- What workloads matter most?
+- What symptoms are observed?
+- What constraints matter most (latency, uptime, cost, scale, compliance)?
+- What upcoming changes are expected?
+
+### Phase 2: Probe Execution
+
+Run SQL and platform probes. Evidence is collected and stored.
+
+### Phase 3: Interpretation
+
+Evaluate findings in the context of both the auto-filled facts and customer intent. Apply business-context-adjusted scoring (Pass 2).
+
+### Phase 4: Output
+
+Produce a report with findings, confidence, and recommendations.
+
+### Detailed Workflow Steps
+
+Once backed by a database, the detailed workflow within these phases is:
+
+1. **Create assessment** — auto-populate platform data (Phase 0)
+2. **Run probes** — CLI → DB (Phase 0 / Phase 2)
+3. **Add customer context** — manual input (Phase 1)
+4. **Review evidence** — human (Phase 2)
+5. **Generate findings** — rules engine (Phase 3)
+6. **Adjust severity** — human override if needed (Phase 3)
+7. **Generate report** — templated output (Phase 4)
+8. **Mark complete** — status transition (Phase 4)
 
 This is the "laboratory process." It is iterative, not one-shot. An assessment may cycle through probe → review → refine multiple times.
+
+> **Note:** These per-assessment workflow phases (0–4) are not the same as the product maturity phases (Phase 1–4) in `13_roadmap.md`. The roadmap phases describe how the pg-healthkit system itself evolves (Manual → CLI → Time-series → Productization). The per-assessment phases describe the lifecycle of a single health evaluation.
 
 ## Four Required Capabilities (satisfied)
 

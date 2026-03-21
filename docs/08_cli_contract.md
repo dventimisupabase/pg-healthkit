@@ -414,6 +414,47 @@ supabase db health report generate \
   --format markdown
 ```
 
+## Suggested Directory Structure
+
+```
+pg_healthkit/
+  probes/
+    00_instance_metadata.sql
+    01_extensions_inventory.sql
+    10_database_activity.sql
+    11_connection_pressure.sql
+    12_long_running_transactions.sql
+    13_lock_blocking_chains.sql
+    20_top_queries_total_time.sql
+    21_top_queries_mean_latency.sql
+    22_temp_spill_queries.sql
+    30_largest_tables.sql
+    31_dead_tuple_ratio.sql
+    32_stale_maintenance.sql
+    33_unused_indexes.sql
+    40_replication_health.sql
+    41_wal_checkpoint_health.sql
+  rules/
+    default.yaml
+    oltp.yaml
+    olap.yaml
+  reports/
+  cli/
+    main.go
+    db.go
+    runner.go
+    rules.go
+    scoring.go
+    report.go
+  contracts/
+    probe_registry.yaml
+    rules.yaml
+    normalizer_spec.md
+    normalizer_interface_contract.md
+```
+
+SQL probes are stored as versioned files. Rule evaluation and scoring live in Go packages. Contracts define the boundary between components.
+
 ## What the CLI Should NOT Do in v1
 
 Avoid putting too much business logic into the CLI. Specifically:

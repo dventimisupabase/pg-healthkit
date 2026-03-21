@@ -22,6 +22,8 @@ Seven orthogonal scoring domains:
 
 Each domain scored 0–100, or `null` for unknown.
 
+> **Design note:** The original conversation proposed a 0–5 scale (5=healthy, 4=minor issues, 3=moderate concern, 2=high concern, 1=critical risk, 0=unknown/insufficient evidence). The 0–100 scale was adopted instead because it allows finer-grained score deltas from individual rules without rounding effects, and maps more naturally to percentage-based weighted composites. The original "0 = insufficient evidence" semantics are preserved via `null`.
+
 | Score Range | Interpretation                               |
 |-------------|----------------------------------------------|
 | 90–100      | Healthy — no significant issues              |

@@ -90,6 +90,7 @@ This separation is operationally important: it minimizes customer questioning an
 | `pitr_enabled`      | boolean | Platform metadata       |
 | `max_connections`   | integer | Platform metadata / SQL |
 | `pgbouncer_enabled` | boolean | Platform metadata       |
+| `deployment_shape`  | enum (single_node, primary_replica, managed, self_hosted, kubernetes, cloud_vm) | Platform metadata |
 
 ### Customer-derived
 
