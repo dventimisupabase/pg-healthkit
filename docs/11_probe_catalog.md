@@ -229,6 +229,90 @@ This document provides the human-readable probe catalog with purpose, interpreta
 
 **Affected domains:** performance, efficiency
 
+### cache_hit_ratio
+
+**Purpose:** Directional signal for buffer cache efficiency.
+
+**Collects:** Database name, blocks hit, blocks read, cache hit percentage.
+
+**Interpretation:** Use cautiously; this is a directional signal, not a health score by itself. A high cache hit ratio (> 99%) is normal for well-sized OLTP workloads. A low ratio may indicate working set exceeds shared_buffers, but it can also reflect a cold start, a recent stats reset, or an OLAP workload that naturally scans large datasets. Never use this as a standalone health metric — always interpret in context of workload type and I/O patterns.
+
+**Candidate findings:** `low_cache_hit_ratio` (context-dependent, low confidence without corroborating signals)
+
+**Affected domains:** performance, efficiency
+
+### vacuum_progress
+
+**Purpose:** Show currently running vacuum operations and their progress.
+
+**Collects:** PID, relation, phase, heap blocks total/scanned/vacuumed, index vacuum count, max/current dead tuples.
+
+**Interpretation:** This is a point-in-time snapshot of active vacuum operations. Useful for understanding whether vacuum is actively working on large tables and how far along it is. If no vacuums are running, the probe returns zero rows — that is normal and not a finding. Most valuable when paired with `dead_tuple_ratio` or `stale_maintenance` to understand *why* vacuum might not be keeping up.
+
+**Candidate findings:** None directly (observational probe; useful for corroboration)
+
+**Affected domains:** storage, performance
+
+### analyze_progress
+
+**Purpose:** Show currently running analyze operations and their progress.
+
+**Collects:** PID, relation, phase, sample blocks total/scanned, extended stats total/computed.
+
+**Interpretation:** Similar to vacuum_progress — a point-in-time snapshot. Zero rows is normal. Useful for understanding whether statistics gathering is active and potentially consuming resources during the assessment window.
+
+**Candidate findings:** None directly (observational probe; useful for corroboration)
+
+**Affected domains:** performance
+
+### index_usage
+
+**Purpose:** Show all index usage statistics ordered by scan frequency and size.
+
+**Collects:** Schema, table, index name, idx_scan count, index size.
+
+**Interpretation:** Complements the `unused_indexes` probe by showing the full index usage spectrum, not just zero-scan indexes. Low-scan large indexes are worth reviewing even if not strictly zero. Ordered by ascending scan count and descending size, so the most wasteful indexes appear first. Same stats-window caveats apply as with `unused_indexes`.
+
+**Candidate findings:** `low_usage_large_indexes` (low confidence without representative stats window)
+
+**Affected domains:** storage, efficiency, cost
+
+### table_xid_age
+
+**Purpose:** Detect tables approaching transaction ID wraparound risk.
+
+**Collects:** Schema, table, xid age (via `age(relfrozenxid)`), total size, live tuples, last autovacuum, last vacuum.
+
+**Interpretation:** Transaction ID wraparound is one of the few scenarios where PostgreSQL will refuse to accept new writes (emergency shutdown at 2^31 - 1M transactions). Tables with xid age approaching `autovacuum_freeze_max_age` (default 200M) trigger aggressive anti-wraparound vacuum. Tables above 500M xid age are a concern. Above 1B is high severity. This probe is especially important when long-running transactions prevent vacuum from advancing the freeze horizon.
+
+**Candidate findings:** `xid_wraparound_risk`
+
+**Affected domains:** availability, storage
+
+### prepared_transactions
+
+**Purpose:** Detect abandoned two-phase commit transactions.
+
+**Collects:** Global ID (gid), prepared timestamp, owner, database, transaction age.
+
+**Interpretation:** Prepared transactions (from `PREPARE TRANSACTION`) survive connection close and server restart. They hold locks and prevent vacuum progress just like long-running transactions, but are harder to discover. Any prepared transaction older than a few minutes is suspicious. Most applications do not use two-phase commit at all, so any rows returned from this probe are worth investigating. If `max_prepared_transactions = 0`, this probe should be skipped.
+
+**Candidate findings:** `abandoned_prepared_transactions`
+
+**Affected domains:** concurrency, storage, availability
+
+### replica_conflicts
+
+**Purpose:** Detect query cancellations and conflict events on streaming replicas.
+
+**Collects:** Database name, conflict counts by type (tablespace, lock, snapshot, bufferpin, deadlock).
+
+**Interpretation:** Conflicts occur when the primary's cleanup operations (vacuum, buffer cleanup) conflict with long-running queries on the replica. High `confl_snapshot` counts indicate that queries on the replica are being cancelled because the primary vacuumed away rows they need. This is the most common conflict type and is aggravated by long queries on replicas combined with aggressive vacuum on the primary. Only meaningful when `pg_is_in_recovery() = true`. Cumulative counters — interpret relative to stats age.
+
+**Candidate findings:** `replica_conflict_rate_high`
+
+**Affected domains:** availability, performance
+
 ## Supabase-Specific Probes
 
 ### 16. rls_policy_column_indexing
