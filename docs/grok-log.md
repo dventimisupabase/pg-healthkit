@@ -187,3 +187,37 @@
 
 **New residuals added:**
 - None
+
+---
+
+### 2026-03-21 (pass 9 — SQL-contract column alignment focus)
+
+**Counts:**
+- Total issues found: 19
+- Already known from residuals: 0
+- New issues found: 19
+- New issues auto-fixed: 19
+- New residuals added: 0
+
+**Special focus:** SQL probe output columns vs probe_registry.yaml contract fields.
+
+**Findings:**
+- All 25 SQL probes were checked against their corresponding probe_registry.yaml entries
+- No column name mismatches found between SQL output aliases and registry field names
+- No missing required fields in SQL output
+- 16 generic SQL probe headers were missing `supabase_default` profile (cosmetic, since the registry is authoritative, but consistency matters)
+- 3 stale column name references in docs/15_normalizer.md for Supabase probes
+
+**Fixes made:**
+- Added missing `supabase_default` profile to SQL header comments in all 16 generic probes (00-50) to match probe_registry.yaml
+- Fixed `docs/15_normalizer.md` pgvector_index_health section: updated stale references to `table_name` and `missing_vector_index` (SQL actually outputs `tablename` and `has_index` directly)
+- Fixed `docs/15_normalizer.md` pg_cron_job_health section: noted that SQL already aliases `command` to `jobname` and `start_time` to `last_run_time` (normalizer mapping description was misleading)
+- Fixed `docs/15_normalizer.md` pgbouncer_pool_health section: corrected column reference from `active` to `active_connections` to match SQL probe output
+
+**SQL-contract alignment summary:**
+- All 25 probes have SQL output column names that match or are properly mapped by the normalizer
+- Extra fields in SQL output beyond registry requirements: `client_addr` in replication_health, `n_live_tup`/`n_dead_tup`/`last_autoanalyze`/`total_bytes` in system_schema_bloat, `temp_blks_written` in top_queries_mean_latency — all acceptable per forward-compatibility rules
+- Known residuals about pgbouncer_pool_health field mapping and wal_checkpoint_health _ms suffix remain unchanged
+
+**New residuals added:**
+- None
