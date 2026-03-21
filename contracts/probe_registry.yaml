@@ -18,7 +18,7 @@ probes:
   - name: instance_metadata
     version: "2026-03-20"
     enabled: true
-    profiles: [default, performance, reliability, cost_capacity]
+    profiles: [default, performance, reliability, cost_capacity, supabase_default]
     category: baseline
     sql_file: probes/00_instance_metadata.sql
     prerequisites:
@@ -94,7 +94,7 @@ probes:
   - name: extensions_inventory
     version: "2026-03-20"
     enabled: true
-    profiles: [default, performance, reliability, cost_capacity]
+    profiles: [default, performance, reliability, cost_capacity, supabase_default]
     category: baseline
     sql_file: probes/01_extensions_inventory.sql
     prerequisites:
@@ -137,7 +137,7 @@ probes:
   - name: database_activity
     version: "2026-03-20"
     enabled: true
-    profiles: [default, performance, reliability]
+    profiles: [default, performance, reliability, supabase_default]
     category: baseline
     sql_file: probes/10_database_activity.sql
     prerequisites:
@@ -185,7 +185,7 @@ probes:
   - name: connection_pressure
     version: "2026-03-20"
     enabled: true
-    profiles: [default, performance, reliability]
+    profiles: [default, performance, reliability, supabase_default]
     category: baseline
     sql_file: probes/11_connection_pressure.sql
     prerequisites:
@@ -236,7 +236,7 @@ probes:
   - name: long_running_transactions
     version: "2026-03-20"
     enabled: true
-    profiles: [default, performance, reliability]
+    profiles: [default, performance, reliability, supabase_default]
     category: baseline
     sql_file: probes/12_long_running_transactions.sql
     prerequisites:
@@ -295,7 +295,7 @@ probes:
   - name: lock_blocking_chains
     version: "2026-03-20"
     enabled: true
-    profiles: [default, performance, reliability]
+    profiles: [default, performance, reliability, supabase_default]
     category: baseline
     sql_file: probes/13_lock_blocking_chains.sql
     prerequisites:
@@ -344,7 +344,7 @@ probes:
   - name: top_queries_total_time
     version: "2026-03-20"
     enabled: true
-    profiles: [default, performance, cost_capacity]
+    profiles: [default, performance, cost_capacity, supabase_default]
     category: baseline
     sql_file: probes/20_top_queries_total_time.sql
     prerequisites:
@@ -398,7 +398,7 @@ probes:
   - name: top_queries_mean_latency
     version: "2026-03-20"
     enabled: true
-    profiles: [default, performance]
+    profiles: [default, performance, supabase_default]
     category: baseline
     sql_file: probes/21_top_queries_mean_latency.sql
     prerequisites:
@@ -444,7 +444,7 @@ probes:
   - name: temp_spill_queries
     version: "2026-03-20"
     enabled: true
-    profiles: [default, performance, cost_capacity]
+    profiles: [default, performance, cost_capacity, supabase_default]
     category: baseline
     sql_file: probes/22_temp_spill_queries.sql
     prerequisites:
@@ -494,7 +494,7 @@ probes:
   - name: largest_tables
     version: "2026-03-20"
     enabled: true
-    profiles: [default, reliability, cost_capacity]
+    profiles: [default, reliability, cost_capacity, supabase_default]
     category: baseline
     sql_file: probes/30_largest_tables.sql
     prerequisites:
@@ -544,7 +544,7 @@ probes:
   - name: dead_tuple_ratio
     version: "2026-03-20"
     enabled: true
-    profiles: [default, performance, reliability]
+    profiles: [default, performance, reliability, supabase_default]
     category: baseline
     sql_file: probes/31_dead_tuple_ratio.sql
     prerequisites:
@@ -595,7 +595,7 @@ probes:
   - name: stale_maintenance
     version: "2026-03-20"
     enabled: true
-    profiles: [default, performance, reliability]
+    profiles: [default, performance, reliability, supabase_default]
     category: baseline
     sql_file: probes/32_stale_maintenance.sql
     prerequisites:
@@ -649,7 +649,7 @@ probes:
   - name: unused_indexes
     version: "2026-03-20"
     enabled: true
-    profiles: [default, cost_capacity]
+    profiles: [default, cost_capacity, supabase_default]
     category: baseline
     sql_file: probes/33_unused_indexes.sql
     prerequisites:
@@ -697,7 +697,7 @@ probes:
   - name: replication_health
     version: "2026-03-20"
     enabled: true
-    profiles: [default, reliability]
+    profiles: [default, reliability, supabase_default]
     category: contextual
     sql_file: probes/40_replication_health.sql
     prerequisites:
@@ -739,7 +739,7 @@ probes:
   - name: wal_checkpoint_health
     version: "2026-03-20"
     enabled: true
-    profiles: [default, reliability, cost_capacity]
+    profiles: [default, reliability, cost_capacity, supabase_default]
     category: baseline
     sql_file: probes/41_wal_checkpoint_health.sql
     prerequisites:
@@ -790,7 +790,7 @@ probes:
   - name: role_inventory
     version: "2026-03-20"
     enabled: true
-    profiles: [default, reliability]
+    profiles: [default, reliability, supabase_default]
     category: baseline
     sql_file: probes/50_role_inventory.sql
     prerequisites:
@@ -1033,11 +1033,11 @@ probes:
       properties:
         summary:
           type: object
-          required: [active_connections, waiting_clients]
+          required: [active_connections]
           properties:
-            pool_mode: { type: string, description: "Requires platform metadata — not derivable from SQL" }
+            pool_mode: { type: string, nullable: true, description: "Requires platform metadata — not derivable from SQL" }
             active_connections: { type: integer }
-            waiting_clients: { type: integer }
+            waiting_clients: { type: integer, nullable: true }
     summary_fields:
       - summary.pool_mode
       - summary.waiting_clients

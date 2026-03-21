@@ -7,8 +7,8 @@
 SELECT
   checkpoints_timed,
   checkpoints_req,
-  checkpoint_write_time,
-  checkpoint_sync_time,
+  checkpoint_write_time AS checkpoint_write_time_ms,
+  checkpoint_sync_time AS checkpoint_sync_time_ms,
   buffers_checkpoint,
   buffers_clean,
   maxwritten_clean,

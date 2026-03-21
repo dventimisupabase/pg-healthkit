@@ -233,6 +233,70 @@ Derive:
 ### wal_checkpoint_health
 No generic `summary` required. Expose `bgwriter` and optional `wal`.
 
+### Supabase-Specific Probes
+
+### rls_policy_column_indexing
+Derive:
+- `summary.unindexed_policy_column_count` — count of rows where `has_index = false`
+
+The SQL probe outputs one row per RLS-referenced column with columns `schemaname`, `tablename`, `column_name`, and `has_index` (boolean). Zero rows means no RLS policies were found; emit `unindexed_policy_column_count: 0`.
+
+### realtime_replication_slot_health
+Derive:
+- `summary.max_lag_bytes` — max `lag_bytes` across all rows; emit `0` if no rows
+- `summary.inactive_slot_count` — count of rows where `active = false`
+
+The SQL probe outputs one row per replication slot with columns `slot_name`, `slot_type`, `active` (boolean), `xmin`, `confirmed_flush_lsn`, `current_wal_lsn`, and `lag_bytes` (integer). Coerce `lag_bytes` from numeric string to integer. Null `lag_bytes` should be treated as `0` for max computation.
+
+### auth_schema_health
+Derive:
+- `summary.max_dead_tuple_pct` — max `dead_tuple_pct` across all rows; emit `0` if no rows
+- `summary.sessions_row_count` — `n_live_tup` from the row where `relname = 'sessions'`; emit `0` if that row is absent
+
+The SQL probe outputs one row per auth table (`users`, `sessions`, `refresh_tokens`, `mfa_factors`) with columns `schemaname`, `relname`, `n_live_tup`, `n_dead_tup`, `dead_tuple_pct` (number), `last_vacuum`, `last_autovacuum`, `last_analyze`, `last_autoanalyze`, and `total_bytes`. Coerce `dead_tuple_pct` to number (null becomes `0`). Coerce timestamp columns to ISO-8601 or null.
+
+### storage_objects_health
+Derive:
+- `summary.total_rows` — value of `total_rows` from the singleton row; emit `0` if no rows
+- `summary.soft_deleted_rows` — value of `soft_deleted_rows` from the singleton row; emit `0` if no rows
+- `summary.soft_deleted_ratio` — value of `soft_deleted_ratio` from the singleton row; emit `0` if no rows
+- `summary.dead_tuple_pct` — value of `dead_tuple_pct` from the singleton row; emit `0` if no rows
+
+The SQL probe returns a single row with columns `schemaname`, `relname`, `total_rows` (integer), `soft_deleted_rows` (integer), `soft_deleted_ratio` (number), `n_live_tup`, `n_dead_tup`, `dead_tuple_pct` (number), `last_autovacuum`, `last_autoanalyze`, and `total_bytes`. Coerce `soft_deleted_ratio` and `dead_tuple_pct` to number (null becomes `0`). This probe has no `rows` array in the contract; all data goes into `summary`.
+
+### system_schema_bloat
+Derive:
+- `summary.max_dead_tuple_pct` — max `dead_tuple_pct` across all rows; emit `0` if no rows
+
+The SQL probe outputs up to 30 rows from Supabase system schemas (`auth`, `storage`, `realtime`, `extensions`, `supabase_functions`) with columns `schemaname`, `relname`, `n_live_tup`, `n_dead_tup`, `dead_tuple_pct` (number), `last_autovacuum`, `last_autoanalyze`, and `total_bytes`. Coerce `dead_tuple_pct` to number (null becomes `0`).
+
+### pgbouncer_pool_health
+Derive:
+- `summary.active_connections` — value of `active` from the singleton row; emit `0` if no rows
+- `summary.waiting_clients` — value of `idle_in_transaction` from the singleton row; emit `0` if no rows
+- `summary.pool_mode` — **not derivable from SQL**; must be supplied via platform metadata. If unavailable, emit `null`.
+
+The SQL probe returns a single row with columns `total_connections`, `distinct_clients`, `pooler_connections`, `active` (integer), `idle` (integer), `idle_in_transaction` (integer), and `max_connections` (integer). The contract's `waiting_clients` maps to clients blocked waiting for a pooler slot; in this fallback probe, `idle_in_transaction` is the best available proxy. This probe has no `rows` array in the contract; all data goes into `summary`.
+
+### pg_cron_job_health
+Derive:
+- `summary.failed_job_count` — count of rows where `last_status = 'failed'`
+
+The SQL probe outputs one row per cron job with columns `jobid`, `schedule`, `command`, `nodename`, `nodeport`, `database`, `username`, `job_active`, `runid`, `job_pid`, `last_status` (string), `return_message`, `start_time`, `end_time`, and `duration_seconds` (number). The contract row type requires `jobname` and `last_status`; map `command` (or a human-readable label) to `jobname`. Map `start_time` to `last_run_time` (ISO-8601 or null). Rows with no run history (`last_status` is null) should not count as failed.
+
+### extension_version_health
+Derive:
+- `summary.outdated_count` — count of rows where `installed_version != available_version` and `available_version` is not null
+
+The SQL probe outputs one row per installed extension with columns `name`, `installed_version`, `available_version`, and `upgrade_available` (boolean). The contract row type requires `name`, `installed_version`, and `available_version`. If `available_version` is null (no newer version found), treat that extension as current, not outdated.
+
+### pgvector_index_health
+Derive:
+- `summary.unindexed_vector_column_count` — count of rows where `missing_vector_index = true` (equivalently, where `index_name` is null)
+- `summary.misconfigured_index_count` — count of rows where an index exists but its parameters are suboptimal for the dataset size; specifically, rows where `index_type = 'ivfflat'` and `row_count > 1000000` (large tables where ivfflat may under-perform vs. hnsw), or other heuristics defined by the rule engine. For v1, emit `0` if no misconfiguration heuristic is implemented yet.
+
+The SQL probe outputs one row per vector column with columns `schemaname`, `table_name`, `column_name`, `column_type`, `row_count`, `index_name`, `index_type`, `index_bytes`, `index_def`, and `missing_vector_index` (boolean). The contract row type requires `tablename`, `column_name`, and `has_index`; map `table_name` to `tablename` and invert `missing_vector_index` to `has_index`.
+
 ## Raw Input Contract
 
 The SQL runner must produce a raw probe result:

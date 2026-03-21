@@ -17,7 +17,7 @@ SELECT
   COUNT(*) AS total_connections,
   COUNT(DISTINCT client_addr) AS distinct_clients,
   COUNT(*) FILTER (WHERE application_name LIKE '%pgbouncer%' OR application_name LIKE '%supavisor%') AS pooler_connections,
-  COUNT(*) FILTER (WHERE state = 'active') AS active,
+  COUNT(*) FILTER (WHERE state = 'active') AS active_connections,
   COUNT(*) FILTER (WHERE state = 'idle') AS idle,
   COUNT(*) FILTER (WHERE state = 'idle in transaction') AS idle_in_transaction,
   current_setting('max_connections')::int AS max_connections

@@ -1128,6 +1128,10 @@ rules:
   - id: pool_mode_misconfiguration
     enabled: true
     profiles: [default, performance, supabase_default]
+    skip_when_null: [summary.pool_mode]
+    note: >
+      pool_mode is optional (requires platform metadata). This rule is skipped
+      when pool_mode is null to avoid false results.
     finding:
       key: pool_mode_misconfiguration
       domain: performance
@@ -1305,6 +1309,10 @@ rules:
   - id: pool_contention_detected
     enabled: true
     profiles: [default, performance, supabase_default]
+    skip_when_null: [summary.waiting_clients]
+    note: >
+      waiting_clients is optional. This rule is skipped when waiting_clients
+      is null to avoid false results.
     finding:
       key: pool_contention_detected
       domain: concurrency
