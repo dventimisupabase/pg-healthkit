@@ -263,38 +263,39 @@ The exact layout can vary, but keeping contracts and fixtures explicit is import
 Start with the highest-value probes first:
 
 ### Wave 1 — Generic (highest signal, fewest dependencies)
-1. `connection_pressure`
-2. `long_running_transactions`
-3. `lock_blocking_chains`
-4. `dead_tuple_ratio`
-5. `stale_maintenance`
+1. `instance_metadata`
+2. `extensions_inventory`
+3. `connection_pressure`
+4. `long_running_transactions`
+5. `lock_blocking_chains`
 6. `largest_tables`
-7. `instance_metadata`
-8. `extensions_inventory`
+7. `dead_tuple_ratio`
+8. `stale_maintenance`
+9. `role_inventory`
 
 ### Wave 2 — Generic (requires pg_stat_statements)
-9. `top_queries_total_time`
-10. `top_queries_mean_latency`
-11. `temp_spill_queries`
-12. `database_activity`
+10. `database_activity`
+11. `top_queries_total_time`
+12. `top_queries_mean_latency`
+13. `temp_spill_queries`
 
 ### Wave 3 — Generic (operational depth)
-13. `replication_health`
-14. `wal_checkpoint_health`
-15. `unused_indexes`
+14. `replication_health`
+15. `wal_checkpoint_health`
+16. `unused_indexes`
 
 ### Wave 4 — Supabase-specific (critical)
-16. `rls_policy_column_indexing` — arguably the highest-impact Supabase probe; implement early
-17. `auth_schema_health`
-18. `system_schema_bloat`
-19. `realtime_replication_slot_health`
+17. `rls_policy_column_indexing` — arguably the highest-impact Supabase probe; implement early
+18. `realtime_replication_slot_health`
+19. `auth_schema_health`
 20. `storage_objects_health`
-21. `pgbouncer_pool_health`
+21. `system_schema_bloat`
+22. `pgbouncer_pool_health`
 
 ### Wave 5 — Supabase-specific (contextual)
-22. `pg_cron_job_health`
-23. `extension_version_health`
-24. `pgvector_index_health`
+23. `pg_cron_job_health`
+24. `extension_version_health`
+25. `pgvector_index_health`
 
 For Supabase deployments, Wave 4 should be prioritized alongside or immediately after Wave 1, since `rls_policy_column_indexing` and `auth_schema_health` catch the most common Supabase-specific issues.
 
@@ -304,29 +305,40 @@ For Supabase deployments, Wave 4 should be prioritized alongside or immediately 
 1. `long_running_transactions_detected`
 2. `idle_in_transaction_sessions_detected`
 3. `active_lock_blocking_detected`
-4. `high_connection_utilization`
-5. `high_latency_queries_detected`
-6. `high_impact_query_total_time`
-7. `dead_tuple_accumulation_detected`
-8. `stale_vacuum_or_analyze_detected`
-9. `replication_lag_elevated`
+4. `deadlocks_observed`
+5. `high_connection_utilization`
+6. `significant_temp_spill_activity`
+7. `high_impact_query_total_time`
+8. `high_latency_queries_detected`
+9. `dead_tuple_accumulation_detected`
+10. `stale_vacuum_or_analyze_detected`
+11. `potentially_unused_large_indexes`
+12. `replication_lag_elevated`
+13. `checkpoint_pressure_detected`
+14. `diagnostic_visibility_limited`
+15. `diagnostic_configuration_weak`
+16. `storage_concentration_risk`
+17. `excessive_superuser_roles`
 
 ### Supabase rules (immediately after)
-10. `rls_policy_columns_unindexed`
-11. `auth_table_bloat_detected`
-12. `system_schema_vacuum_stale`
-13. `replication_slot_inactive_or_lagging`
-14. `storage_soft_delete_pressure`
-15. `pool_mode_misconfiguration`
+18. `rls_policy_columns_unindexed`
+19. `auth_table_bloat_detected`
+20. `system_schema_vacuum_stale`
+21. `replication_slot_inactive_or_lagging`
+22. `storage_soft_delete_pressure`
+23. `pool_mode_misconfiguration`
+24. `pg_cron_job_failures`
+25. `extension_version_outdated`
+26. `pgvector_missing_index`
 
-These are the best candidates for an early credible report. For Supabase assessments, rules 10–12 are as high-priority as the generic top 9.
+These are the best candidates for an early credible report. For Supabase assessments, rules 18–20 are as high-priority as the generic top 12.
 
 ## Definition of Done for v1
 
 The v1 system is “done enough” when the following is true:
 
 - a target profile can be selected (including `supabase_default`)
-- probes run or skip deterministically (15 generic + at minimum `rls_policy_column_indexing` for Supabase)
+- probes run or skip deterministically (16 generic + 9 Supabase-specific = 25 total)
 - canonical payloads validate against registry contracts
 - rules produce stable findings
 - domain scores are computed reproducibly
