@@ -1,16 +1,95 @@
 # Grok This Repository
 
-Spawn a subagent to critically analyze this repository's documentation, auto-fix what it can, and log anything it can't resolve to a residuals file. The subagent starts with zero prior context every time.
+Critically analyze this repository's documentation, auto-fix what can be fixed, and log anything unresolvable to a residuals file. Each pass uses a fresh subagent with zero prior context.
+
+## Usage
+
+`/grok [N]` — run N passes (default: 1). Each pass spawns an independent subagent.
 
 ## What To Do
 
-Use the Agent tool to launch a single `general-purpose` subagent with the prompt below. Do NOT read the docs or the residuals file yourself first — the subagent does everything in isolation.
+Parse the iteration count from: $ARGUMENTS
 
-After the subagent returns, present a brief summary to the user: how many issues found, how many fixed, how many were already-known residuals, how many new residuals added. Then remind them to check `docs/RESIDUALS.md` at their convenience.
+If the argument is empty or not a positive integer, default to 1.
+
+### Run the passes
+
+Maintain an array of "new items found" counts, one per pass.
+
+For each iteration (1 through N):
+
+1. Announce: `### Grok pass [X] of [N]`
+2. Launch a single `general-purpose` Agent with the subagent prompt below. Do NOT read the docs or the residuals file yourself — the subagent does everything in isolation.
+3. Wait for it to complete fully (the subagent finishes, commits, and returns its report).
+4. Parse the `NEW_ITEMS=[N]` line from the first line of the subagent's response. Record that number for this pass.
+5. Briefly announce: `Pass [X]: [N] new items found`
+6. Only then proceed to the next iteration.
+
+### Present Results
+
+**If N = 1 (single pass):** Present the subagent's summary directly. Remind the user to check `docs/RESIDUALS.md` if new residuals were added.
+
+**If N >= 2 (multiple passes):** Read `docs/grok-log.md` and produce a distilled summary plus a convergence graph.
+
+The convergence graph is an ASCII bar chart showing new items found per pass:
+
+```
+New items found per pass (target: 0)
+
+  Pass 1 │████████████████████████████ 7
+  Pass 2 │████████████████ 4
+  Pass 3 │████████████ 3
+  Pass 4 │████ 1
+  Pass 5 │████ 1
+         └─────────────────────────────
+```
+
+Scale bars proportionally to the maximum value. Use `█` characters. At least 1 `█` wide if count > 0. A count of 0 shows no bar, just the number:
+
+```
+  Pass 6 │ 0
+```
+
+If the trend is decreasing, add: `Trend: converging 👍`
+If the trend is flat or increasing, add: `Trend: not yet converging — consider reviewing docs/RESIDUALS.md`
+
+Full output structure for multi-pass:
+
+```
+## Grok Complete — [N] passes
+
+### Convergence
+
+[the ASCII bar chart]
+
+[trend note]
+
+### Aggregate counts
+- **Total issues found across all passes**: [sum]
+- **Total auto-fixed across all passes**: [sum]
+- **Total new residuals added across all passes**: [sum]
+
+### Themes
+[2-5 bullet points identifying patterns across passes]
+
+### What's left
+[Brief description of what remains in docs/RESIDUALS.md that needs human attention, if anything new was added]
+
+### Raw log
+Full per-pass details are in `docs/grok-log.md`.
+```
+
+## Important
+
+- Strictly sequential. Never start pass X+1 until pass X has fully completed and committed.
+- Each pass spawns its own fresh subagent — no context carries between passes.
+- If a pass fails (subagent errors out), record its new-items count as `?`, log the failure, and continue to the next pass. Don't abort the loop.
+- Do NOT push to remote. The user will push when ready.
+- For multi-pass runs, the per-pass raw summaries live in `docs/grok-log.md`. Don't repeat them verbatim — distill them.
 
 ## Subagent Prompt
 
-Launch this as a general-purpose Agent:
+Launch this as a general-purpose Agent for each pass:
 
 ```
 You are a critical reviewer and autonomous editor for a repository's documentation. You have no prior context about this project — read everything fresh and form your own conclusions. You will find problems, fix what you can, and log what you can't.
