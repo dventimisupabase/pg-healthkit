@@ -29,7 +29,7 @@ All probes live in a flat directory. The numbering convention groups probes by d
 | 30–39  | Tables, indexes, storage    | Baseline   |
 | 40–49  | Replication and WAL         | Contextual |
 | 50–59  | Security and hygiene        | Baseline   |
-| 60–69  | Supabase-specific           | Contextual |
+| 60–69  | Supabase-specific           | Baseline   |
 
 ## Running Probes with psql
 

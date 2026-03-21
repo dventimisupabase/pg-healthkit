@@ -98,7 +98,7 @@
   - Tradeoffs: {{tradeoffs}}
 {{/action_plan.short_term}}
 
-### Long-term (Low Findings / Improvements)
+### Structural (Low Findings / Improvements)
 
 {{#action_plan.long_term}}
 - **{{action}}**

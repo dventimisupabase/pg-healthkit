@@ -812,6 +812,7 @@ probes:
               rolsuper: { type: boolean }
               rolcreaterole: { type: boolean }
               rolcreatedb: { type: boolean }
+              rolreplication: { type: boolean }
               rolcanlogin: { type: boolean }
               rolvaliduntil: { type: string, nullable: true }
         summary:

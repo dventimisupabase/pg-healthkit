@@ -235,7 +235,7 @@ Good but not required for a credible first release:
 **Prerequisites:** Realtime enabled.
 **Execution scope:** database.
 **Collects:** slot_name, slot_type, active, xmin, confirmed_flush_lsn, current WAL LSN, lag_bytes (computed).
-**Candidate findings:** `replication_slot_lag_elevated` (Supabase-specific variant), `replication_slot_inactive`.
+**Candidate findings:** `replication_slot_inactive_or_lagging`.
 **Affected domains:** availability, storage.
 **Interpretation:** Supabase Realtime uses logical replication. Unconsumed or inactive slots prevent WAL cleanup and can fill disk. This is a common cause of disk pressure incidents.
 

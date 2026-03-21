@@ -133,7 +133,11 @@ Example:
 | Assessment Overview    | `assessments` table metadata         |
 | Executive Summary      | `assessment_scores` + top findings   |
 | Findings (Detailed)    | `assessment_findings` grouped by domain |
+| Action Plan            | `assessment_findings` (urgency field) |
+| Domain Score Detail    | `assessment_scores` + `assessment_findings` |
 | Supporting Observations| `assessment_evidence` (raw payloads) |
+| Interpretation Notes   | Static content (methodology caveats) |
+| Methodology Reference  | Static content (system pointers)     |
 | Probe Execution Summary| `assessment_evidence` (status field) |
 
 ## Design Decisions

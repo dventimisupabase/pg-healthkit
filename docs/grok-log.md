@@ -76,3 +76,25 @@
 
 **New residuals added:**
 - None
+
+---
+
+### 2026-03-20 (pass 4)
+
+**Counts:**
+- Total issues found: 11
+- Already known from residuals: 5
+- New issues found: 6
+- New issues auto-fixed: 6
+- New residuals added: 0
+
+**Fixes made:**
+- Fixed `contracts/probe_registry.yaml`: added missing `rolreplication` property to `role_inventory` payload contract to match the SQL probe output in `probes/50_role_inventory.sql`
+- Fixed `probes/README.md`: changed Supabase probe range 60-69 category from "Contextual" to "Baseline" to match `probe_registry.yaml` which lists all Supabase probes as `category: baseline`
+- Fixed `docs/12_findings_catalog.md`: removed duplicate table separator line above the "Finding Structure" header row (malformed markdown table)
+- Fixed `docs/sample_report_template.md`: renamed action plan section "Long-term" to "Structural" to match the urgency enum values used in `rules.yaml` and `docs/12_findings_catalog.md`
+- Fixed `docs/07_probe_system.md`: corrected `realtime_replication_slot_health` candidate findings from stale `replication_slot_lag_elevated` / `replication_slot_inactive` to `replication_slot_inactive_or_lagging` to match `rules.yaml` and `probe_registry.yaml`
+- Fixed `docs/16_report_template.md`: added missing Action Plan, Domain Score Detail, Interpretation Notes, and Methodology Reference sections to the Alignment with Data Model table
+
+**New residuals added:**
+- None

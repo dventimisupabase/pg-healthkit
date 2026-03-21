@@ -6,7 +6,6 @@ This document defines the v1 findings with their logic, inputs, severity gradati
 
 Each finding includes:
 
-|------------------|---------------------------------------------------------------------------------------------|
 | Field            | Purpose                                                                                     |
 |------------------|---------------------------------------------------------------------------------------------|
 | `finding_key`    | Stable identifier for the issue class                                                       |
