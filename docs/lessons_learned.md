@@ -116,3 +116,24 @@ Strict TDD (write test → fail → implement → pass) was followed for Phase 1
 ### What to track in conversation tasks
 
 Use conversation tasks as an ephemeral checklist. Mark each step as done. Don't write durable plan documents — the design docs serve that purpose.
+
+## Trial History
+
+### Trial 01 — 2026-03-21
+
+**Scope:** Full v1 implementation (Phases 1-5). All 24 probes, all 28 rules, CLI with arena integration, markdown reporting.
+
+**Doc fixes:**
+- `docs: strip Go code examples from design docs` — removed illustrative Go interfaces from `15_normalizer.md` and all Go code from `IMPLEMENTATION_PLAN.md`. Replaced with prose and an 8-step checklist.
+- `docs: merge Phase 1 implementation tasks into IMPLEMENTATION_PLAN.md` — consolidated the plan into one document (later stripped of code).
+- `CLAUDE.md` updated to specify Go as CLI language.
+
+**New lessons:**
+- Heavyweight planning ceremony (brainstorm → spec → plan → reviews) is disproportionate when design docs are thorough. Skip it.
+- Code in plans is noise. Good specs produce good code.
+- Use Supabase CLI and psql for database operations, not the Supabase MCP (except for provisioning).
+- Use Supabase seed files for reference data, not custom tooling.
+- TDD for interfaces (vertical slice), integration tests for breadth.
+- Separate doc-fix commits from implementation commits throughout the trial, not retroactively.
+
+**Status:** Complete. All v1 Definition of Done criteria met. Retrospective produced the trial protocol (`docs/trial_protocol.md`).
