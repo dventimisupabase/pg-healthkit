@@ -204,7 +204,7 @@ To make assessments customer-facing and repeatable, introduce scoring:
 - Each domain scored 0–100
 - Weighted by persona intent
 
-Weights vary by assessment profile (e.g., DBA/SRE vs CTO). The default profile weights are:
+Weights vary by assessment profile (e.g., DBA/SRE vs CTO). Other profiles (reliability, cost_capacity, performance, supabase_default) shift these weights significantly — for example, `cost_capacity` gives Cost 30% weight vs 10% here. The default profile weights are:
 
 | Domain              | Weight |
 |---------------------|--------|

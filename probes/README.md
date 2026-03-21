@@ -17,7 +17,7 @@ probes/
   60–69  Supabase-specific
 ```
 
-All probes live in a flat directory. The numbering convention groups probes by domain.
+All probes live in a flat directory. The numbering convention groups probes by domain. Profile assignments are per-probe, not per-range — see `contracts/probe_registry.yaml` for the authoritative per-probe profile list.
 
 ## Probe Numbering Convention
 

@@ -1091,13 +1091,20 @@ probes:
       properties:
         summary:
           type: object
-          required: [active_connections]
+          required: [active_connections, total_connections]
           properties:
             pool_mode: { type: string, nullable: true, description: "Requires platform metadata — not derivable from SQL" }
+            total_connections: { type: integer }
+            distinct_clients: { type: integer }
+            pooler_connections: { type: integer }
             active_connections: { type: integer }
-            waiting_clients: { type: integer, nullable: true }
+            idle: { type: integer }
+            idle_in_transaction: { type: integer }
+            max_connections: { type: integer }
+            waiting_clients: { type: integer, nullable: true, description: "Requires PgBouncer admin access — not available from pg_stat_activity fallback" }
     summary_fields:
       - summary.pool_mode
+      - summary.active_connections
       - summary.waiting_clients
     supports_findings:
       - pool_mode_misconfiguration

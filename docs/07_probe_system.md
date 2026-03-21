@@ -175,6 +175,8 @@ All probes from `default`, plus all Supabase-specific probes (60–69): `rls_pol
 
 This profile uses Supabase-specific scoring weights (see `10_scoring_model.md`) and enables tier-aware threshold adjustments.
 
+> **Design note:** `supabase_default` is not inherited from `default` — it is explicitly listed on every probe and rule it should include. This avoids implicit inheritance semantics in the contracts and makes profile membership fully declarative. All generic rules also list `supabase_default` so they fire for Supabase assessments without requiring a profile inheritance engine.
+
 ## Implementation Prioritization
 
 ### First Wave (highest value, fewest dependencies)
