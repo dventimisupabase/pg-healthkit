@@ -286,6 +286,7 @@ probes:
               wait_event_type: { type: string, nullable: true }
               wait_event: { type: string, nullable: true }
               query: { type: string, nullable: true }
+              client_addr: { type: string, nullable: true, optional: true }
         summary:
           type: object
           required:
@@ -639,6 +640,9 @@ probes:
               last_autoanalyze: { type: string, nullable: true }
               autovacuum_count: { type: integer, nullable: true }
               autoanalyze_count: { type: integer, nullable: true }
+              n_dead_tup: { type: integer }
+              vacuum_count: { type: integer }    # manual vacuum count (distinct from autovacuum_count)
+              analyze_count: { type: integer }   # manual analyze count (distinct from autoanalyze_count)
         summary:
           type: object
           required:
@@ -787,6 +791,8 @@ probes:
             buffers_clean: { type: integer }
             buffers_backend: { type: integer }
             buffers_backend_fsync: { type: integer }
+            maxwritten_clean: { type: integer, optional: true }
+            buffers_alloc: { type: integer, optional: true }
         wal:
           type: object
           nullable: true
@@ -905,6 +911,10 @@ probes:
               slot_name: { type: string }
               active: { type: boolean }
               lag_bytes: { type: integer }
+              slot_type: { type: string, optional: true }
+              xmin: { type: string, nullable: true, optional: true }
+              confirmed_flush_lsn: { type: string, nullable: true, optional: true }
+              current_wal_lsn: { type: string, optional: true }
         summary:
           type: object
           required: [max_lag_bytes, inactive_slot_count]
@@ -944,6 +954,11 @@ probes:
               n_dead_tup: { type: integer }
               dead_tuple_pct: { type: number }
               last_autovacuum: { type: string, nullable: true }
+              schemaname: { type: string }
+              last_vacuum: { type: string, nullable: true, optional: true }
+              last_analyze: { type: string, nullable: true, optional: true }
+              last_autoanalyze: { type: string, nullable: true, optional: true }
+              total_bytes: { type: integer }
         summary:
           type: object
           required: [max_dead_tuple_pct, sessions_row_count]
@@ -974,6 +989,24 @@ probes:
       type: object
       required: [summary]
       properties:
+        rows:
+          type: array
+          # This probe always returns exactly one row
+          items:
+            type: object
+            required: [schemaname, relname, total_rows, soft_deleted_rows, soft_deleted_ratio, n_live_tup, n_dead_tup, dead_tuple_pct, total_bytes]
+            properties:
+              schemaname: { type: string }
+              relname: { type: string }
+              total_rows: { type: integer }
+              soft_deleted_rows: { type: integer }
+              soft_deleted_ratio: { type: number }
+              n_live_tup: { type: integer }
+              n_dead_tup: { type: integer }
+              dead_tuple_pct: { type: number }
+              last_autovacuum: { type: string, nullable: true }
+              last_autoanalyze: { type: string, nullable: true }
+              total_bytes: { type: integer }
         summary:
           type: object
           required: [total_rows, soft_deleted_rows, soft_deleted_ratio, dead_tuple_pct]
