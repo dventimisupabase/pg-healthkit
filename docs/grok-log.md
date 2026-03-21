@@ -269,3 +269,37 @@
 
 **New residuals added:**
 - None
+
+---
+
+### 2026-03-21 (pass 12)
+
+**Counts:**
+- Total issues found: 9
+- Already known from residuals: 8
+- New issues found: 2 (7 sub-fixes)
+- New issues auto-fixed: 2 (7 sub-fixes)
+- New residuals added: 0
+
+**Fixes made:**
+- Fixed `docs/09_rule_engine.md`: removed "with growth > 1M/week" from `auth_session_explosion` medium case logic — `rules.yaml` v1 implementation uses threshold-only conditions (> 5M); growth rate detection is deferred to Phase 3 as noted in `12_findings_catalog.md`
+- Fixed `docs/12_findings_catalog.md`: added missing corroborating probes to Inputs fields for 6 findings to match `docs/09_rule_engine.md` and `docs/11_probe_catalog.md` mapping tables — both docs have clarifying notes saying Inputs should list required and corroborating probes, but `12_findings_catalog.md` was systematically omitting corroborating probes:
+  - `high_latency_queries_detected`: added `temp_spill_queries`, `lock_blocking_chains`
+  - `dead_tuple_accumulation_detected`: added `long_running_transactions`, `largest_tables`
+  - `stale_vacuum_or_analyze_detected`: added `dead_tuple_ratio`
+  - `potentially_unused_large_indexes`: added `largest_tables`
+  - `checkpoint_pressure_detected`: added `database_activity`, `instance_metadata`
+  - `storage_concentration_risk`: added `unused_indexes`
+
+**Known residuals re-confirmed (8):**
+- `active_lock_blocking_detected` missing critical severity case in rules.yaml (requires payload design decisions)
+- `diagnostic_configuration_weak` rule medium case missing pg_stat_statements condition (cross-probe dependency question)
+- Methodology doc scoring weights example only shows reliability profile
+- `probes/README.md` profile selection table has drifted from probe_registry.yaml
+- `supabase_default` profile inheritance not encoded in contracts (requires design decision)
+- `wal_checkpoint_health` SQL column names lack `_ms` suffix required by registry (requires naming decision)
+- `pgbouncer_pool_health` SQL probe cannot produce required registry fields `waiting_clients` and `active_connections` (requires implementation strategy)
+- Generic rules in `rules.yaml` do not include `supabase_default` profile (same root cause as profile inheritance residual)
+
+**New residuals added:**
+- None
