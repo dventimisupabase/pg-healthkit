@@ -1,7 +1,7 @@
 -- probe: dead_tuple_ratio
 -- purpose: Detect likely vacuum lag and bloat pressure.
 -- prerequisites: none
--- profiles: default, performance, reliability
+-- profiles: default, performance, reliability, supabase_default
 
 SELECT
   schemaname,

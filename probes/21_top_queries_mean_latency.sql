@@ -1,7 +1,7 @@
 -- probe: top_queries_mean_latency
 -- purpose: Identify slow queries on a per-call basis.
 -- prerequisites: pg_stat_statements
--- profiles: default, performance
+-- profiles: default, performance, supabase_default
 
 SELECT
   queryid,

@@ -1,7 +1,7 @@
 -- probe: unused_indexes
 -- purpose: Detect likely write/storage waste from unused indexes.
 -- prerequisites: none
--- profiles: default, cost_capacity
+-- profiles: default, cost_capacity, supabase_default
 -- note: Medium-confidence unless stats age is known and representative.
 
 SELECT

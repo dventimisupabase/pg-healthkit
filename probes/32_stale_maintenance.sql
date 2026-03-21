@@ -1,7 +1,7 @@
 -- probe: stale_maintenance
 -- purpose: Detect tables not being vacuumed/analyzed adequately.
 -- prerequisites: none
--- profiles: default, performance, reliability
+-- profiles: default, performance, reliability, supabase_default
 
 SELECT
   schemaname,

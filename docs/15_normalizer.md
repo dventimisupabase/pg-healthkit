@@ -272,17 +272,17 @@ The SQL probe outputs up to 30 rows from Supabase system schemas (`auth`, `stora
 
 ### pgbouncer_pool_health
 Derive:
-- `summary.active_connections` — value of `active` from the singleton row; emit `0` if no rows
+- `summary.active_connections` — value of `active_connections` from the singleton row; emit `0` if no rows
 - `summary.waiting_clients` — value of `idle_in_transaction` from the singleton row; emit `0` if no rows
 - `summary.pool_mode` — **not derivable from SQL**; must be supplied via platform metadata. If unavailable, emit `null`.
 
-The SQL probe returns a single row with columns `total_connections`, `distinct_clients`, `pooler_connections`, `active` (integer), `idle` (integer), `idle_in_transaction` (integer), and `max_connections` (integer). The contract's `waiting_clients` maps to clients blocked waiting for a pooler slot; in this fallback probe, `idle_in_transaction` is the best available proxy. This probe has no `rows` array in the contract; all data goes into `summary`.
+The SQL probe returns a single row with columns `total_connections`, `distinct_clients`, `pooler_connections`, `active_connections` (integer), `idle` (integer), `idle_in_transaction` (integer), and `max_connections` (integer). The contract's `waiting_clients` maps to clients blocked waiting for a pooler slot; in this fallback probe, `idle_in_transaction` is the best available proxy. This probe has no `rows` array in the contract; all data goes into `summary`.
 
 ### pg_cron_job_health
 Derive:
 - `summary.failed_job_count` — count of rows where `last_status = 'failed'`
 
-The SQL probe outputs one row per cron job with columns `jobid`, `schedule`, `command`, `nodename`, `nodeport`, `database`, `username`, `job_active`, `runid`, `job_pid`, `last_status` (string), `return_message`, `start_time`, `end_time`, and `duration_seconds` (number). The contract row type requires `jobname` and `last_status`; map `command` (or a human-readable label) to `jobname`. Map `start_time` to `last_run_time` (ISO-8601 or null). Rows with no run history (`last_status` is null) should not count as failed.
+The SQL probe outputs one row per cron job with columns `jobid`, `schedule`, `jobname` (aliased from `command`), `nodename`, `nodeport`, `database`, `username`, `job_active`, `runid`, `job_pid`, `last_status` (string), `return_message`, `last_run_time` (aliased from `start_time`), `end_time`, and `duration_seconds` (number). The SQL already aliases `command` to `jobname` and `start_time` to `last_run_time`, so no normalizer mapping is needed for these fields. Coerce `last_run_time` to ISO-8601 or null. Rows with no run history (`last_status` is null) should not count as failed.
 
 ### extension_version_health
 Derive:
@@ -292,10 +292,10 @@ The SQL probe outputs one row per installed extension with columns `name`, `inst
 
 ### pgvector_index_health
 Derive:
-- `summary.unindexed_vector_column_count` — count of rows where `missing_vector_index = true` (equivalently, where `index_name` is null)
+- `summary.unindexed_vector_column_count` — count of rows where `has_index = false` (equivalently, where `index_name` is null)
 - `summary.misconfigured_index_count` — count of rows where an index exists but its parameters are suboptimal for the dataset size; specifically, rows where `index_type = 'ivfflat'` and `row_count > 1000000` (large tables where ivfflat may under-perform vs. hnsw), or other heuristics defined by the rule engine. For v1, emit `0` if no misconfiguration heuristic is implemented yet.
 
-The SQL probe outputs one row per vector column with columns `schemaname`, `table_name`, `column_name`, `column_type`, `row_count`, `index_name`, `index_type`, `index_bytes`, `index_def`, and `missing_vector_index` (boolean). The contract row type requires `tablename`, `column_name`, and `has_index`; map `table_name` to `tablename` and invert `missing_vector_index` to `has_index`.
+The SQL probe outputs one row per vector column with columns `schemaname`, `tablename`, `column_name`, `column_type`, `row_count`, `index_name`, `index_type`, `index_bytes`, `index_def`, and `has_index` (boolean, computed as `index_name IS NOT NULL`). The SQL already outputs the contract field names directly (`tablename` and `has_index`), so no normalizer mapping is needed for these fields.
 
 ## Raw Input Contract
 

@@ -1,7 +1,7 @@
 -- probe: top_queries_total_time
 -- purpose: Identify the queries consuming the most total execution time.
 -- prerequisites: pg_stat_statements
--- profiles: default, performance, cost_capacity
+-- profiles: default, performance, cost_capacity, supabase_default
 
 SELECT
   queryid,

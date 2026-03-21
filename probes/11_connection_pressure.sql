@@ -1,7 +1,7 @@
 -- probe: connection_pressure
 -- purpose: Understand whether connection management is a risk.
 -- prerequisites: none
--- profiles: default, performance, reliability
+-- profiles: default, performance, reliability, supabase_default
 
 -- Part 1: Session state summary
 SELECT

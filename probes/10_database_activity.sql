@@ -1,7 +1,7 @@
 -- probe: database_activity
 -- purpose: Capture database-wide workload and pressure signals.
 -- prerequisites: none
--- profiles: default, performance, reliability
+-- profiles: default, performance, reliability, supabase_default
 -- note: Cumulative stats; depends on stats reset horizon.
 
 SELECT

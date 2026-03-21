@@ -1,7 +1,7 @@
 -- probe: temp_spill_queries
 -- purpose: Detect queries spilling to temp files due to sort/hash pressure.
 -- prerequisites: pg_stat_statements
--- profiles: default, performance, cost_capacity
+-- profiles: default, performance, cost_capacity, supabase_default
 
 SELECT
   queryid,

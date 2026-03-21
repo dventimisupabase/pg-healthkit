@@ -1,7 +1,7 @@
 -- probe: long_running_transactions
 -- purpose: Detect transaction behavior that harms vacuum, contention, and reliability.
 -- prerequisites: none
--- profiles: default, performance, reliability
+-- profiles: default, performance, reliability, supabase_default
 
 SELECT
   pid,

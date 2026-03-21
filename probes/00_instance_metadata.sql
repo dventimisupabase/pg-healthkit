@@ -1,7 +1,7 @@
 -- probe: instance_metadata
 -- purpose: Establish technical context for the rest of the assessment.
 -- prerequisites: none
--- profiles: default, performance, reliability, cost_capacity
+-- profiles: default, performance, reliability, cost_capacity, supabase_default
 
 SELECT
   current_database() AS db,

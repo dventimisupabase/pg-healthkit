@@ -1,7 +1,7 @@
 -- probe: largest_tables
 -- purpose: Identify storage concentration and likely maintenance hotspots.
 -- prerequisites: none
--- profiles: default, reliability, cost_capacity
+-- profiles: default, reliability, cost_capacity, supabase_default
 
 SELECT
   schemaname,

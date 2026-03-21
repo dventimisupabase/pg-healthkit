@@ -1,7 +1,7 @@
 -- probe: wal_checkpoint_health
 -- purpose: Assess checkpoint and background writer pressure.
 -- prerequisites: none (pg_stat_wal available on PG 14+)
--- profiles: default, reliability, cost_capacity
+-- profiles: default, reliability, cost_capacity, supabase_default
 
 -- Background writer / checkpoint stats (all versions)
 SELECT

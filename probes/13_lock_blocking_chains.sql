@@ -1,7 +1,7 @@
 -- probe: lock_blocking_chains
 -- purpose: Detect active blocking and lock contention.
 -- prerequisites: none
--- profiles: default, performance, reliability
+-- profiles: default, performance, reliability, supabase_default
 
 WITH blocked AS (
   SELECT

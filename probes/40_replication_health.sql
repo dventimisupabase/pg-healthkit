@@ -1,7 +1,7 @@
 -- probe: replication_health
 -- purpose: Assess lag and replica posture.
 -- prerequisites: none (contextual — run if replication is relevant)
--- profiles: default, reliability
+-- profiles: default, reliability, supabase_default
 --
 -- On a primary, this returns replica lag information.
 -- On a replica, run the replica query below instead.
