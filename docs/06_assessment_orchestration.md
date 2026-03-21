@@ -178,8 +178,6 @@ Once assessments are stored structurally, you unlock something more valuable tha
 
 That is where this becomes strategically important, not just operationally useful.
 
-See `14_cross_assessment_model.md` for the cross-assessment model.
-
 ## Existing Supabase CLI Capabilities
 
 The Supabase CLI (`supabase`) already has a `db inspect` subcommand with early diagnostic queries. Before implementing new probes, the existing inspection component should be inventoried to:

@@ -295,12 +295,11 @@ Start with the highest-value probes first:
 19. `auth_schema_health`
 20. `storage_objects_health`
 21. `system_schema_bloat`
-22. `pgbouncer_pool_health`
 
 ### Wave 6 — Supabase-specific (contextual)
-23. `pg_cron_job_health`
-24. `extension_version_health`
-25. `pgvector_index_health`
+22. `pg_cron_job_health`
+23. `extension_version_health`
+24. `pgvector_index_health`
 
 For Supabase deployments, Wave 5 should be prioritized alongside or immediately after Wave 1, since `rls_policy_column_indexing` and `auth_schema_health` catch the most common Supabase-specific issues.
 
@@ -331,14 +330,12 @@ For Supabase deployments, Wave 5 should be prioritized alongside or immediately 
 20. `system_schema_vacuum_stale`
 21. `replication_slot_inactive_or_lagging`
 22. `storage_soft_delete_pressure`
-23. `pool_mode_misconfiguration`
-24. `pg_cron_job_failures`
-25. `extension_version_outdated`
-26. `pgvector_missing_index`
-27. `pgvector_index_misconfigured`
-28. `pool_contention_detected`
-29. `auth_session_explosion`
-30. `storage_objects_bloat`
+23. `pg_cron_job_failures`
+24. `extension_version_outdated`
+25. `pgvector_missing_index`
+26. `pgvector_index_misconfigured`
+27. `auth_session_explosion`
+28. `storage_objects_bloat`
 
 These are the best candidates for an early credible report. For Supabase assessments, rules 18–20 are as high-priority as the generic top 12.
 
@@ -347,7 +344,7 @@ These are the best candidates for an early credible report. For Supabase assessm
 The v1 system is “done enough” when the following is true:
 
 - a target profile can be selected (including `supabase_default`)
-- probes run or skip deterministically (16 generic + 9 Supabase-specific = 25 total)
+- probes run or skip deterministically (16 generic + 8 Supabase-specific = 24 total)
 - canonical payloads validate against registry contracts
 - rules produce stable findings
 - domain scores are computed reproducibly

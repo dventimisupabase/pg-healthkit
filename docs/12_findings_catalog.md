@@ -1,6 +1,6 @@
 # V1 Findings Catalog
 
-This document defines the v1 findings with their logic, inputs, severity gradation, and domain effects. There are 17 generic findings and 13 Supabase-specific findings (30 total). For the machine-readable rule definitions, see `rules.yaml`.
+This document defines the v1 findings with their logic, inputs, severity gradation, and domain effects. There are 17 generic findings and 11 Supabase-specific findings (28 total). For the machine-readable rule definitions, see `rules.yaml`.
 
 ## Finding Structure
 
@@ -446,24 +446,7 @@ Note: the medium case intentionally checks only two conditions (track_io_timing 
 
 ---
 
-### 23. pool_mode_misconfiguration
-
-**Domain:** performance
-**Inputs:** `pgbouncer_pool_health`
-
-| Condition                                         | Severity | Confidence |
-|---------------------------------------------------|----------|------------|
-| Transaction mode detected                         | low      | medium     |
-
-**Cause:** Connection pooler (PgBouncer/Supavisor) configured in transaction mode when prepared statements are required.
-**Impact:** Transaction mode breaks prepared statement caching, causing repeated planning overhead for every query.
-**Recommendation:** Use session mode for workloads requiring prepared statements, or optimize application to use transaction-mode-safe patterns.
-**Urgency:** structural
-**Score effects (low):** performance -4
-
----
-
-### 24. pg_cron_job_failures
+### 23. pg_cron_job_failures
 
 **Domain:** operational_hygiene
 **Inputs:** `pg_cron_job_health`
@@ -480,7 +463,7 @@ Note: the medium case intentionally checks only two conditions (track_io_timing 
 
 ---
 
-### 25. extension_version_outdated
+### 24. extension_version_outdated
 
 **Domain:** operational_hygiene
 **Inputs:** `extension_version_health`
@@ -497,7 +480,7 @@ Note: the medium case intentionally checks only two conditions (track_io_timing 
 
 ---
 
-### 26. pgvector_missing_index
+### 25. pgvector_missing_index
 
 **Domain:** performance
 **Inputs:** `pgvector_index_health`
@@ -514,7 +497,7 @@ Note: the medium case intentionally checks only two conditions (track_io_timing 
 
 ---
 
-### 27. pgvector_index_misconfigured
+### 26. pgvector_index_misconfigured
 
 **Domain:** performance
 **Inputs:** `pgvector_index_health`
@@ -532,25 +515,7 @@ Note: the medium case intentionally checks only two conditions (track_io_timing 
 
 ---
 
-### 28. pool_contention_detected
-
-**Domain:** concurrency
-**Inputs:** `pgbouncer_pool_health`
-
-| Condition                                        | Severity | Confidence |
-|--------------------------------------------------|----------|------------|
-| Waiting clients > 10                               | high     | high       |
-| Waiting clients > 0                              | medium   | medium     |
-
-**Cause:** Connection pool is undersized relative to demand, causing clients to queue for available connections.
-**Impact:** Pool contention adds latency to every queued request and can cascade into timeouts under load.
-**Recommendation:** Increase pool size, reduce per-connection hold time, or add a secondary pooler. Investigate whether idle-in-transaction sessions are consuming pool slots unnecessarily.
-**Urgency:** short_term
-**Score effects (high):** concurrency -15, performance -8
-
----
-
-### 29. auth_session_explosion
+### 27. auth_session_explosion
 
 **Domain:** storage
 **Inputs:** `auth_schema_health`
@@ -570,7 +535,7 @@ Note: the medium case intentionally checks only two conditions (track_io_timing 
 
 ---
 
-### 30. storage_objects_bloat
+### 28. storage_objects_bloat
 
 **Domain:** storage
 **Inputs:** `storage_objects_health`

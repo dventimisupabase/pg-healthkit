@@ -136,7 +136,6 @@ Batch 2 (read in parallel):
 - docs/11_probe_catalog.md
 - docs/12_findings_catalog.md
 - docs/13_roadmap.md
-- docs/14_cross_assessment_model.md
 - docs/15_normalizer.md
 - docs/16_report_template.md
 

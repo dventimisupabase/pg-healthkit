@@ -353,24 +353,6 @@ This is possibly the single highest-impact Supabase-specific finding. RLS is ena
 | **Domains**    | storage, performance, operational_hygiene                                                                               |
 | **Confidence** | high                                                                                                                    |
 
-### pool_mode_misconfiguration
-
-| Property       | Value                                                                                                                                                                                           |
-|----------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| **Inputs**     | `pgbouncer_pool_health`                                                                                                                                                                         |
-| **Logic**      | low if pool_mode = transaction (informational) |
-| **Domains**    | performance, concurrency                                                                                                                                                                        |
-| **Confidence** | medium                                                                                                                                                                                          |
-
-### pool_contention_detected
-
-| Property       | Value                                                                                                   |
-|----------------|---------------------------------------------------------------------------------------------------------|
-| **Inputs**     | `pgbouncer_pool_health`                                                                                 |
-| **Logic**      | high if waiting clients > 10; medium if any clients waiting                |
-| **Domains**    | concurrency, performance                                                                                |
-| **Confidence** | high                                                                                                    |
-
 ### auth_session_explosion
 
 | Property       | Value                                                                                                                      |

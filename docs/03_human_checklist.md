@@ -203,4 +203,3 @@ When assessing a Supabase-managed database, add these questions:
 - [ ] Auth schema tables vacuumed recently? (auth.sessions and auth.refresh_tokens churn heavily)
 - [ ] Storage.objects soft-delete pressure? (un-cleaned soft deletes waste space)
 - [ ] System schema bloat? (auth, storage, realtime, extensions schemas need vacuum too)
-- [ ] PgBouncer pool contention? (waiting clients, pool sizing)

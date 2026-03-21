@@ -270,14 +270,6 @@ Derive:
 
 The SQL probe outputs up to 30 rows from Supabase system schemas (`auth`, `storage`, `realtime`, `extensions`, `supabase_functions`) with columns `schemaname`, `relname`, `n_live_tup`, `n_dead_tup`, `dead_tuple_pct` (number), `last_autovacuum`, `last_autoanalyze`, and `total_bytes`. Coerce `dead_tuple_pct` to number (null becomes `0`).
 
-### pgbouncer_pool_health
-Derive:
-- `summary.active_connections` — value of `active_connections` from the singleton row; emit `0` if no rows
-- `summary.waiting_clients` — value of `idle_in_transaction` from the singleton row; emit `0` if no rows
-- `summary.pool_mode` — **not derivable from SQL**; must be supplied via platform metadata. If unavailable, emit `null`.
-
-The SQL probe returns a single row with columns `total_connections`, `distinct_clients`, `pooler_connections`, `active_connections` (integer), `idle` (integer), `idle_in_transaction` (integer), and `max_connections` (integer). The contract's `waiting_clients` maps to clients blocked waiting for a pooler slot; in this fallback probe, `idle_in_transaction` is the best available proxy. This probe has no `rows` array in the contract; all data goes into `summary`.
-
 ### pg_cron_job_health
 Derive:
 - `summary.failed_job_count` — count of rows where `last_status = 'failed'`

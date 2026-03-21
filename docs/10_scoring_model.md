@@ -230,7 +230,7 @@ Add a `supabase_default` profile with adjusted weights:
 | Performance         | 25%    | Most customer-visible; includes RLS tax                      |
 | Availability        | 20%    | Platform manages HA but slot lag and WAL bloat are risks     |
 | Storage             | 20%    | Direct billing impact; system schema bloat adds to cost      |
-| Concurrency         | 15%    | Pool mode and connection limits are tier-constrained         |
+| Concurrency         | 15%    | Connection limits are tier-constrained                       |
 | Operational Hygiene | 10%    | Includes system schema maintenance and extension health      |
 | Efficiency          | 5%     | Less tunable in managed context                              |
 | Cost                | 5%     | Tier-based pricing means less micro-optimization opportunity |

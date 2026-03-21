@@ -6,7 +6,7 @@
 
 **Deliverables:**
 - Standardized human checklist (sections A–K)
-- SQL probe pack (25 probes: 16 generic + 9 Supabase-specific, organized by domain)
+- SQL probe pack (24 probes: 16 generic + 8 Supabase-specific, organized by domain)
 - Scoring rubric (7 domains, persona-weighted)
 - Report template (executive summary + domain scores + findings + appendix)
 
@@ -126,7 +126,7 @@ Then add `connection_pressure` + `idle_in_transaction_sessions_detected`, then `
 - Add system schema vacuum check to manual checklist
 
 ### Phase 2 additions
-- Implement 6 critical Supabase probes (RLS indexing, Realtime slots, Auth schema, Storage objects, System schema bloat, PgBouncer pool)
+- Implement 5 critical Supabase probes (RLS indexing, Realtime slots, Auth schema, Storage objects, System schema bloat)
 - Add Supabase platform metadata auto-population (tier, region, features from Management API)
 - Add `supabase_default` scoring profile
 - Add system schema filtering option to CLI

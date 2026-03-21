@@ -362,17 +362,7 @@ This document provides the human-readable probe catalog with purpose, interpreta
 
 **Interpretation:** System schemas are managed by the platform but still need vacuum like any other tables. Customers often don't monitor these because they "belong to Supabase." High dead tuple ratios on system tables indicate platform-level maintenance gaps.
 
-### 22. pgbouncer_pool_health
-
-**Purpose:** Detect connection pool mode and contention.
-
-**Requires:** PgBouncer/Supavisor metrics accessible.
-
-**Collects:** pool_mode (transaction/session), active connections, idle connections, waiting clients, max pool size.
-
-**Interpretation:** Transaction mode breaks prepared statement caching (causing repeated planning overhead). Session mode limits connection reuse. High waiting client count indicates pool undersizing.
-
-### 23. pg_cron_job_health
+### 22. pg_cron_job_health
 
 **Purpose:** Detect failed or long-running scheduled jobs.
 
@@ -382,7 +372,7 @@ This document provides the human-readable probe catalog with purpose, interpreta
 
 **Interpretation:** Failed cron jobs may indicate schema issues, permission problems, or resource contention. Long-running jobs can spike CPU/lock pressure during execution windows.
 
-### 24. extension_version_health
+### 23. extension_version_health
 
 **Purpose:** Detect outdated or potentially incompatible extensions.
 
@@ -390,7 +380,7 @@ This document provides the human-readable probe catalog with purpose, interpreta
 
 **Interpretation:** Outdated extensions may miss security patches or performance improvements. On Supabase, extension upgrades are sometimes tied to platform version upgrades.
 
-### 25. pgvector_index_health
+### 24. pgvector_index_health
 
 **Purpose:** Assess vector index configuration and health.
 
@@ -409,11 +399,9 @@ This document provides the human-readable probe catalog with purpose, interpreta
 | `auth_table_bloat_detected`            | `auth_schema_health`               | `dead_tuple_ratio`, `stale_maintenance` |
 | `storage_soft_delete_pressure`         | `storage_objects_health`           | `largest_tables`                        |
 | `system_schema_vacuum_stale`           | `system_schema_bloat`              | `stale_maintenance`                     |
-| `pool_mode_misconfiguration`           | `pgbouncer_pool_health`            | `top_queries_total_time`                |
 | `pg_cron_job_failures`                 | `pg_cron_job_health`               | —                                       |
 | `extension_version_outdated`           | `extension_version_health`         | `extensions_inventory`                  |
 | `pgvector_missing_index`               | `pgvector_index_health`            | `largest_tables`                        |
 | `pgvector_index_misconfigured`         | `pgvector_index_health`            | —                                       |
-| `pool_contention_detected`             | `pgbouncer_pool_health`            | `top_queries_total_time`                |
 | `auth_session_explosion`               | `auth_schema_health`               | `largest_tables`                        |
 | `storage_objects_bloat`                | `storage_objects_health`           | `dead_tuple_ratio`                      |

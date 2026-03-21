@@ -230,7 +230,6 @@ These additional platform-derived inputs should be collected for Supabase assess
 | `auth_provider`             | string (supabase/external)     | Platform metadata |
 | `realtime_enabled`          | boolean                        | Platform metadata |
 | `storage_enabled`           | boolean                        | Platform metadata |
-| `pgbouncer_pool_mode`       | string (transaction/session)   | Platform metadata |
 | `postgrest_max_rows`        | integer                        | Platform config   |
 | `supabase_project_age_days` | integer                        | Platform metadata |
 

@@ -1125,45 +1125,6 @@ rules:
             storage: -8
             performance: -5
 
-  - id: pool_mode_misconfiguration
-    enabled: true
-    profiles: [default, performance, supabase_default]
-    skip_when_null: [summary.pool_mode]
-    note: >
-      pool_mode is optional (requires platform metadata). This rule is skipped
-      when pool_mode is null to avoid false results.
-    finding:
-      key: pool_mode_misconfiguration
-      domain: performance
-      title: Connection pool mode misconfiguration
-      urgency: structural
-      summary_template: >
-        Connection pool is in ${summary.pool_mode} mode.
-      cause_template: >
-        Connection pooler (PgBouncer/Supavisor) configured in transaction mode when prepared statements are required.
-      impact_template: >
-        Transaction mode breaks prepared statement caching, increasing planning overhead.
-      recommendation_template: >
-        Use session mode for workloads requiring prepared statements, or transaction mode for high
-        concurrency.
-      tags: [supabase, pgbouncer, pooling]
-    evidence:
-      required_probes:
-        - pgbouncer_pool_health
-    evaluate:
-      mode: first_match
-      cases:
-        - when:
-            all:
-              - fact: summary.pool_mode
-                from: pgbouncer_pool_health
-                op: eq
-                value: transaction
-          severity: low
-          confidence: medium
-          score_effects:
-            performance: -4
-
   - id: pg_cron_job_failures
     enabled: true
     profiles: [default, reliability, supabase_default]
@@ -1305,60 +1266,6 @@ rules:
           score_effects:
             performance: -8
             efficiency: -5
-
-  - id: pool_contention_detected
-    enabled: true
-    profiles: [default, performance, supabase_default]
-    skip_when_null: [summary.waiting_clients]
-    note: >
-      waiting_clients is optional. This rule is skipped when waiting_clients
-      is null to avoid false results.
-    finding:
-      key: pool_contention_detected
-      domain: concurrency
-      title: Connection pool contention detected
-      urgency: short_term
-      summary_template: >
-        Clients are waiting for available connections from the pool; ${summary.waiting_clients}
-        client(s) waiting.
-      cause_template: >
-        Connection pool is undersized relative to demand, causing clients to queue for available
-        connections.
-      impact_template: >
-        Pool contention adds latency to every queued request and can cascade into timeouts under load.
-      recommendation_template: >
-        Increase pool size, reduce per-connection hold time, or add a secondary pooler. Investigate
-        whether idle-in-transaction sessions are consuming pool slots unnecessarily.
-      tags: [supabase, pgbouncer, pooling, contention]
-    evidence:
-      required_probes:
-        - pgbouncer_pool_health
-    evaluate:
-      mode: first_match
-      cases:
-        - when:
-            all:
-              - fact: summary.waiting_clients
-                from: pgbouncer_pool_health
-                op: gt
-                value: 10
-          severity: high
-          confidence: high
-          score_effects:
-            concurrency: -15
-            performance: -8
-
-        - when:
-            all:
-              - fact: summary.waiting_clients
-                from: pgbouncer_pool_health
-                op: gt
-                value: 0
-          severity: medium
-          confidence: medium
-          score_effects:
-            concurrency: -8
-            performance: -4
 
   - id: auth_session_explosion
     enabled: true
