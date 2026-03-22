@@ -190,3 +190,18 @@ Use conversation tasks as an ephemeral checklist. Mark each step as done. Don't 
 - Design docs remain stable at four consecutive trials. The trial protocol's "done criteria" of zero doc-fix commits was met again.
 
 **Status:** Complete. All v1 Definition of Done criteria met. All 28 rules fire correctly against synthetic evidence (13 findings from 19 evidence records, scores computed correctly with overall 65.80). End-to-end probe execution and full Arena integration pass against local PostgreSQL 17. Markdown report generated successfully. Zero doc-fix commits.
+
+### Trial 05 — 2026-03-22
+
+**Scope:** Full v1 implementation (Phases 1-5). All 24 probes, all 28 rules, CLI with arena integration, markdown reporting. Fifth trial to validate continued doc stability.
+
+**Doc fixes:** None. No ambiguities were encountered. All design docs, contracts, and specs were followed without modification.
+
+**New lessons:**
+- The `run_analysis` SQL function must use `SECURITY DEFINER` when called via PostgREST RPC. Without it, PostgREST's safety checks block DELETE statements inside the function body (error: "DELETE requires a WHERE clause").
+- Temp tables (`CREATE TEMP TABLE`) inside SQL functions called via PostgREST RPC can cause issues. Using inline PL/pgSQL variables for score accumulation (one variable per domain) is simpler and avoids the temp table overhead entirely.
+- Previous trial functions with different return types require `DROP FUNCTION IF EXISTS` before `CREATE OR REPLACE FUNCTION`, since PostgreSQL cannot change a function's return type in place.
+- The Go `pgtype.Numeric.Float64Value()` method returns a `pgtype.Float8` struct, not a raw `float64`. The caller must check `.Valid` and use `.Float64` from the returned struct.
+- Design docs remain stable at five consecutive trials. Zero doc-fix commits across trials 03, 04, and 05.
+
+**Status:** Complete. All v1 Definition of Done criteria met. All 28 rules fire correctly against synthetic evidence (18 findings from 19 evidence records, scores computed correctly with overall 54.90). End-to-end probe execution and full Arena integration pass against local PostgreSQL 17. Markdown report generated successfully. Zero doc-fix commits.
