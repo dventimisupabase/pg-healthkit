@@ -174,3 +174,19 @@ Use conversation tasks as an ephemeral checklist. Mark each step as done. Don't 
 - Design docs are now stable enough for zero-fix implementation. The trial protocol's done criteria of "no doc-fix commits needed" was met.
 
 **Status:** Complete. All v1 Definition of Done criteria met. All 28 rules fire correctly against synthetic evidence (12 findings from 19 evidence records, scores computed correctly). End-to-end probe execution passes against local PostgreSQL 17. Zero doc-fix commits.
+
+### Trial 04 — 2026-03-22
+
+**Scope:** Full v1 implementation (Phases 1-5). All 24 probes, all 28 rules, CLI with arena integration, markdown reporting. Fourth trial to validate continued doc stability and measure implementation consistency.
+
+**Doc fixes:** None. No ambiguities were encountered. All design docs, contracts, and specs were followed without modification.
+
+**New lessons:**
+- The `splitStatements` function for multi-statement SQL (DO blocks with `$$` dollar-quoting) needs character-level parsing rather than line-level regex. A simple state machine tracking `$$` toggle in/out of dollar-quote mode is sufficient and more robust than counting `$$` occurrences per line.
+- Previous trial migrations left functions with different parameter names on the Arena database. The `CREATE OR REPLACE FUNCTION` statement cannot change parameter names, so `DROP FUNCTION IF EXISTS` must precede function creation in the migration for cross-trial idempotency.
+- The Supabase CLI v2.75 lacks a `db execute` command for running arbitrary SQL against the remote database. The Supabase MCP `execute_sql` tool or psql with the project connection string are the alternatives. MCP works but has payload size limits requiring batching for large seed files.
+- The Go seed generator's regex-based SQL splitting can be fragile when INSERT values contain semicolons (e.g., template strings with semicolons). A proper parser that splits on `);` followed by newline is more reliable than splitting on bare `;`.
+- Full end-to-end integration (probe → normalize → upload → analyze → fetch → report) works with the Supabase anon key when RLS is disabled. For production, a service_role key or proper RLS policies would be needed.
+- Design docs remain stable at four consecutive trials. The trial protocol's "done criteria" of zero doc-fix commits was met again.
+
+**Status:** Complete. All v1 Definition of Done criteria met. All 28 rules fire correctly against synthetic evidence (13 findings from 19 evidence records, scores computed correctly with overall 65.80). End-to-end probe execution and full Arena integration pass against local PostgreSQL 17. Markdown report generated successfully. Zero doc-fix commits.
