@@ -1,5 +1,7 @@
 # Trial Protocol
 
+> **Status: GOLD** — 7 trials completed (2026-03-21 to 2026-03-22). Design docs reached stability at trial 03 (zero doc-fix commits in trials 03-07). Trial 07 validated canonical payload fixture tests as the solution to cross-trial finding-count variation. The trial protocol has served its purpose — docs are solid.
+
 ## Purpose
 
 Each trial is a stress test of the design docs. The implementation is the test; the design docs are the code under test. Trials reveal ambiguities, gaps, and incorrect assumptions in the docs. The docs get tighter with each trial. The code is forensic evidence, not a deliverable.
