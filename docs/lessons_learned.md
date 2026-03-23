@@ -205,3 +205,16 @@ Use conversation tasks as an ephemeral checklist. Mark each step as done. Don't 
 - Design docs remain stable at five consecutive trials. Zero doc-fix commits across trials 03, 04, and 05.
 
 **Status:** Complete. All v1 Definition of Done criteria met. All 28 rules fire correctly against synthetic evidence (18 findings from 19 evidence records, scores computed correctly with overall 54.90). End-to-end probe execution and full Arena integration pass against local PostgreSQL 17. Markdown report generated successfully. Zero doc-fix commits.
+
+### Trial 06 — 2026-03-22
+
+**Scope:** Full v1 implementation (Phases 1-5). All 24 probes, all 28 rules, CLI with arena integration, markdown reporting. Sixth trial to validate continued doc stability.
+
+**Doc fixes:** None. No ambiguities were encountered. All design docs, contracts, and specs were followed without modification.
+
+**New lessons:**
+- PostgREST requires all objects in an array POST body to have identical key sets (error: "All object keys must match"). When uploading evidence records where some have `error_text` and some don't, use a pointer type (`*string`) with JSON `null` rather than `omitempty` to ensure consistent keys across all records.
+- The Assessment struct's `id` field must use `omitempty` when creating via PostgREST POST, since sending an empty string for a UUID column causes a parse error. Let the database generate the UUID via `DEFAULT gen_random_uuid()`.
+- Design docs remain stable at six consecutive trials. Zero doc-fix commits across trials 03, 04, 05, and 06.
+
+**Status:** Complete. All v1 Definition of Done criteria met. All 28 rules fire correctly against synthetic evidence (16 findings from 19 evidence records, scores computed correctly with overall 56.70). End-to-end probe execution and full Arena integration pass against local PostgreSQL 17. Markdown report generated successfully. Zero doc-fix commits.
