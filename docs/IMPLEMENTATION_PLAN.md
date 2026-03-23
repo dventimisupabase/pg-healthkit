@@ -96,10 +96,12 @@ Build in this order. Use TDD for the first 3 probes (vertical slice) to lock dow
 2. Implement registry loader: parse `probe_registry.yaml` into Go structs, filter by profile, find by name. Test against the real registry file.
 3. Implement probe runner: connect via pgx, read SQL files, execute queries, capture rows into `[]map[string]any`, track duration. Handle success/failed/skipped states. Integration test (build-tagged) against a real database.
 4. Implement normalizer: generic type coercion (intervals→ms, sizes→bytes, numeric strings→numbers, query truncation→1000 chars, nulls→JSON null), canonical envelope per `docs/15_normalizer.md`, probe-specific summary derivation per the same doc. Start with `long_running_transactions`, `instance_metadata`, `connection_pressure`. Fixture-driven tests.
-5. Implement validator: decode `payload_contract` YAML node, check required summary fields present, check required row fields present. Validation errors are warnings, not fatal.
-6. Wire up `cmd/healthkit/main.go`: parse flags (`--dsn`, `--profile`, `--probes`, `--probes-dir`, `--registry`, `--timeout`), orchestrate prereq probes → main probes → normalize → validate → JSON to stdout. Pre-run `extensions_inventory` and `instance_metadata` for prerequisite checking; cache results to avoid double-running.
-7. Implement remaining 21 probe summary derivation functions per `docs/15_normalizer.md`.
-8. End-to-end smoke test: build binary, run all probes against a real database, verify JSON output.
+5. **Write canonical payload fixture tests for the 3 vertical-slice probes.** For each probe, store a golden JSON file in `cli/testdata/canonical/` representing the exact JSONB structure that will be uploaded to `assessment_evidence.payload`. Assert that normalize + reshapePayload produces this exact output. These fixtures are the contract between CLI and Arena — the rule engine's `resolve_fact()` dot-paths depend on this shape. See "Canonical payload fixtures (CRITICAL)" in the test strategy section below.
+6. Implement validator: decode `payload_contract` YAML node, check required summary fields present, check required row fields present. Validation errors are warnings, not fatal.
+7. Wire up `cmd/healthkit/main.go`: parse flags (`--dsn`, `--profile`, `--probes`, `--probes-dir`, `--registry`, `--timeout`), orchestrate prereq probes → main probes → normalize → validate → JSON to stdout. Pre-run `extensions_inventory` and `instance_metadata` for prerequisite checking; cache results to avoid double-running.
+8. Implement remaining 21 probe summary derivation functions per `docs/15_normalizer.md`.
+9. **Extend canonical payload fixture tests to all 24 probes.** Do not proceed to Arena integration (Phase 3) until all 24 probes have passing canonical fixture tests. This is the gate that prevents the finding-count variation observed across trials 03-06.
+10. End-to-end smoke test: build binary, run all probes against a real database, verify JSON output.
 
 ### Phase 3 — Rule evaluation (Arena-side, SQL functions)
 Implement as SQL functions in the Arena database:
@@ -258,9 +260,18 @@ Store:
 - canonical payload outputs
 - validation expectations
 
+### Canonical payload fixtures (CRITICAL)
+Store in `cli/testdata/canonical/` one golden JSON file per probe representing the exact JSONB structure that gets uploaded to `assessment_evidence.payload` in the Arena. These are the contract between CLI and Arena — they pin the shape that the rule engine's `resolve_fact()` dot-paths depend on.
+
+For each probe, the fixture should capture the full payload as uploaded (including `summary`, `rows`, and any probe-specific top-level keys like `bgwriter`, `stats`, `datname`). Tests should assert that `normalize + reshapePayload` produces output matching the fixture exactly.
+
+**Why this matters:** Across 6 trials, finding counts from identical synthetic evidence varied from 12 to 18 because each trial's normalizer structured payloads slightly differently, causing different rule dot-paths to resolve or fail. This is the single most important test artifact for implementation consistency.
+
+Write these fixtures during the vertical slice phase (3 probes) and extend to all 24 before broadening. Do not proceed to Arena integration without passing canonical fixture tests for all probes.
+
 ### Rule fixtures
 Store:
-- canonical payload bundles
+- canonical payload bundles (reuse the canonical payload fixtures above)
 - expected findings
 - expected score deltas
 

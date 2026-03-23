@@ -95,15 +95,17 @@ Strict TDD (write test → fail → implement → pass) was followed for Phase 1
 2. Implement registry loader (parse contracts)
 3. Implement probe runner (pgx, SQL execution) for 3 probes
 4. Implement normalizer (type coercion + summary derivation) for 3 probes
-5. Implement validator (contract checking)
-6. Wire up CLI entry point
-7. Set up Arena: `supabase init`, apply schema migration, generate seed file from contracts, apply seed
-8. Implement rule engine SQL functions
-9. Broaden to all 24 probes (normalizer summaries)
-10. Implement CLI → Arena integration (upload evidence, trigger analysis, fetch results)
-11. Implement markdown report renderer
-12. Write boundary-level test suites (CLI integration tests, Arena integration tests)
-13. End-to-end validation against a real Supabase project
+5. **Write canonical payload fixture tests for the 3 vertical-slice probes** — golden JSON files in `cli/testdata/canonical/` asserting the exact JSONB uploaded to `assessment_evidence.payload`. This is the contract between CLI and Arena.
+6. Implement validator (contract checking)
+7. Wire up CLI entry point
+8. Broaden to all 24 probes (normalizer summaries)
+9. **Extend canonical payload fixture tests to all 24 probes** — do not proceed to Arena integration until all pass
+10. Set up Arena: `supabase init`, apply schema migration, generate seed file from contracts, apply seed
+11. Implement rule engine SQL functions
+12. Implement CLI → Arena integration (upload evidence, trigger analysis, fetch results)
+13. Implement markdown report renderer
+14. Write boundary-level test suites (CLI integration tests, Arena integration tests)
+15. End-to-end validation against a real Supabase project
 
 ### Tools to use
 
@@ -118,6 +120,14 @@ Strict TDD (write test → fail → implement → pass) was followed for Phase 1
 - Test probes against PG 15, 16, and 17 at minimum. PG 17 restructured `pg_stat_bgwriter` into separate `pg_stat_checkpointer` and `pg_stat_bgwriter` views.
 - Probes that query system catalog views should use version-aware SQL (e.g., `DO $$ IF current_setting('server_version_num')::int >= 170000 THEN ... END IF; $$`) for cross-version compatibility.
 - The pgx driver returns PostgreSQL `numeric` as `pgtype.Numeric`, not Go `float64`. Handle this explicitly in type coercion.
+
+### Canonical payload fixture tests (CRITICAL)
+
+Across 6 trials, the finding count from the same 19 synthetic evidence records varied from 12 to 18. The rule engine evaluated correctly given what it received — the variation came from subtle differences in how each trial's normalizer structured the evidence JSONB uploaded to the Arena. Different implementations made slightly different choices about payload shape, which changed which dot-paths the rule engine could resolve.
+
+**Fix:** Add canonical payload fixture tests that assert the exact JSONB structure uploaded for each probe type. For every probe, store a golden JSON file in `cli/testdata/canonical/` that represents the expected payload as it would be stored in `assessment_evidence.payload`. Test that the normalizer + reshape logic produces this exact structure. This pins the contract between CLI and Arena and eliminates cross-trial variation.
+
+These fixtures should be written during the vertical slice (step 4) and validated before broadening to all 24 probes. They are the most important test artifact — more important than unit tests on individual functions.
 
 ### What to track in conversation tasks
 
